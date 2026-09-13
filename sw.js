@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.1.0';
 const CACHE   = `adkar-${VERSION}`;
 
 const APP_SHELL = [

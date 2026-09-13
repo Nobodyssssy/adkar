@@ -315,3 +315,75 @@ body.modal-open {
 .modal-sheet, .modal-box {
   overscroll-behavior: contain;
 }
+/* ═══════════════════════════════════════════════════════════
+   Search filter bar
+   ═══════════════════════════════════════════════════════════ */
+.filter-bar{
+  padding:10px 20px 4px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.filter-group{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.filter-label{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:var(--text3);
+  font-weight:700;
+}
+
+.filter-row{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.filter-chip{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  color:var(--text2);
+  border-radius:50px;
+  padding:5px 12px;
+  font-size:12px;
+  font-family:inherit;
+  cursor:pointer;
+  transition:all var(--tr);
+  white-space:nowrap;
+}
+.filter-chip:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.filter-chip.on{
+  background:var(--glow);
+  border-color:var(--accent);
+  color:var(--accent);
+  font-weight:700;
+}
+.filter-chip.tag{
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+}
+.filter-chip.clear{
+  align-self:flex-start;
+  border-color:var(--red);
+  color:var(--red);
+  margin-bottom:4px;
+}
+.filter-chip.clear:hover{
+  background:var(--red);
+  color:#fff;
+}
+
+/* Mobile-friendly filter bar */
+@media(max-width:480px){
+  .filter-bar{padding:8px 14px 2px;gap:8px;}
+  .filter-chip{padding:5px 10px;font-size:11px;}
+}

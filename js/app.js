@@ -15,7 +15,10 @@
     /* 2. Daily reset check (now async) */
     await store.checkDailyReset();
 
-    /* 3. Render initial view */
+    /* 3. Build the fuzzy search index (once data is loaded) */
+    rebuildSearchIndex();
+
+    /* 4. Render initial view */
     renderCatsGrid();
 
     /* 4. Global keyboard shortcuts */
