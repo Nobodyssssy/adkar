@@ -18,7 +18,10 @@
     /* 3. Build the fuzzy search index (once data is loaded) */
     rebuildSearchIndex();
 
-    /* 4. Render initial view */
+    /* 4. Render header date */
+    if(typeof renderHeaderDate === 'function') renderHeaderDate();
+
+    /* 5. Render initial view */
     renderCatsGrid();
 
     /* 4. Global keyboard shortcuts */

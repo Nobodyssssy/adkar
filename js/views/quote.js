@@ -37,7 +37,10 @@ async function renderQuoteCard(){
 
   host.classList.toggle('expanded', _quoteExpanded);
 
+  const dateLine = (typeof formatHeaderDate === 'function') ? formatHeaderDate() : '';
+
   host.innerHTML = `
+    ${dateLine ? `<div class="quote-dateline">${dateLine}</div>` : ''}
     <div class="quote-header">
       <div class="quote-badge">
         <span class="quote-badge-icon">${badgeIcon}</span>
