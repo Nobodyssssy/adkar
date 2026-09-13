@@ -1,0 +1,161 @@
+/* ══════════════════════════════════════════
+   TABLET (≤ 768px)
+   ══════════════════════════════════════════ */
+@media(max-width:768px){
+  .cats-grid{
+    grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    padding:0 14px 80px;
+    gap:12px;
+  }
+  .adkar-grid{padding:14px 14px 80px;}
+  .search-bar{padding:12px 14px 0;}
+  .page-header{padding:16px 14px 12px;}
+  .back-bar{padding:12px 14px 0;}
+  .favs-header{padding:16px 14px 12px;}
+}
+
+/* ══════════════════════════════════════════
+   PHONE (≤ 480px)
+   ══════════════════════════════════════════ */
+@media(max-width:480px){
+  /* Header: compact but tappable */
+  header{
+    height:54px;
+    padding-left:calc(12px + env(safe-area-inset-left));
+    padding-right:calc(12px + env(safe-area-inset-right));
+  }
+  .logo-icon{width:30px;height:30px;font-size:14px;}
+  .logo-text{font-size:17px;}
+  .logo-sub{display:none;}
+  .hright{gap:4px;}
+
+  .icon-btn{
+    width:38px;height:38px;
+    font-size:14px;
+    border-radius:9px;
+  }
+  /* Collapse "Add" text into icon only */
+  .btn-add{
+    padding:0;
+    width:38px;height:38px;
+    justify-content:center;
+    font-size:18px;
+    border-radius:9px;
+  }
+  .btn-add span.text{display:none;}
+
+  /* Search */
+  .search-wrap input{
+    padding:11px 40px 11px 38px;
+    font-size:15px;
+  }
+
+  /* Grid */
+  .cats-grid{
+    grid-template-columns:repeat(2,1fr);
+    padding:0 12px 90px;
+    gap:10px;
+  }
+  .cat-card{
+    padding:16px 12px;
+    gap:6px;
+  }
+  .cat-icon{width:38px;height:38px;font-size:17px;}
+  .cat-name{font-size:14px;}
+  .cat-en{font-size:10px;}
+  .cat-count{font-size:10px;padding:2px 7px;}
+  .cat-new-card{min-height:120px;font-size:12px;}
+
+  .adkar-grid{padding:12px 12px 90px;gap:8px;}
+  .adkar-card{padding:14px 14px;gap:10px;}
+  .adkar-text{font-size:16px;line-height:1.65;}
+  .adkar-actions{gap:3px;}
+  .adkar-btn{width:30px;height:30px;font-size:12px;}
+
+  /* Sheet / detail */
+  .modal-sheet{border-radius:20px 20px 0 0;}
+  .sheet-body{padding:0 16px 28px;gap:16px;}
+  .arabic-big{
+    font-size:20px;
+    line-height:1.9;
+    padding:16px 14px;
+  }
+  .situation-pill{font-size:11px;padding:3px 12px;}
+
+  /* Counter buttons — bigger targets */
+  .cbtn{width:52px;height:52px;font-size:24px;}
+  .cval{font-size:30px;}
+
+  /* Modals */
+  .modal-box{border-radius:16px;max-width:94vw;}
+  .mh h2{font-size:15px;}
+  .mb{padding:14px 16px;gap:11px;}
+  .mf{padding:11px 16px;}
+  .btn-save,.btn-cancel{padding:11px 18px;min-height:44px;}
+  .fr2{grid-template-columns:1fr;}
+
+  /* Session */
+  .session-header{padding:12px 14px;gap:8px;}
+  .session-arabic{font-size:20px;padding:16px;line-height:1.85;}
+  .session-tap-btn{width:100px;height:100px;font-size:26px;}
+  .session-tap-btn:active{transform:scale(.9);}
+  .session-situation{font-size:12px;}
+  .session-info{font-size:12px;padding:10px 12px;}
+
+  /* Buttons in bar */
+  .btn-back,.btn-session{
+    padding:8px 11px;
+    font-size:12px;
+    min-height:38px;
+  }
+
+  /* Swatches bigger */
+  .sw{width:28px;height:28px;}
+
+  /* Toast */
+  .toast{
+    padding:10px 16px;
+    font-size:13px;
+    max-width:90vw;
+    white-space:normal;
+    text-align:center;
+  }
+}
+
+/* ══════════════════════════════════════════
+   VERY SMALL PHONE (≤ 360px)
+   ══════════════════════════════════════════ */
+@media(max-width:360px){
+  .cats-grid{grid-template-columns:1fr;}
+  .icon-btn{width:34px;height:34px;font-size:13px;}
+  .btn-add{width:34px;height:34px;font-size:16px;}
+  .adkar-card{padding:12px 12px;}
+  .adkar-text{font-size:15px;}
+  .arabic-big{font-size:18px;}
+  .session-arabic{font-size:18px;}
+  .session-tap-btn{width:88px;height:88px;font-size:22px;}
+}
+
+/* ══════════════════════════════════════════
+   LANDSCAPE PHONE — keep session usable
+   ══════════════════════════════════════════ */
+@media(max-height:500px) and (orientation:landscape){
+  .session-body{
+    flex-direction:row;
+    flex-wrap:wrap;
+    justify-content:center;
+    padding:12px;
+    gap:12px;
+  }
+  .session-arabic{font-size:16px;padding:12px;max-width:60vw;}
+  .session-counter-area{max-width:180px;}
+  .session-tap-btn{width:80px;height:80px;font-size:20px;}
+}
+
+/* ══════════════════════════════════════════
+   DESKTOP (≥ 1024px) — a bit more air
+   ══════════════════════════════════════════ */
+@media(min-width:1024px){
+  .cats-grid{max-width:1100px;margin:0 auto;}
+  .adkar-grid,.search-results{max-width:820px;margin:0 auto;}
+}

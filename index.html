@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0f14">
+<title>أذكاري · My Adkar</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="goHome()" title="Home">
+    <div class="logo-icon">☽</div>
+    <div>
+      <div class="logo-text">أذكاري</div>
+      <div class="logo-sub">My Adkar</div>
+    </div>
+  </div>
+  <div class="hright">
+    <button class="icon-btn" onclick="toggleFavsView()" id="btn-favs" title="Favorites">⭐</button>
+    <button class="icon-btn" onclick="openCatMgr()" title="Categories">⚙️</button>
+    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+    <button class="btn-add" onclick="openForm()" title="Add dhikr">
+  ＋<span class="text" style="margin-left:4px">Add</span>
+</button>
+  </div>
+</header>
+
+<div class="search-bar" id="search-bar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="Search all adkar..." oninput="handleSearch()">
+    <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none">✕</button>
+  </div>
+</div>
+
+<!-- VIEW: SEARCH -->
+<div class="view" id="view-search">
+  <div style="padding:14px 20px 8px;font-size:12px;color:var(--text3)" id="search-count"></div>
+  <div class="search-results" id="search-results"></div>
+</div>
+
+<!-- VIEW: CATEGORIES -->
+<div class="view active" id="view-cats">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Categories · الفئات</div>
+      <div class="page-sub" id="daily-reset-info"></div>
+    </div>
+  </div>
+  <div class="cats-grid" id="cats-grid"></div>
+</div>
+
+<!-- VIEW: ADKAR LIST -->
+<div class="view" id="view-adkar">
+  <div class="back-bar">
+    <button class="btn-back" onclick="goHome()">← Back</button>
+    <button class="btn-session" onclick="startSession()">▶ Session</button>
+    <div id="adkar-view-title" style="font-family:'Amiri',serif;font-size:17px;color:var(--accent)"></div>
+  </div>
+  <div class="adkar-grid" id="adkar-grid"></div>
+</div>
+
+<!-- VIEW: FAVORITES -->
+<div class="view" id="view-favs">
+  <div class="favs-header">
+    <button class="btn-back" onclick="closeFavsView()">← Back</button>
+    <div class="favs-title">Favorites · المفضلة</div>
+  </div>
+  <div class="adkar-grid" id="favs-grid"></div>
+</div>
+
+<!-- SESSION OVERLAY -->
+<div class="session-overlay" id="session-overlay">
+  <div class="session-header">
+    <button class="session-back-btn" id="sess-back-btn" onclick="sessionPrev()">← Prev</button>
+    <div class="session-header-center">
+      <div class="session-title" id="sess-title"></div>
+      <div class="session-progress-text" id="sess-prog-text"></div>
+    </div>
+    <button class="session-close-btn" onclick="closeSession()">✕</button>
+  </div>
+  <div class="session-body" id="sess-body"></div>
+  <div class="session-footer" id="sess-footer">
+    <button class="btn-session-skip" onclick="sessionSkip()">Skip</button>
+    <button class="btn-session-next" id="sess-next-btn" onclick="sessionNext()">Next →</button>
+  </div>
+</div>
+
+<!-- DETAIL SHEET -->
+<div class="ov" id="ov-detail" onclick="if(event.target===this)closeDetail()">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-cat" id="d-cat-lbl"></div>
+      <div class="sheet-head-right">
+        <button class="btn-close" id="d-fav-btn" onclick="toggleFavFromDetail()" style="font-size:16px;background:none;border:none;cursor:pointer;color:var(--text3)">☆</button>
+        <button class="btn-close" onclick="closeDetail()">✕</button>
+      </div>
+    </div>
+    <div class="sheet-body" id="d-body"></div>
+  </div>
+</div>
+
+<!-- DHIKR FORM -->
+<div class="ov center" id="ov-form" onclick="if(event.target===this)closeForm()">
+  <div class="modal-box">
+    <div class="mh">
+      <h2 id="form-title">Add Dhikr</h2>
+      <button class="btn-close" onclick="closeForm()">✕</button>
+    </div>
+    <div class="mb">
+      <div class="fg">
+        <label class="fl">النص العربي * / Arabic text *</label>
+        <textarea class="fta ar" id="f-arabic" placeholder="اكتب الذكر هنا..."></textarea>
+      </div>
+      <div class="fg">
+        <label class="fl">الموقف / Situation</label>
+        <input class="fi" id="f-situation" placeholder="مثال: عند لبس الثوب ، قبل النوم ...">
+      </div>
+      <div class="fg">
+        <label class="fl">Transliteration</label>
+        <input class="fi" id="f-translit" placeholder="Latin script (optional)">
+      </div>
+      <div class="fr2">
+        <div class="fg">
+          <label class="fl">Category / الفئة</label>
+          <select class="fse" id="f-cat"></select>
+        </div>
+        <div class="fg">
+          <label class="fl">Repeat ×</label>
+          <input class="fi" type="number" id="f-repeat" value="3" min="1" max="1000">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Reliability / الدرجة</label>
+        <select class="fse" id="f-rel">
+          <option value="">— Unknown</option>
+          <option value="sahih">✅ Sahih صحيح</option>
+          <option value="hasan">🔵 Hasan حسن</option>
+          <option value="daif">🔴 Da'if ضعيف</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">📖 Source / المصدر</label>
+        <textarea class="fta" id="f-hadith" placeholder="رواه..."></textarea>
+      </div>
+      <div class="fg">
+        <label class="fl">✨ Virtue / الفضل</label>
+        <textarea class="fta" id="f-virtue" placeholder="من قالها..."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-cancel" onclick="closeForm()">Cancel</button>
+      <button class="btn-save" onclick="saveCard()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORY MANAGER -->
+<div class="ov center" id="ov-cats" onclick="if(event.target===this)closeCatMgr()">
+  <div class="modal-box">
+    <div class="mh">
+      <h2>Categories</h2>
+      <button class="btn-close" onclick="closeCatMgr()">✕</button>
+    </div>
+    <div class="mb" id="cat-list-body" style="gap:7px"></div>
+    <div style="padding:0 20px 10px;display:flex;flex-direction:column;gap:8px">
+      <button class="btn-newcat" onclick="toggleNewCatForm()">＋ New category</button>
+      <div class="newcat-form" id="newcat-form" style="display:none">
+        <div class="fr2">
+          <div class="fg">
+            <label class="fl">العربية</label>
+            <input class="fi" id="nc-ar" placeholder="أذكار الصباح" style="font-family:'Amiri',serif;font-size:15px;direction:rtl;text-align:right">
+          </div>
+          <div class="fg">
+            <label class="fl">English</label>
+            <input class="fi" id="nc-en" placeholder="Morning">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Color</label>
+          <div class="swatches" id="sw-new"></div>
+        </div>
+        <button class="btn-save" style="width:100%" onclick="addCat()">Add</button>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em;text-transform:uppercase">Data</div>
+        <button class="io-btn" onclick="exportData()">⬇️ Export JSON</button>
+        <label class="io-btn" style="margin:0">⬆️ Import JSON (replace)<input type="file" accept=".json" onchange="importData(event,'replace')" style="display:none"></label>
+        <label class="io-btn" style="margin:0;border-color:var(--green);color:var(--green)">🔀 Import JSON (merge)<input type="file" accept=".json" onchange="importData(event,'merge')" style="display:none"></label>
+      </div>
+    </div>
+    <div style="padding:8px 20px 16px;font-size:11px;color:var(--text3);text-align:center">
+      Counters reset automatically at midnight
+    </div>
+  </div>
+</div>
+
+<!-- EDIT CATEGORY -->
+<div class="ov center" id="ov-editcat" onclick="if(event.target===this)closeEditCat()">
+  <div class="modal-box" style="max-width:360px">
+    <div class="mh">
+      <h2>Edit Category</h2>
+      <button class="btn-close" onclick="closeEditCat()">✕</button>
+    </div>
+    <div class="mb">
+      <div class="fg"><label class="fl">العربية</label><input class="fi" id="ec-ar" style="font-family:'Amiri',serif;font-size:15px;direction:rtl;text-align:right"></div>
+      <div class="fg"><label class="fl">English</label><input class="fi" id="ec-en"></div>
+      <div class="fg"><label class="fl">Color</label><div class="swatches" id="sw-edit"></div></div>
+    </div>
+    <div class="mf">
+      <button class="btn-cancel" onclick="closeEditCat()">Cancel</button>
+      <button class="btn-save" onclick="saveEditCat()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="ov center" id="ov-confirm" onclick="if(event.target===this)closeConfirm()">
+  <div class="confirm-inner">
+    <div class="conf-ico" id="conf-ico">🗑️</div>
+    <div class="conf-t" id="conf-t">Delete?</div>
+    <div class="conf-x" id="conf-x">This cannot be undone.</div>
+    <div class="conf-acts">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-del" onclick="doDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Load order matters -->
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/store.js"></script>
+<script src="js/data-defaults.js"></script>
+<script src="js/state.js"></script>
+<script src="js/views/cats.js"></script>
+<script src="js/views/adkar.js"></script>
+<script src="js/views/search.js"></script>
+<script src="js/views/favs.js"></script>
+<script src="js/views/detail.js"></script>
+<script src="js/views/session.js"></script>
+<script src="js/views/form.js"></script>
+<script src="js/views/catmgr.js"></script>
+<script src="js/views/confirm.js"></script>
+<script src="js/io.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

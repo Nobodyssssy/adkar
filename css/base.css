@@ -1,0 +1,52 @@
+:root{
+  --bg:#0d0f14;--surface:#161920;--surface2:#1e2230;--surface3:#252a3a;
+  --border:#2e3450;--accent:#c9a84c;--accent2:#e8c97a;--glow:rgba(201,168,76,.15);
+  --text:#f0ead6;--text2:#9a9db5;--text3:#5c607a;
+  --green:#4caf89;--red:#c94c4c;--blue:#4c7fc9;--orange:#e07b2a;
+  --r:16px;--rs:10px;--sh:0 8px 32px rgba(0,0,0,.4);--tr:.22s cubic-bezier(.4,0,.2,1);
+}
+.light{
+  --bg:#f4efe4;--surface:#fdfaf3;--surface2:#ede8d8;--surface3:#e4ddc8;
+  --border:#cfc59e;--accent:#7a5c10;--accent2:#9b7520;--glow:rgba(122,92,16,.1);
+  --text:#1a1710;--text2:#5a5240;--text3:#9a9080;--sh:0 8px 32px rgba(0,0,0,.1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+/* ── Mobile baseline ── */
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body{
+  font-family:'Tajawal',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;
+  min-height:100dvh; /* mobile viewport fix */
+  transition:background var(--tr),color var(--tr);
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior-y:none;
+}
+button,input,textarea,select{
+  font-family:inherit;
+  /* iOS: prevent zoom-on-focus for < 16px inputs */
+  font-size:16px;
+}
+input,textarea{font-size:16px;} /* keep 16px to avoid iOS zoom */
+
+button{
+  -webkit-user-select:none;user-select:none;
+  touch-action:manipulation;
+}
+
+/* Safe-area insets (notch / home indicator) */
+header{
+  padding-left:calc(20px + env(safe-area-inset-left));
+  padding-right:calc(20px + env(safe-area-inset-right));
+}
+.toast{
+  bottom:calc(28px + env(safe-area-inset-bottom));
+}
+.session-footer{
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+}

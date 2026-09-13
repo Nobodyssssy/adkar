@@ -1,0 +1,23 @@
+# Local server script — not part of the deployable app
+start.py
+
+# Backups / exports
+*.json
+!package.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+33/
