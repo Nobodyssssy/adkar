@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v1.1.0';
+const VERSION = 'v1.2.0';
 const CACHE   = `adkar-${VERSION}`;
 
 const APP_SHELL = [
@@ -22,11 +22,16 @@ const APP_SHELL = [
 
   './js/config.js',
   './js/utils.js',
+  './js/dict.js',
+  './js/vendor/fuse.min.js',
+  './js/db.js',
   './js/store.js',
   './js/data-defaults.js',
   './js/state.js',
-  './js/io.js',
-  './js/app.js',
+  './js/search.js',
+  './js/prayer.js',
+  './js/qibla.js',
+  './js/location.js',
 
   './js/views/cats.js',
   './js/views/adkar.js',
@@ -37,12 +42,15 @@ const APP_SHELL = [
   './js/views/form.js',
   './js/views/catmgr.js',
   './js/views/confirm.js',
+  './js/views/prayer.js',
+
+  './js/io.js',
+  './js/app.js',
 
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
-
 /* ── Install: precache the shell ── */
 self.addEventListener('install', (event) => {
   event.waitUntil(
