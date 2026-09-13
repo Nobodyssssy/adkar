@@ -13,10 +13,12 @@ function handleSearch(){
       normalizeAr(d.arabic),
       normalizeAr(d.situation || ''),
       normalizeAr(d.hadith   || ''),
-      normalizeAr(d.virtue   || ''),
-      normalizeEn(d.transliteration || '')
+      normalizeAr(d.virtue   || '')
     ].join(' ');
-    const hayLatin = normalizeEn([d.transliteration, d.hadith, d.virtue].join(' '));
+    const hayLatin = normalizeEn([
+      d.transliteration, d.hadith, d.virtue,
+      ...(Array.isArray(d.tags) ? d.tags : [])
+    ].join(' '));
     return (nq && fuzzyMatch(hay, nq)) || (ne && fuzzyMatch(hayLatin, ne));
   });
 
@@ -29,7 +31,8 @@ function handleSearch(){
     </div>`;
   } else {
     el.innerHTML = results.map(d => {
-      const cat = getCat(d.cat);
+      const catKey = Array.isArray(d.categories) ? d.categories[0] : null;
+      const cat = getCat(catKey);
       return `<div class="search-result-card" style="--cc:${cat.color}" onclick="openDetail(${d.id})">
         <div class="src-cat-label" style="color:${cat.color}">${cat.ar}</div>
         ${d.situation ? `<div class="src-situation">${d.situation}</div>` : ''}

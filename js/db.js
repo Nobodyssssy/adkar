@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 const DB_NAME    = 'adkar-db';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let _dbPromise = null;
 
@@ -52,6 +52,45 @@ function openDB(){
       }
       if(!db.objectStoreNames.contains('meta')){
         db.createObjectStore('meta', { keyPath: 'key' });
+      }
+	        /* v2 data migration: convert `cat: 'x'` → `categories: ['x']`, add tags:[].
+         Runs once per browser on first load after DB_VERSION 2 deploy.
+         Uses a cursor to avoid loading everything into memory. */
+      if(event.oldVersion < 3){
+        const tx = event.target.transaction;
+        if(tx.objectStoreNames.contains('adkar')){
+          const store = tx.objectStore('adkar');
+          const cursorReq = store.openCursor();
+          cursorReq.onsuccess = (e) => {
+            const cursor = e.target.result;
+            if(!cursor) return;
+            const d = cursor.value;
+            let changed = false;
+
+            /* Migrate cat → categories[] */
+            if(typeof d.cat === 'string' && !Array.isArray(d.categories)){
+              d.categories = [d.cat];
+              delete d.cat;
+              changed = true;
+            } else if(Array.isArray(d.categories) && 'cat' in d){
+              /* partial migration — clean up */
+              delete d.cat;
+              changed = true;
+            }
+
+            /* Ensure tags array exists */
+            if(!Array.isArray(d.tags)){
+              d.tags = [];
+              changed = true;
+            }
+
+            if(changed){
+              cursor.update(d);
+              console.log(`[migrate] adkar #${d.id}: cat → categories[]`, d.categories);
+            }
+            cursor.continue();
+          };
+        }
       }
     };
 

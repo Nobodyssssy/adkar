@@ -3,25 +3,50 @@
 function openForm(id = null){
   editId = id;
   $('form-title').textContent = id ? 'Edit Dhikr' : 'Add Dhikr';
-  $('f-cat').innerHTML = cats.map(c => `<option value="${c.key}">${c.ar} — ${c.en}</option>`).join('');
+  $('f-cat').innerHTML = cats.map(c =>
+    `<option value="${c.key}">${c.ar} — ${c.en}</option>`
+  ).join('');
+
+  /* Find or create tags input if it doesn't exist */
+  ensureTagsInput();
+
   if(id){
     const d = data.find(x => x.id === id);
-    $('f-arabic').value      = d.arabic;
-    $('f-situation').value   = d.situation || '';
-    $('f-translit').value    = d.transliteration || '';
-    $('f-cat').value         = d.cat;
-    $('f-repeat').value      = d.repeat;
-    $('f-rel').value         = d.reliability || '';
-    $('f-hadith').value      = d.hadith || '';
-    $('f-virtue').value      = d.virtue || '';
+    $('f-arabic').value    = d.arabic;
+    $('f-situation').value = d.situation || '';
+    $('f-translit').value  = d.transliteration || '';
+    $('f-repeat').value    = d.repeat;
+    $('f-rel').value       = d.reliability || '';
+    $('f-hadith').value    = d.hadith || '';
+    $('f-virtue').value    = d.virtue || '';
+    $('f-tags').value      = (d.tags || []).join(', ');
+    /* Multi-category: set the first category as selected for now.
+       (Full multi-select UI comes in a later step.) */
+    const firstCat = Array.isArray(d.categories) ? d.categories[0] : null;
+    if(firstCat) $('f-cat').value = firstCat;
   } else {
-    ['f-arabic','f-situation','f-translit','f-hadith','f-virtue'].forEach(x => $(x).value = '');
+    ['f-arabic','f-situation','f-translit','f-hadith','f-virtue','f-tags']
+      .forEach(x => $(x).value = '');
     $('f-repeat').value = 3;
     $('f-rel').value = '';
     if(currentCat) $('f-cat').value = currentCat;
   }
   $('ov-form').classList.add('open');
   lockBody();
+}
+
+/* Injects the tags input into the form if not already present */
+function ensureTagsInput(){
+  if($('f-tags')) return;
+  const catGroup = $('f-cat').closest('.fg').parentNode;  /* .fr2 wrapper */
+  const wrapper = document.createElement('div');
+  wrapper.className = 'fg';
+  wrapper.innerHTML = `
+    <label class="fl">Tags (comma-separated)</label>
+    <input class="fi" id="f-tags" placeholder="daily, protection, after-prayer">
+  `;
+  /* Insert after the .fr2 block */
+  catGroup.parentNode.insertBefore(wrapper, catGroup.nextSibling);
 }
 
 function closeForm(){
@@ -32,26 +57,38 @@ function closeForm(){
 function saveCard(){
   const arabic = $('f-arabic').value.trim();
   if(!arabic){ toast('⚠️ Arabic text required'); return; }
+
+  const catKey = $('f-cat').value;
+  const tags = ($('f-tags').value || '')
+    .split(',')
+    .map(t => t.trim().toLowerCase())
+    .filter(Boolean)
+    /* dedupe */
+    .filter((t, i, arr) => arr.indexOf(t) === i);
+
   const obj = {
     arabic,
-    situation: $('f-situation').value.trim() || null,
+    situation:       $('f-situation').value.trim() || null,
     transliteration: $('f-translit').value.trim() || null,
-    cat: $('f-cat').value,
-    repeat: parseInt($('f-repeat').value) || 1,
-    reliability: $('f-rel').value || null,
-    hadith: $('f-hadith').value.trim() || null,
-    virtue: $('f-virtue').value.trim() || null
+    categories:      [catKey],   /* multi-select UI can extend this later */
+    tags,
+    repeat:          parseInt($('f-repeat').value) || 1,
+    reliability:     $('f-rel').value || null,
+    hadith:          $('f-hadith').value.trim() || null,
+    virtue:          $('f-virtue').value.trim() || null
   };
+
   if(editId){
     const i = data.findIndex(x => x.id === editId);
     data[i] = {...data[i], ...obj};
     toast('✏️ Updated');
+    store.putAdkar(data[i]);
   } else {
     obj.id = nextId++;
     data.push(obj);
     toast('✅ Added');
+    store.putAdkar(obj);
   }
-  saveData();
   closeForm();
   if(currentCat) renderAdkarGrid();
   renderCatsGrid();

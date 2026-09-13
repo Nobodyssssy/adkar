@@ -1,9 +1,16 @@
 'use strict';
 
+/* ═══════════════════════════════════════════════════════════
+   Categories grid
+   Counts items by checking categories.includes(key)
+   ═══════════════════════════════════════════════════════════ */
+
 function renderCatsGrid(){
   const g = $('cats-grid');
   g.innerHTML = cats.map(c => {
-    const items = data.filter(d => d.cat === c.key);
+    const items = data.filter(d =>
+      Array.isArray(d.categories) && d.categories.includes(c.key)
+    );
     const n = items.length;
     const done = items.filter(d => (counters[`c_${d.id}`]||0) >= d.repeat).length;
     const pct = n > 0 ? Math.round(done / n * 100) : 0;

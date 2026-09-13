@@ -1,7 +1,9 @@
 'use strict';
 
 function startSession(){
-  const items = data.filter(d => d.cat === currentCat);
+  const items = data.filter(d =>
+    Array.isArray(d.categories) && d.categories.includes(currentCat)
+  );
   if(!items.length){ toast('No adkar in this category'); return; }
   sessItems = [...items];
   sessIdx = 0;
@@ -47,6 +49,7 @@ function renderSessionStep(){
     <div class="session-badges">
       <span class="badge badge-repeat" style="font-size:12px;padding:3px 10px">× ${d.repeat}</span>
       ${relBadge}
+      ${renderTagChips(d.tags)}
     </div>
     ${d.hadith ? `<div class="session-info session-hadith"><strong style="color:var(--accent)">📖</strong> ${d.hadith}</div>` : ''}
     ${d.virtue ? `<div class="session-info session-virtue"><strong style="color:var(--green)">✨</strong> ${d.virtue}</div>` : ''}
@@ -84,24 +87,20 @@ function sessionTap(id, target){
 }
 
 function sessionNext(){
-  sessIdx++;
-  sessTapCount = 0;
+  sessIdx++; sessTapCount = 0;
   if(sessIdx >= sessItems.length) renderSessionDone();
   else renderSessionStep();
 }
 
 function sessionSkip(){
-  sessIdx++;
-  sessTapCount = 0;
+  sessIdx++; sessTapCount = 0;
   if(sessIdx >= sessItems.length) renderSessionDone();
   else renderSessionStep();
 }
 
 function sessionPrev(){
   if(sessIdx === 0) return;
-  sessIdx--;
-  /* Bug fix #6: reload tap count from storage so going back is consistent */
-  sessTapCount = 0;
+  sessIdx--; sessTapCount = 0;
   renderSessionStep();
 }
 

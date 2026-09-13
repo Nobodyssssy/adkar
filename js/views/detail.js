@@ -4,13 +4,17 @@ function openDetail(id){
   const d = data.find(x => x.id === id);
   if(!d) return;
   detailId = id;
-  const cat = getCat(d.cat);
+
+  const catKey = Array.isArray(d.categories) ? d.categories[0] : null;
+  const cat = getCat(catKey);
   const k = `c_${id}`;
   if(!counters[k]) counters[k] = 0;
+
   const isFav = favs.includes(id);
   $('d-cat-lbl').textContent = cat.ar;
   $('d-fav-btn').textContent = isFav ? '★' : '☆';
   $('d-fav-btn').style.color = isFav ? '#e8c97a' : 'var(--text3)';
+
   const relBadge = d.reliability
     ? `<div style="display:flex;justify-content:center">
          <span class="badge badge-${d.reliability}" style="font-size:12px;padding:3px 10px">${REL_LABEL[d.reliability]}</span>
@@ -19,11 +23,20 @@ function openDetail(id){
   const translit = d.transliteration
     ? `<div class="translit-box">${esc(d.transliteration)}</div>`
     : '';
+
+  /* Show all categories + tags in the detail view */
+  const catChips = renderCatChips(d.categories);
+  const tagChips = renderTagChips(d.tags);
+  const chipsRow = (catChips || tagChips)
+    ? `<div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap">${catChips}${tagChips}</div>`
+    : '';
+
   $('d-body').innerHTML = `
     ${d.situation ? `<div><span class="situation-pill">${d.situation}</span></div>` : ''}
     <div class="arabic-big">${d.arabic}</div>
     ${translit}
     ${relBadge}
+    ${chipsRow}
     ${d.hadith ? `<div class="info-box hadith-box"><div class="info-label">📖 Source</div>${d.hadith}</div>` : ''}
     ${d.virtue ? `<div class="info-box virtue-box"><div class="info-label">✨ Virtue</div>${d.virtue}</div>` : ''}
     <div class="counter-wrap">
@@ -72,7 +85,7 @@ function dec(id){
 
 function resetCtr(id){
   counters[`c_${id}`] = 0;
-  saveCtrs();
+  store.setCounter(id, 0);
   $(`cv-${id}`).textContent = 0;
   $(`cp-${id}`).style.width = '0%';
 }
