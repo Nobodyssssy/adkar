@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 const DB_NAME    = 'adkar-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let _dbPromise = null;
 
@@ -27,6 +27,22 @@ function openDB(){
         const s = db.createObjectStore('adkar', { keyPath: 'id' });
         s.createIndex('cat', 'cat', { unique: false });
         s.createIndex('reliability', 'reliability', { unique: false });
+      }
+
+      /* v2: add multi-value index on `categories` array + `tags` array.
+         IndexedDB supports array indexes — a dhikr with
+         categories: ['sabah','masaa'] will be indexed under both. */
+      if(event.oldVersion < 2){
+        const tx = event.target.transaction;
+        if(tx.objectStoreNames.contains('adkar')){
+          const store = tx.objectStore('adkar');
+          if(!store.indexNames.contains('categories')){
+            store.createIndex('categories', 'categories', { unique: false, multiEntry: true });
+          }
+          if(!store.indexNames.contains('tags')){
+            store.createIndex('tags', 'tags', { unique: false, multiEntry: true });
+          }
+        }
       }
       if(!db.objectStoreNames.contains('favs')){
         db.createObjectStore('favs', { keyPath: 'id' });
