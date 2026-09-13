@@ -6,6 +6,9 @@
    ═══════════════════════════════════════════════════════════ */
 
 function renderCatsGrid(){
+  /* Render the daily quote card above the categories */
+  if(typeof renderQuoteCard === 'function') renderQuoteCard();
+
   const g = $('cats-grid');
   g.innerHTML = cats.map(c => {
     const items = data.filter(d =>
