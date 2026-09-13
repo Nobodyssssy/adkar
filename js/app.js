@@ -12,5 +12,15 @@
     }
   });
 
-  console.log('%cأذكاري · My Adkar ready', 'color:#c9a84c;font-weight:bold');
+  /* ── Standalone-mode class (for CSS tweaks when installed) ── */
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+  if(isStandalone) document.documentElement.classList.add('pwa-standalone');
+
+  /* ── Log ── */
+  console.log(
+    '%cأذكاري · My Adkar' + (isStandalone ? ' (installed)' : ''),
+    'color:#c9a84c;font-weight:bold'
+  );
 })();

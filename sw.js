@@ -1,0 +1,127 @@
+/* ─────────────────────────────────────────────
+   Service Worker — adkar app
+   Strategy:
+     • Precache app shell on install
+     • Cache-first for same-origin assets
+     • Network-first for HTML navigation (so updates flow)
+     • Stale-while-revalidate for fonts
+   ───────────────────────────────────────────── */
+
+const VERSION = 'v1.0.0';
+const CACHE   = `adkar-${VERSION}`;
+
+const APP_SHELL = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+
+  './css/base.css',
+  './css/layout.css',
+  './css/components.css',
+  './css/responsive.css',
+
+  './js/config.js',
+  './js/utils.js',
+  './js/store.js',
+  './js/data-defaults.js',
+  './js/state.js',
+  './js/io.js',
+  './js/app.js',
+
+  './js/views/cats.js',
+  './js/views/adkar.js',
+  './js/views/search.js',
+  './js/views/favs.js',
+  './js/views/detail.js',
+  './js/views/session.js',
+  './js/views/form.js',
+  './js/views/catmgr.js',
+  './js/views/confirm.js',
+
+  './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
+];
+
+/* ── Install: precache the shell ── */
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+      .catch((err) => console.warn('[sw] precache failed', err))
+  );
+});
+
+/* ── Activate: drop old caches ── */
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.filter((k) => k.startsWith('adkar-') && k !== CACHE)
+            .map((k) => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
+/* ── Fetch handling ── */
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+
+  const isSameOrigin = url.origin === self.location.origin;
+  const isFont = url.hostname.endsWith('gstatic.com') || url.hostname.endsWith('googleapis.com');
+
+  if (!isSameOrigin && !isFont) return;
+
+  /* HTML navigation → network-first, fall back to cache when offline */
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  /* Fonts → stale-while-revalidate */
+  if (isFont) {
+    event.respondWith(
+      caches.open(CACHE).then((cache) =>
+        cache.match(req).then((cached) => {
+          const fetchPromise = fetch(req).then((res) => {
+            if (res && res.status === 200) cache.put(req, res.clone());
+            return res;
+          }).catch(() => cached);
+          return cached || fetchPromise;
+        })
+      )
+    );
+    return;
+  }
+
+  /* Same-origin static assets → cache-first */
+  event.respondWith(
+    caches.match(req).then((cached) =>
+      cached || fetch(req).then((res) => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
+        return res;
+      })
+    )
+  );
+});
+
+/* ── Allow the page to trigger skipWaiting ── */
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
+});

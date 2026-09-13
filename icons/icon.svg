@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c9a84c"/>
+      <stop offset="1" stop-color="#e8c97a"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#0d0f14"/>
+  <!-- Inner ring (subtle) -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#g)" stroke-width="6" opacity="0.35"/>
+  <!-- Crescent moon -->
+  <path d="M 300 130
+           A 130 130 0 1 0 300 382
+           A 100 100 0 1 1 300 130 Z"
+        fill="url(#g)"/>
+  <!-- Star (5-point, small) -->
+  <path d="M 340 200
+           L 348 224 L 374 224 L 353 240 L 361 264
+           L 340 248 L 319 264 L 327 240 L 306 224 L 332 224 Z"
+        fill="url(#g)"/>
+</svg>
