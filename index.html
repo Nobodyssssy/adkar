@@ -62,6 +62,11 @@
 	  <span class="menu-label">Hijri calendar</span>
 	</button>
 
+  <button class="menu-item" onclick="closeMainMenu();openAsmaView()">
+    <span class="menu-icon">📿</span>
+    <span class="menu-label">99 Names of Allah</span>
+  </button>
+  
     <button class="menu-item" onclick="closeMainMenu();openCatMgr()">
       <span class="menu-icon">⚙️</span>
       <span class="menu-label">Categories</span>
@@ -130,6 +135,15 @@
     <div id="hijri-view-title" style="font-family:'Amiri',serif;font-size:17px;color:var(--accent)">Calendar · التقويم</div>
   </div>
   <div class="hijri-container" id="hijri-body"></div>
+</div>
+
+<!-- VIEW: ASMA AL-HUSNA -->
+<div class="view" id="view-asma">
+  <div class="back-bar">
+    <button class="btn-back" onclick="closeAsmaView()">← Back</button>
+    <div id="asma-view-title" style="font-family:'Amiri',serif;font-size:17px;color:var(--accent)">Asma al-Husna · أسماء الله</div>
+  </div>
+  <div class="asma-container" id="asma-body"></div>
 </div>
 
 <!-- SESSION OVERLAY -->
@@ -310,6 +324,8 @@
 <script src="js/dates.js"></script>
 <script src="js/hijri-events.js"></script>
 <script src="js/hijri-calendar.js"></script>
+<script src="js/asma-data.js"></script>
+<script src="js/asma.js"></script>
 <script src="js/compass.js"></script>
 <script src="js/views/cats.js"></script>
 <script src="js/views/quote.js"></script>
@@ -324,6 +340,7 @@
 <script src="js/views/prayer.js"></script>
 <script src="js/views/menu.js"></script>
 <script src="js/views/hijri.js"></script>
+<script src="js/views/asma.js"></script>
 <script src="js/io.js"></script>
 <script src="js/app.js"></script>
 </body>
