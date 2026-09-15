@@ -243,12 +243,19 @@ async function enableLiveCompass(qiblaDeg){
     while(diff > 180)  diff -= 360;
     while(diff < -180) diff += 360;
 
-    const aligned = Math.abs(diff) <= 5;
-    if(deg) deg.textContent = Math.abs(Math.round(diff)) + '°';
-    if(card) card.classList.toggle('aligned', aligned);
+    const absDiff = Math.abs(diff);
+    /* Two-level feedback: aligned (≤5°), close (≤15°) */
+    const aligned = absDiff <= 5;
+    const close   = absDiff <= 15 && !aligned;
+
+    if(deg) deg.textContent = Math.round(absDiff) + '°';
+    if(card){
+      card.classList.toggle('aligned', aligned);
+      card.classList.toggle('close',   close);
+    }
   });
 
-  _compassAccuracyTimer = setInterval(() => {
+    _compassAccuracyTimer = setInterval(() => {
     const isAligned = document.querySelector('.prayer-qibla-card.aligned');
     if(isAligned){
       status.textContent = '✓ Facing Qibla';
@@ -257,10 +264,10 @@ async function enableLiveCompass(qiblaDeg){
     }
     const acc = compassAccuracy();
     const map = {
-      good:    { label: '🧭 Live — 🟢 Good signal',                 cls: 'good' },
-      fair:    { label: '🧭 Live — 🟡 Fair signal',                 cls: 'fair' },
-      poor:    { label: '🧭 Live — 🔴 Weak — move away from metal', cls: 'poor' },
-      unknown: { label: '🧭 Live — calibrating…',                   cls: 'loading' },
+      good:    { label: '🧭 Live — 🟢 Strong signal',                         cls: 'good' },
+      fair:    { label: '🧭 Live — 🟡 Signal ok',                            cls: 'fair' },
+      poor:    { label: '🧭 Live — 🔴 Noisy — wave phone in a figure-8',     cls: 'poor' },
+      unknown: { label: '🧭 Live — 📡 Calibrating…',                          cls: 'loading' },
     };
     const info = map[acc] || map.unknown;
     status.textContent = info.label;

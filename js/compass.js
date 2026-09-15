@@ -5,15 +5,39 @@
    • Uses DeviceOrientationEvent (magnetometer on phones)
    • iOS 13+ requires requestPermission() from a user gesture
    • Falls back gracefully on desktop (no compass)
-   • Emits a heading in degrees (0-360, clockwise from North)
+   • Emits a smoothed heading in degrees (0-360, clockwise from North)
    ═══════════════════════════════════════════════════════════ */
 
 let _compassActive = false;
-let _compassHeading = null;   /* last known heading, 0-360 */
-let _compassListeners = [];   /* callbacks for heading changes */
-let _compassSupported = null; /* null = unknown, true/false after first check */
+let _compassHeading = null;    /* last RAW heading, 0-360 */
+let _smoothedHeading = null;   /* last SMOOTHED heading */
+let _compassListeners = [];    /* callbacks for heading changes */
+let _compassSupported = null;  /* null = unknown, true/false after first check */
 
-/* ── Feature detection ── */
+/* ── Smoothing buffer ── */
+const SMOOTH_WINDOW = 8;       /* how many readings to average */
+let _headingBuffer = [];       /* recent raw headings */
+
+/* ═══════════════════════════════════════════════════════════
+   Circular mean — averages angles correctly (no 359/0 wrap issues)
+   ═══════════════════════════════════════════════════════════ */
+function circularMean(angles){
+  if(!angles.length) return null;
+  let sumSin = 0, sumCos = 0;
+  for(const deg of angles){
+    const rad = deg * Math.PI / 180;
+    sumSin += Math.sin(rad);
+    sumCos += Math.cos(rad);
+  }
+  const meanRad = Math.atan2(sumSin / angles.length, sumCos / angles.length);
+  let meanDeg = meanRad * 180 / Math.PI;
+  if(meanDeg < 0) meanDeg += 360;
+  return meanDeg;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Feature detection
+   ═══════════════════════════════════════════════════════════ */
 function compassSupported(){
   if(_compassSupported !== null) return _compassSupported;
   _compassSupported =
@@ -22,25 +46,38 @@ function compassSupported(){
   return _compassSupported;
 }
 
-/* ── Handle a deviceorientation event ── */
+/* ═══════════════════════════════════════════════════════════
+   Handle a deviceorientation event — push to buffer, emit smoothed
+   ═══════════════════════════════════════════════════════════ */
 function _handleOrientation(e){
+  let heading = null;
+
   /* iOS gives `webkitCompassHeading` — most accurate absolute heading */
   if(typeof e.webkitCompassHeading === 'number' && !Number.isNaN(e.webkitCompassHeading)){
-    _compassHeading = e.webkitCompassHeading;
+    heading = e.webkitCompassHeading;
   }
   /* Android: use absolute alpha (degrees from north, counterclockwise) */
   else if(e.absolute === true && typeof e.alpha === 'number'){
-    /* Convert alpha (counterclockwise from north) to clockwise heading */
-    _compassHeading = (360 - e.alpha) % 360;
+    heading = (360 - e.alpha) % 360;
   }
   /* Some browsers give compass heading directly */
   else if(typeof e.alpha === 'number'){
-    _compassHeading = (360 - e.alpha) % 360;
+    heading = (360 - e.alpha) % 360;
   }
 
-  if(_compassHeading !== null){
+  if(heading === null || Number.isNaN(heading)) return;
+
+  _compassHeading = heading;
+
+  /* Push to buffer, keep the last N */
+  _headingBuffer.push(heading);
+  if(_headingBuffer.length > SMOOTH_WINDOW) _headingBuffer.shift();
+
+  /* Emit smoothed heading once we have enough samples */
+  if(_headingBuffer.length >= 3){
+    _smoothedHeading = circularMean(_headingBuffer);
     _compassListeners.forEach(fn => {
-      try{ fn(_compassHeading); }catch(err){ /* ignore listener errors */ }
+      try{ fn(_smoothedHeading); }catch(err){ /* ignore listener errors */ }
     });
   }
 }
@@ -71,6 +108,7 @@ async function startCompass(){
   window.addEventListener('deviceorientationabsolute', _handleOrientation, true);
   window.addEventListener('deviceorientation', _handleOrientation, true);
   _compassActive = true;
+  _headingBuffer = [];
   return { ok: true };
 }
 
@@ -81,25 +119,30 @@ function stopCompass(){
   window.removeEventListener('deviceorientation', _handleOrientation, true);
   _compassActive = false;
   _compassHeading = null;
+  _smoothedHeading = null;
+  _headingBuffer = [];
 }
 
 /* ── Subscribe to heading changes ── */
 function onCompassChange(callback){
   _compassListeners.push(callback);
-  /* Return unsubscribe function */
   return () => {
     _compassListeners = _compassListeners.filter(fn => fn !== callback);
   };
 }
 
-/* ── Current heading ── */
-function getCompassHeading(){
-  return _compassHeading;
-}
+/* ── Current headings ── */
+function getCompassHeading(){ return _smoothedHeading; }
+function getRawCompassHeading(){ return _compassHeading; }
 
 /* ── Is compass running? ── */
 function isCompassActive(){
   return _compassActive;
+}
+
+/* ── Reset calibration buffer ── */
+function resetCompassCalibration(){
+  _headingBuffer = [];
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -116,27 +159,36 @@ function computeArrowRotation(qiblaDeg, deviceHeading){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Accuracy heuristic — how reliable is the heading?
-   Some phones give noisy readings. We monitor the deltas.
+   Accuracy — measures the jitter of recent RAW readings
+   • We use a wider window and looser thresholds now
+   • 'poor' only when readings are genuinely chaotic
    ═══════════════════════════════════════════════════════════ */
-let _recentHeadings = [];
+let _recentRawHeadings = [];
+
 function compassAccuracy(){
-  if(_recentHeadings.length < 5) return 'unknown';
-  const diffs = [];
-  for(let i = 1; i < _recentHeadings.length; i++){
-    let d = _recentHeadings[i] - _recentHeadings[i - 1];
-    if(d > 180)  d -= 360;
-    if(d < -180) d += 360;
-    diffs.push(Math.abs(d));
+  if(_recentRawHeadings.length < 6) return 'unknown';
+
+  /* Circular variance: how spread out are the readings? */
+  const angles = _recentRawHeadings.slice(-8);
+  let sumSin = 0, sumCos = 0;
+  for(const deg of angles){
+    const rad = deg * Math.PI / 180;
+    sumSin += Math.sin(rad);
+    sumCos += Math.cos(rad);
   }
-  const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
-  if(avg < 3)  return 'good';
-  if(avg < 10) return 'fair';
+  const r = Math.sqrt(sumSin * sumSin + sumCos * sumCos) / angles.length;
+  /* r = 1 → perfect agreement; r = 0 → totally random
+     We map r to accuracy: > 0.995 good, > 0.95 fair, else poor */
+
+  if(r > 0.995) return 'good';
+  if(r > 0.95)  return 'fair';
   return 'poor';
 }
 
-/* Track recent headings for accuracy estimation */
+/* Track recent RAW headings for accuracy estimation */
 onCompassChange((h) => {
-  _recentHeadings.push(h);
-  if(_recentHeadings.length > 10) _recentHeadings.shift();
+  if(_compassHeading !== null){
+    _recentRawHeadings.push(_compassHeading);
+    if(_recentRawHeadings.length > 10) _recentRawHeadings.shift();
+  }
 });

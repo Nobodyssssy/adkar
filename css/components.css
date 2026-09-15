@@ -868,9 +868,9 @@ body.modal-open {
   text-align:center;
   transition:border-color var(--tr), box-shadow var(--tr);
 }
-.prayer-qibla-card.aligned{
-  border-color:var(--green);
-  box-shadow:0 0 32px rgba(76,175,137,.25);
+.prayer-qibla-card.close{
+  border-color:var(--accent);
+  box-shadow:0 0 24px rgba(201,168,76,.4);
 }
 
 .prayer-qibla-head{
