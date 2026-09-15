@@ -97,3 +97,240 @@ header{
 
 /* SEARCH RESULTS */
 .search-results{padding:14px 20px 80px;display:flex;flex-direction:column;gap:10px;}
+/* ═══════════════════════════════════════════════════════════
+   Header redesign — 3-column layout with centered date
+   ═══════════════════════════════════════════════════════════ */
+
+header{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  grid-template-areas:"left date logo";
+  align-items:center;
+  gap:12px;
+  padding:10px 16px;
+  height:auto;
+  min-height:64px;
+  direction:ltr;    /* Force LTR layout inside, keep text RTL */
+}
+
+/* Left group — menu, favorites, add */
+.header-left{
+  grid-area:left;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  direction:ltr;
+}
+
+/* Center block — date lines */
+.header-date-block{
+  grid-area:date;
+  text-align:center;
+  min-width:0;
+  line-height:1.3;
+  padding:2px 8px;
+  direction:rtl;    /* Date text stays RTL */
+}
+.header-date-ar{
+  font-family:'Amiri',serif;
+  font-size:14px;
+  color:var(--text);
+  direction:rtl;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.header-date-en{
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  color:var(--text3);
+  letter-spacing:0.02em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-top:1px;
+}
+
+/* Right block — logo */
+.logo{
+  grid-area:logo;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  user-select:none;
+  direction:rtl;    /* Logo internals stay RTL */
+}
+.logo-icon{
+  width:34px;
+  height:34px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  transition:transform var(--tr);
+  color:#1a1200;
+}
+.logo-text{
+  font-family:'Amiri',serif;
+  font-size:17px;
+  color:var(--accent);
+  font-weight:700;
+  line-height:1.1;
+  direction:rtl;
+  text-align:right;
+}
+.logo-sub{
+  font-size:10px;
+  color:var(--text3);
+  text-align:right;
+  letter-spacing:0.03em;
+}
+
+/* Small icon add-button (in the left group) */
+.btn-add-icon{
+  font-weight:700;
+  font-size:15px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Main menu dropdown
+   ═══════════════════════════════════════════════════════════ */
+.menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:150;
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(4px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity var(--tr);
+}
+.menu-overlay.open{
+  opacity:1;
+  pointer-events:all;
+}
+.menu-dropdown{
+  position:absolute;
+  top:70px;
+  left:16px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  box-shadow:var(--sh);
+  min-width:220px;
+  padding:6px;
+  transform:translateY(-10px) scale(.96);
+  opacity:0;
+  transition:transform .18s cubic-bezier(.34,1.4,.64,1), opacity .18s ease;
+}
+.menu-overlay.open .menu-dropdown{
+  transform:translateY(0) scale(1);
+  opacity:1;
+}
+.menu-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  padding:11px 14px;
+  background:transparent;
+  border:none;
+  color:var(--text);
+  font-family:inherit;
+  font-size:14px;
+  text-align:left;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background var(--tr), color var(--tr);
+}
+.menu-item:hover{
+  background:var(--glow);
+  color:var(--accent);
+}
+.menu-icon{
+  font-size:16px;
+  width:22px;
+  text-align:center;
+  flex-shrink:0;
+}
+.menu-label{
+  flex:1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Mobile adjustments
+   ═══════════════════════════════════════════════════════════ */
+@media(max-width:600px){
+  header{padding:8px 12px;gap:8px;min-height:auto;}
+  .header-date-ar{font-size:13px;}
+  .header-date-en{display:none;}      /* hide Gregorian on small screens */
+  .header-left{gap:4px;}
+  .icon-btn{width:34px;height:34px;font-size:14px;}
+  .btn-add-icon{font-size:16px;}
+  .logo-icon{width:28px;height:28px;font-size:14px;}
+  .logo-text{font-size:15px;}
+  .logo-sub{display:none;}
+  .menu-dropdown{
+    top:60px;
+    left:8px;
+    right:8px;
+    min-width:auto;
+  }
+}
+
+@media(max-width:400px){
+  .header-date-ar{font-size:11px;}
+  .header-left{gap:3px;}
+  .icon-btn{width:32px;height:32px;font-size:13px;}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Header icon color overrides
+   ═══════════════════════════════════════════════════════════ */
+
+/* Add button is gold */
+.btn-add-icon{
+  color:var(--accent) !important;
+  font-weight:700;
+}
+.btn-add-icon:hover{
+  background:var(--glow) !important;
+  color:var(--accent2) !important;
+}
+
+/* Favorites button has star color */
+#btn-favs{
+  color:var(--text2);
+}
+#btn-favs:hover{
+  color:#e8c97a;
+  border-color:#e8c97a;
+  background:rgba(232,201,122,.1);
+}
+#btn-favs.active{
+  color:#e8c97a;
+  border-color:#e8c97a;
+  background:rgba(232,201,122,.1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Favorites star — force gold
+   ═══════════════════════════════════════════════════════════ */
+#btn-favs,
+#btn-favs svg,
+header #btn-favs {
+  color: #e8c97a !important;
+}
+#btn-favs:hover {
+  color: #f0d580 !important;
+  border-color: #e8c97a !important;
+  background: rgba(232,201,122,.12) !important;
+}
+#btn-favs.active {
+  color: #e8c97a !important;
+  border-color: #e8c97a !important;
+  background: rgba(232,201,122,.15) !important;
+}

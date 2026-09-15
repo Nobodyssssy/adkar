@@ -88,9 +88,25 @@ function formatShortHijri(date){
    Render into the header element
    ═══════════════════════════════════════════════════════════ */
 function renderHeaderDate(){
-  const el = document.getElementById('header-date');
-  if(!el) return;
-  el.textContent = formatHeaderDate(new Date());
+  const arEl = document.getElementById('header-date-ar');
+  const enEl = document.getElementById('header-date-en');
+  if(!arEl || !enEl) return;
+
+  const date = new Date();
+  const hijri = getHijriParts(date);
+  const weekdayAr = WEEKDAYS_AR[date.getDay()];
+
+  /* Arabic line: الأحد 2 ربيع الثاني 1448 */
+  if(hijri){
+    arEl.textContent = `${weekdayAr} ${hijri.day} ${hijri.monthNameAr} ${hijri.year}`;
+  } else {
+    arEl.textContent = '';
+  }
+
+  /* English line: Tuesday 15 Sep 2026 */
+  const weekdayEn = date.toLocaleDateString('en-US', { weekday: 'long' });
+  const monthEn = MONTHS_EN[date.getMonth()];
+  enEl.textContent = `${weekdayEn} ${date.getDate()} ${monthEn} ${date.getFullYear()}`;
 }
 
 /* ═══════════════════════════════════════════════════════════

@@ -21,24 +21,46 @@
 <body>
 
 <header>
+  <!-- Left group: menu, favorites, add -->
+  <div class="header-left">
+    <button class="icon-btn" onclick="toggleMainMenu(event)" id="btn-menu" title="Menu" aria-label="Menu">☰</button>
+    <button class="icon-btn" onclick="toggleFavsView()" id="btn-favs" title="Favorites">★</button>
+    <button class="icon-btn btn-add-icon" onclick="openForm()" title="Add dhikr">＋</button>
+  </div>
+
+  <!-- Center: date (2 lines) -->
+  <div class="header-date-block" id="header-date-block">
+    <div class="header-date-ar" id="header-date-ar"></div>
+    <div class="header-date-en" id="header-date-en"></div>
+  </div>
+
+  <!-- Right: logo -->
   <div class="logo" onclick="goHome()" title="Home">
-    <div class="logo-icon">☽</div>
     <div>
       <div class="logo-text">أذكاري</div>
       <div class="logo-sub">My Adkar</div>
-      <div class="logo-date" id="header-date"></div>
     </div>
-  </div>
-  <div class="hright">
-    <button class="icon-btn" onclick="toggleFavsView()" id="btn-favs" title="Favorites">⭐</button>
-	<button class="icon-btn" onclick="openPrayerView()" title="Prayer times">🕌</button>
-    <button class="icon-btn" onclick="openCatMgr()" title="Categories">⚙️</button>
-    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
-    <button class="btn-add" onclick="openForm()" title="Add dhikr">
-  ＋<span class="text" style="margin-left:4px">Add</span>
-</button>
+    <div class="logo-icon">☽</div>
   </div>
 </header>
+
+<!-- MAIN MENU (dropdown) -->
+<div class="menu-overlay" id="menu-overlay" onclick="if(event.target===this)closeMainMenu()">
+  <div class="menu-dropdown" id="menu-dropdown">
+    <button class="menu-item" onclick="closeMainMenu();openPrayerView()">
+      <span class="menu-icon">🕌</span>
+      <span class="menu-label">Prayer times</span>
+    </button>
+    <button class="menu-item" onclick="closeMainMenu();toggleTheme()">
+      <span class="menu-icon" id="menu-theme-icon">🌙</span>
+      <span class="menu-label" id="menu-theme-label">Dark mode</span>
+    </button>
+    <button class="menu-item" onclick="closeMainMenu();openCatMgr()">
+      <span class="menu-icon">⚙️</span>
+      <span class="menu-label">Categories</span>
+    </button>
+  </div>
+</div>
 
 <div class="search-bar" id="search-bar">
   <div class="search-wrap">
@@ -281,6 +303,7 @@
 <script src="js/views/catmgr.js"></script>
 <script src="js/views/confirm.js"></script>
 <script src="js/views/prayer.js"></script>
+<script src="js/views/menu.js"></script>
 <script src="js/io.js"></script>
 <script src="js/app.js"></script>
 </body>

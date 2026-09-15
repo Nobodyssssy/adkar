@@ -59,5 +59,7 @@ function goHome(){
 function toggleTheme(){
   isLight = !isLight;
   document.body.classList.toggle('light', isLight);
-  $('theme-btn').textContent = isLight ? '☀️' : '🌙';
+  const oldBtn = $('theme-btn');
+  if(oldBtn) oldBtn.textContent = isLight ? '☀️' : '🌙';
+  if(typeof updateMenuState === 'function') updateMenuState();
 }

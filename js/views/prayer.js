@@ -4,45 +4,18 @@
    Prayer times view
    • Loads today's times via prayer.js
    • Renders the list with next prayer highlighted
-   • Shows Qibla direction + countdown to next prayer
-   • Refresh button to force-fetch
+   • Shows Qibla direction with a rotating-ring compass
    ═══════════════════════════════════════════════════════════ */
 
-'use strict';
-
-let _prayerData = null;         /* cached today's payload */
+let _prayerData = null;
 let _countdownTimer = null;
-let _compassUnsub = null;       /* unsubscribe function for compass heading */
-let _currentQibla = null;       /* current qibla bearing, so we can recompute */
+let _compassUnsub = null;
+let _compassAccuracyTimer = null;
+let _currentQibla = null;
 
 /* ═══════════════════════════════════════════════════════════
-   Loading / error states
+   ENTRY POINTS
    ═══════════════════════════════════════════════════════════ */
-
-function renderPrayerLoading(){
-  $('prayer-body').innerHTML = `
-    <div class="prayer-loading">
-      <div class="prayer-spinner"></div>
-      <div>Loading prayer times…</div>
-    </div>`;
-}
-
-function renderPrayerError(msg){
-  $('prayer-body').innerHTML = `
-    <div class="prayer-error">
-      <div style="font-size:40px;margin-bottom:12px">🕌</div>
-      <div style="font-weight:700;margin-bottom:6px">Could not get your location</div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:18px;max-width:340px;margin-left:auto;margin-right:auto">${esc(msg)}</div>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button class="btn-save" onclick="openLocationPicker()">📍 Choose location</button>
-        <button class="btn-cancel" onclick="openPrayerView()">↻ Retry GPS</button>
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:20px;max-width:340px;margin-left:auto;margin-right:auto;line-height:1.6">
-        Tip: GPS only works over HTTPS. You can pick your city manually — it works everywhere, offline, on any device.
-      </div>
-    </div>`;
-}
-
 async function openPrayerView(){
   showView('view-prayer');
   renderPrayerLoading();
@@ -67,6 +40,30 @@ function closePrayerView(){
 /* ═══════════════════════════════════════════════════════════
    RENDER STATES
    ═══════════════════════════════════════════════════════════ */
+function renderPrayerLoading(){
+  $('prayer-body').innerHTML = `
+    <div class="prayer-loading">
+      <div class="prayer-spinner"></div>
+      <div>Loading prayer times…</div>
+    </div>`;
+}
+
+function renderPrayerError(msg){
+  $('prayer-body').innerHTML = `
+    <div class="prayer-error">
+      <div style="font-size:40px;margin-bottom:12px">🕌</div>
+      <div style="font-weight:700;margin-bottom:6px">Could not get your location</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:18px;max-width:340px;margin-left:auto;margin-right:auto">${esc(msg)}</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn-save" onclick="openLocationPicker()">📍 Choose location</button>
+        <button class="btn-cancel" onclick="openPrayerView()">↻ Retry GPS</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:20px;max-width:340px;margin-left:auto;margin-right:auto;line-height:1.6">
+        Tip: GPS only works over HTTPS. You can pick your city manually — it works everywhere, offline, on any device.
+      </div>
+    </div>`;
+}
+
 function renderPrayerView(){
   if(!_prayerData || !_prayerData.today){
     renderPrayerError('No data for today');
@@ -80,12 +77,10 @@ function renderPrayerView(){
   const dist = distanceToKaaba(location.lat, location.lng);
   const cardinal = bearingToCardinal(qibla);
 
-  /* Hijri line */
   const hijri = today.hijri
     ? `${today.hijri.day} ${today.hijri.month} ${today.hijri.year} AH`
     : '';
 
-  /* Prayer list — order and Arabic labels */
   const prayers = [
     { name: 'Fajr',    ar: 'الفجر',   time: t.Fajr },
     { name: 'Sunrise', ar: 'الشروق',  time: t.Sunrise, isSunrise: true },
@@ -130,14 +125,32 @@ function renderPrayerView(){
 
     <div class="prayer-qibla-card">
       <div class="prayer-qibla-head">Qibla Direction</div>
-      <div class="prayer-qibla-compass" id="qibla-compass">
-        <div class="qibla-arrow" id="qibla-arrow">▲</div>
-        <div class="qibla-degrees" id="qibla-degrees">${qibla.toFixed(1)}°</div>
+
+      <div class="qibla-compass-wrap">
+        <div class="qibla-pointer-fixed"></div>
+
+        <div class="qibla-ring" id="qibla-ring" style="transform:rotate(0deg)">
+          <div class="qibla-mark n">N</div>
+          <div class="qibla-mark e">E</div>
+          <div class="qibla-mark s">S</div>
+          <div class="qibla-mark w">W</div>
+
+          <div class="qibla-kaaba" id="qibla-kaaba" style="transform:rotate(${qibla}deg)">
+            <div class="qibla-kaaba-icon">🕋</div>
+          </div>
+
+          <div class="qibla-center"></div>
+        </div>
+
+        <div class="qibla-readout" id="qibla-degrees">${qibla.toFixed(0)}°</div>
       </div>
+
       <div class="prayer-qibla-info">
         ${cardinal} · ${dist.toFixed(0)} km to Makkah
       </div>
+
       <div class="qibla-compass-status" id="qibla-compass-status"></div>
+
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
         <button class="btn-save" style="flex:1;min-width:140px" onclick="enableLiveCompass(${qibla})">
           🧭 Enable live compass
@@ -152,87 +165,9 @@ function renderPrayerView(){
     </div>
   `;
 
-  /* Save current qibla bearing for later (live compass uses this) */
   _currentQibla = qibla;
-
-  /* Apply arrow rotation via CSS */
-  const arrow = $('qibla-arrow');
-  if(arrow) arrow.style.transform = `rotate(${qibla}deg)`;
-}
-  /* ═══════════════════════════════════════════════════════════
-   LIVE COMPASS — enable, subscribe, rotate arrow in real time
-   ═══════════════════════════════════════════════════════════ */
-async function enableLiveCompass(qiblaDeg){
-  const status = $('qibla-compass-status');
-  const arrow  = $('qibla-arrow');
-  const deg    = $('qibla-degrees');
-  const box    = $('qibla-compass');
-
-  if(!status || !arrow) return;
-
-  /* Already active → stop */
-  if(isCompassActive()){
-    stopLiveCompass();
-    status.textContent = 'Compass off';
-    status.className = 'qibla-compass-status';
-    return;
-  }
-
-  status.textContent = '⏳ Activating compass…';
-  status.className = 'qibla-compass-status loading';
-
-  const res = await startCompass();
-  if(!res.ok){
-    status.textContent = '⚠️ ' + res.reason;
-    status.className = 'qibla-compass-status error';
-    return;
-  }
-
-  /* Subscribe to heading changes */
-  _compassUnsub = onCompassChange((heading) => {
-    const rotation = computeArrowRotation(qiblaDeg, heading);
-    arrow.style.transform = `rotate(${rotation}deg)`;
-    if(deg) deg.textContent = rotation.toFixed(0) + '°';
-  });
-
-  /* Mark the box as live */
-  if(box) box.classList.add('live');
-
-  /* Update status line + accuracy dot every 2s */
-  status.className = 'qibla-compass-status active';
-  status.textContent = '🧭 Live — rotate your phone';
-
-  /* Start accuracy monitor */
-  _compassAccuracyTimer = setInterval(() => {
-    const acc = compassAccuracy();
-    const map = {
-      good:    { label: '🟢 Good signal',  cls: 'good' },
-      fair:    { label: '🟡 Fair signal',  cls: 'fair' },
-      poor:    { label: '🔴 Weak signal — move away from metal', cls: 'poor' },
-      unknown: { label: '⚪ Calibrating…', cls: 'loading' },
-    };
-    const info = map[acc] || map.unknown;
-    status.textContent = '🧭 Live — ' + info.label;
-    status.className = 'qibla-compass-status active ' + info.cls;
-  }, 2000);
-
-  /* Change button label to "stop" */
-  const btn = document.querySelector('.prayer-qibla-card .btn-save');
-  if(btn) btn.textContent = '🧭 Stop compass';
 }
 
-let _compassAccuracyTimer = null;
-
-function stopLiveCompass(){
-  if(_compassUnsub){ _compassUnsub(); _compassUnsub = null; }
-  if(_compassAccuracyTimer){ clearInterval(_compassAccuracyTimer); _compassAccuracyTimer = null; }
-  stopCompass();
-  const box = $('qibla-compass');
-  if(box) box.classList.remove('live');
-  const btn = document.querySelector('.prayer-qibla-card .btn-save');
-  if(btn) btn.textContent = '🧭 Enable live compass';
-}
-  
 /* ═══════════════════════════════════════════════════════════
    COUNTDOWN — updates every 60 seconds
    ═══════════════════════════════════════════════════════════ */
@@ -248,13 +183,12 @@ function startCountdown(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   REFRESH — force location re-acquisition + fetch fresh times
+   REFRESH LOCATION
    ═══════════════════════════════════════════════════════════ */
 async function refreshLocation(){
   toast('📍 Updating location…');
   try{
-    const loc = await getLocation(true);   /* force refresh */
-    /* Fetch this month with the new coords */
+    const loc = await getLocation(true);
     const now = new Date();
     const key = monthKey(loc.lat, loc.lng, now.getFullYear(), now.getMonth() + 1);
     const cached = await store.getMeta(key);
@@ -266,4 +200,89 @@ async function refreshLocation(){
   }catch(err){
     toast('⚠️ ' + err.message);
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIVE COMPASS — fixed pointer + rotating ring + Kaaba marker
+   Ring rotates with device heading. Kaaba marker sits at the
+   Qibla bearing inside the ring. Turn until the Kaaba aligns
+   with the fixed pointer at the top.
+   ═══════════════════════════════════════════════════════════ */
+async function enableLiveCompass(qiblaDeg){
+  const status = $('qibla-compass-status');
+  const ring   = $('qibla-ring');
+  const deg    = $('qibla-degrees');
+  const card   = document.querySelector('.prayer-qibla-card');
+
+  if(!status || !ring) return;
+
+  if(isCompassActive()){
+    stopLiveCompass();
+    status.textContent = 'Compass off';
+    status.className = 'qibla-compass-status';
+    if(card) card.classList.remove('aligned');
+    return;
+  }
+
+  status.textContent = '⏳ Activating compass…';
+  status.className = 'qibla-compass-status loading';
+
+  const res = await startCompass();
+  if(!res.ok){
+    status.textContent = '⚠️ ' + res.reason;
+    status.className = 'qibla-compass-status error';
+    return;
+  }
+
+  _compassUnsub = onCompassChange((heading) => {
+    /* Ring rotates by -heading so N stays pointing true North on screen */
+    ring.style.transform = `rotate(${-heading}deg)`;
+
+    /* Shortest angular difference between Qibla and current heading */
+    let diff = qiblaDeg - heading;
+    while(diff > 180)  diff -= 360;
+    while(diff < -180) diff += 360;
+
+    const aligned = Math.abs(diff) <= 5;
+    if(deg) deg.textContent = Math.abs(Math.round(diff)) + '°';
+    if(card) card.classList.toggle('aligned', aligned);
+  });
+
+  _compassAccuracyTimer = setInterval(() => {
+    const isAligned = document.querySelector('.prayer-qibla-card.aligned');
+    if(isAligned){
+      status.textContent = '✓ Facing Qibla';
+      status.className = 'qibla-compass-status active good';
+      return;
+    }
+    const acc = compassAccuracy();
+    const map = {
+      good:    { label: '🧭 Live — 🟢 Good signal',                 cls: 'good' },
+      fair:    { label: '🧭 Live — 🟡 Fair signal',                 cls: 'fair' },
+      poor:    { label: '🧭 Live — 🔴 Weak — move away from metal', cls: 'poor' },
+      unknown: { label: '🧭 Live — calibrating…',                   cls: 'loading' },
+    };
+    const info = map[acc] || map.unknown;
+    status.textContent = info.label;
+    status.className = 'qibla-compass-status active ' + info.cls;
+  }, 2000);
+
+  const btn = document.querySelector('.prayer-qibla-card .btn-save');
+  if(btn) btn.textContent = '🧭 Stop compass';
+}
+
+function stopLiveCompass(){
+  if(_compassUnsub){ _compassUnsub(); _compassUnsub = null; }
+  if(_compassAccuracyTimer){ clearInterval(_compassAccuracyTimer); _compassAccuracyTimer = null; }
+  stopCompass();
+
+  const ring = $('qibla-ring');
+  if(ring) ring.style.transform = 'rotate(0deg)';
+  if($('qibla-degrees')) $('qibla-degrees').textContent = (_currentQibla || 0).toFixed(0) + '°';
+
+  const card = document.querySelector('.prayer-qibla-card');
+  if(card) card.classList.remove('aligned');
+
+  const btn = document.querySelector('.prayer-qibla-card .btn-save');
+  if(btn) btn.textContent = '🧭 Enable live compass';
 }
