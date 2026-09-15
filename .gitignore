@@ -21,5 +21,7 @@ desktop.ini
 .idea/
 *.swp
 33/
-# Prayer audio — add when ready
-assets/
+# Prayer audio — add when ready (if using)
+assets/audio/
+
+# Keep books and icons tracked — only exclude audio

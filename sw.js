@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v1.8.0';
+const VERSION = 'v1.9.0';
 const CACHE   = `adkar-${VERSION}`;
 
 const APP_SHELL = [
@@ -38,6 +38,11 @@ const APP_SHELL = [
   './js/hijri-calendar.js',
   './js/asma-data.js',
   './js/asma.js',
+  './js/books-data.js',
+  './js/books.js',
+  './js/reader.js',
+  './js/vendor/pdf.min.js',
+  './js/vendor/pdf.worker.min.js',
   './js/compass.js',
 
   './js/views/cats.js',
@@ -54,7 +59,8 @@ const APP_SHELL = [
   './js/views/prayer.js',
   './js/views/hijri.js',
   './js/views/asma.js',
-
+  './js/views/books.js',
+  './js/views/reader.js',
   './js/io.js',
   './js/app.js',
 
