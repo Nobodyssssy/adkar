@@ -8,31 +8,15 @@
    • Refresh button to force-fetch
    ═══════════════════════════════════════════════════════════ */
 
+'use strict';
+
 let _prayerData = null;         /* cached today's payload */
 let _countdownTimer = null;
-
-async function openPrayerView(){
-  showView('view-prayer');
-  renderPrayerLoading();
-
-  try{
-    const result = await getToday();
-    _prayerData = result;
-    renderPrayerView();
-    startCountdown();
-  }catch(err){
-    console.error('[prayer-view]', err);
-    renderPrayerError(err.message);
-  }
-}
-
-function closePrayerView(){
-  if(_countdownTimer){ clearInterval(_countdownTimer); _countdownTimer = null; }
-  goHome();
-}
+let _compassUnsub = null;       /* unsubscribe function for compass heading */
+let _currentQibla = null;       /* current qibla bearing, so we can recompute */
 
 /* ═══════════════════════════════════════════════════════════
-   RENDER STATES
+   Loading / error states
    ═══════════════════════════════════════════════════════════ */
 
 function renderPrayerLoading(){
@@ -59,6 +43,30 @@ function renderPrayerError(msg){
     </div>`;
 }
 
+async function openPrayerView(){
+  showView('view-prayer');
+  renderPrayerLoading();
+
+  try{
+    const result = await getToday();
+    _prayerData = result;
+    renderPrayerView();
+    startCountdown();
+  }catch(err){
+    console.error('[prayer-view]', err);
+    renderPrayerError(err.message);
+  }
+}
+
+function closePrayerView(){
+  if(_countdownTimer){ clearInterval(_countdownTimer); _countdownTimer = null; }
+  stopLiveCompass();
+  goHome();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER STATES
+   ═══════════════════════════════════════════════════════════ */
 function renderPrayerView(){
   if(!_prayerData || !_prayerData.today){
     renderPrayerError('No data for today');
@@ -122,24 +130,109 @@ function renderPrayerView(){
 
     <div class="prayer-qibla-card">
       <div class="prayer-qibla-head">Qibla Direction</div>
-      <div class="prayer-qibla-compass">
+      <div class="prayer-qibla-compass" id="qibla-compass">
         <div class="qibla-arrow" id="qibla-arrow">▲</div>
-        <div class="qibla-degrees">${qibla.toFixed(1)}°</div>
+        <div class="qibla-degrees" id="qibla-degrees">${qibla.toFixed(1)}°</div>
       </div>
       <div class="prayer-qibla-info">
         ${cardinal} · ${dist.toFixed(0)} km to Makkah
       </div>
-      <button class="btn-cancel" style="margin-top:12px" onclick="refreshLocation()">
-        📍 Update location
-      </button>
+      <div class="qibla-compass-status" id="qibla-compass-status"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn-save" style="flex:1;min-width:140px" onclick="enableLiveCompass(${qibla})">
+          🧭 Enable live compass
+        </button>
+        <button class="btn-cancel" style="flex:1;min-width:140px" onclick="openLocationPicker()">
+          📍 Choose location
+        </button>
+        <button class="btn-cancel" style="flex:1;min-width:140px" onclick="refreshLocation()">
+          ↻ Refresh
+        </button>
+      </div>
     </div>
   `;
 
-  /* Apply arrow rotation via CSS (points to Qibla when device is upright) */
+  /* Save current qibla bearing for later (live compass uses this) */
+  _currentQibla = qibla;
+
+  /* Apply arrow rotation via CSS */
   const arrow = $('qibla-arrow');
   if(arrow) arrow.style.transform = `rotate(${qibla}deg)`;
 }
+  /* ═══════════════════════════════════════════════════════════
+   LIVE COMPASS — enable, subscribe, rotate arrow in real time
+   ═══════════════════════════════════════════════════════════ */
+async function enableLiveCompass(qiblaDeg){
+  const status = $('qibla-compass-status');
+  const arrow  = $('qibla-arrow');
+  const deg    = $('qibla-degrees');
+  const box    = $('qibla-compass');
 
+  if(!status || !arrow) return;
+
+  /* Already active → stop */
+  if(isCompassActive()){
+    stopLiveCompass();
+    status.textContent = 'Compass off';
+    status.className = 'qibla-compass-status';
+    return;
+  }
+
+  status.textContent = '⏳ Activating compass…';
+  status.className = 'qibla-compass-status loading';
+
+  const res = await startCompass();
+  if(!res.ok){
+    status.textContent = '⚠️ ' + res.reason;
+    status.className = 'qibla-compass-status error';
+    return;
+  }
+
+  /* Subscribe to heading changes */
+  _compassUnsub = onCompassChange((heading) => {
+    const rotation = computeArrowRotation(qiblaDeg, heading);
+    arrow.style.transform = `rotate(${rotation}deg)`;
+    if(deg) deg.textContent = rotation.toFixed(0) + '°';
+  });
+
+  /* Mark the box as live */
+  if(box) box.classList.add('live');
+
+  /* Update status line + accuracy dot every 2s */
+  status.className = 'qibla-compass-status active';
+  status.textContent = '🧭 Live — rotate your phone';
+
+  /* Start accuracy monitor */
+  _compassAccuracyTimer = setInterval(() => {
+    const acc = compassAccuracy();
+    const map = {
+      good:    { label: '🟢 Good signal',  cls: 'good' },
+      fair:    { label: '🟡 Fair signal',  cls: 'fair' },
+      poor:    { label: '🔴 Weak signal — move away from metal', cls: 'poor' },
+      unknown: { label: '⚪ Calibrating…', cls: 'loading' },
+    };
+    const info = map[acc] || map.unknown;
+    status.textContent = '🧭 Live — ' + info.label;
+    status.className = 'qibla-compass-status active ' + info.cls;
+  }, 2000);
+
+  /* Change button label to "stop" */
+  const btn = document.querySelector('.prayer-qibla-card .btn-save');
+  if(btn) btn.textContent = '🧭 Stop compass';
+}
+
+let _compassAccuracyTimer = null;
+
+function stopLiveCompass(){
+  if(_compassUnsub){ _compassUnsub(); _compassUnsub = null; }
+  if(_compassAccuracyTimer){ clearInterval(_compassAccuracyTimer); _compassAccuracyTimer = null; }
+  stopCompass();
+  const box = $('qibla-compass');
+  if(box) box.classList.remove('live');
+  const btn = document.querySelector('.prayer-qibla-card .btn-save');
+  if(btn) btn.textContent = '🧭 Enable live compass';
+}
+  
 /* ═══════════════════════════════════════════════════════════
    COUNTDOWN — updates every 60 seconds
    ═══════════════════════════════════════════════════════════ */

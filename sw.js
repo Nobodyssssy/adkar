@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v1.3.0';
+const VERSION = 'v1.4.0';
 const CACHE   = `adkar-${VERSION}`;
 
 const APP_SHELL = [
@@ -33,6 +33,8 @@ const APP_SHELL = [
   './js/qibla.js',
   './js/location.js',
   './js/quotes.js',
+  './js/dates.js',
+  './js/compass.js',
 
   './js/views/cats.js',
   './js/views/adkar.js',
@@ -44,6 +46,7 @@ const APP_SHELL = [
   './js/views/catmgr.js',
   './js/views/confirm.js',
   './js/views/quote.js',
+  './js/views/prayer.js',
   './js/views/prayer.js',
 
   './js/io.js',

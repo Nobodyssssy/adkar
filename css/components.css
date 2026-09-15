@@ -856,3 +856,35 @@ body.modal-open {
 @media(max-width:600px){
   .quote-dateline{font-size:11px;padding-bottom:8px;margin-bottom:10px;}
 }
+/* ═══════════════════════════════════════════════════════════
+   Live compass states
+   ═══════════════════════════════════════════════════════════ */
+.prayer-qibla-compass.live{
+  border-color:var(--accent);
+  box-shadow:0 0 24px rgba(201,168,76,.25);
+  animation:pulseGlow 2s ease-in-out infinite;
+}
+@keyframes pulseGlow{
+  0%,100%{box-shadow:0 0 24px rgba(201,168,76,.25);}
+  50%    {box-shadow:0 0 32px rgba(201,168,76,.45);}
+}
+.prayer-qibla-compass.live .qibla-arrow{
+  /* Faster, smoother rotation while live */
+  transition:transform .15s linear;
+  text-shadow:0 0 24px rgba(201,168,76,.6);
+}
+
+.qibla-compass-status{
+  font-size:11px;
+  text-align:center;
+  color:var(--text3);
+  margin-top:10px;
+  min-height:16px;
+  transition:color var(--tr);
+}
+.qibla-compass-status.active{color:var(--accent);font-weight:600;}
+.qibla-compass-status.active.good{color:var(--green);}
+.qibla-compass-status.active.fair{color:var(--orange);}
+.qibla-compass-status.active.poor{color:var(--red);}
+.qibla-compass-status.error{color:var(--red);}
+.qibla-compass-status.loading{color:var(--text3);}
