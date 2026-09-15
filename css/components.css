@@ -2765,6 +2765,10 @@ body.modal-open {
 .reader-sidebar.open{transform:translateX(0);}
 
 .reader-sidebar-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
   font-size:11px;
   text-transform:uppercase;
   letter-spacing:0.1em;
@@ -2776,6 +2780,30 @@ body.modal-open {
   position:sticky;
   top:-12px;
   background:var(--surface);
+  z-index:2;
+}
+
+.reader-sidebar-close{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  color:var(--text3);
+  cursor:pointer;
+  font-size:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all var(--tr);
+  flex-shrink:0;
+  text-transform:none;
+  letter-spacing:0;
+}
+.reader-sidebar-close:hover{
+  background:var(--red);
+  border-color:var(--red);
+  color:#fff;
 }
 
 .reader-thumbs{

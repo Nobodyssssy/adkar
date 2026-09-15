@@ -36,7 +36,7 @@ function getHijriFromGregorian(date){
     const out = { day: 1, month: 0, year: 1447 };
     for(const p of parts){
       if(p.type === 'day')   out.day   = parseInt(p.value, 10);
-      if(p.type === 'month') out.month = parseInt(p.value, 10) - 1;  /* 0-indexed */
+      if(p.type === 'month') out.month = parseInt(p.value, 10);  /* 1-indexed */
       if(p.type === 'year')  out.year  = parseInt(p.value.replace(/[^0-9]/g, ''), 10);
     }
     return out;
@@ -60,8 +60,8 @@ function gregorianFromHijri(hijriYear, hijriMonth, hijriDay){
   const yearsDiff = hijriYear - anchorHijriYear;
   const yearOffsetDays = Math.round(yearsDiff * 354.367);
 
-  /* Cumulative days from Muharram 1 to start of each month (approximate) */
-  const monthOffsets = [0, 30, 59, 89, 118, 148, 177, 207, 236, 266, 295, 325];
+  /* Cumulative days from Muharram 1 to start of each month (1-indexed: [null, 0, 30, 59, ...]) */
+  const monthOffsets = [null, 0, 30, 59, 89, 118, 148, 177, 207, 236, 266, 295, 325];
   const monthOffsetDays = monthOffsets[hijriMonth] || 0;
   const dayOffsetDays = (hijriDay - 1);
 
@@ -105,8 +105,8 @@ function buildHijriMonthGrid(hijriYear, hijriMonth){
     /* Fallback: show empty grid */
     return {
       year: hijriYear, month: hijriMonth,
-      monthNameAr: HIJRI_MONTHS_NAMES_AR[hijriMonth],
-      monthNameEn: HIJRI_MONTHS_NAMES_EN[hijriMonth],
+      monthNameAr: HIJRI_MONTHS_NAMES_AR[hijriMonth - 1],
+      monthNameEn: HIJRI_MONTHS_NAMES_EN[hijriMonth - 1],
       weekdayHeadersAr: WEEKDAY_HEADERS_AR,
       weekdayHeadersEn: WEEKDAY_HEADERS_EN,
       days: [],
@@ -154,8 +154,8 @@ function buildHijriMonthGrid(hijriYear, hijriMonth){
   return {
     year: hijriYear,
     month: hijriMonth,
-    monthNameAr: HIJRI_MONTHS_NAMES_AR[hijriMonth],
-    monthNameEn: HIJRI_MONTHS_NAMES_EN[hijriMonth],
+    monthNameAr: HIJRI_MONTHS_NAMES_AR[hijriMonth - 1],
+    monthNameEn: HIJRI_MONTHS_NAMES_EN[hijriMonth - 1],
     weekdayHeadersAr: WEEKDAY_HEADERS_AR,
     weekdayHeadersEn: WEEKDAY_HEADERS_EN,
     days,

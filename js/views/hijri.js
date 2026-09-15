@@ -19,7 +19,7 @@ async function openHijriView(){
     _hijriMonth = today.month;
   } else {
     _hijriYear  = 1448;
-    _hijriMonth = 0;
+    _hijriMonth = 1;      /* 1-indexed: 1 = Muharram */
   }
   showView('view-hijri');
   renderHijriCalendar();
@@ -32,13 +32,22 @@ function closeHijriView(){
 /* ── Navigation ── */
 function hijriPrevMonth(){
   _hijriMonth--;
-  if(_hijriMonth < 0){ _hijriMonth = 11; _hijriYear--; }
+  if(_hijriMonth < 1){ _hijriMonth = 12; _hijriYear--; }
   renderHijriCalendar();
 }
 
 function hijriNextMonth(){
   _hijriMonth++;
-  if(_hijriMonth > 11){ _hijriMonth = 0; _hijriYear++; }
+  if(_hijriMonth > 12){ _hijriMonth = 1; _hijriYear++; }
+  renderHijriCalendar();
+}
+
+function hijriGoToday(){
+  const today = getTodayHijri();
+  if(today){
+    _hijriYear  = today.year;
+    _hijriMonth = today.month;
+  }
   renderHijriCalendar();
 }
 

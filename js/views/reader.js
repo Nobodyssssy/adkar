@@ -89,15 +89,16 @@ function ensureReaderOverlay(){
   el.className = 'reader-overlay';
   el.id = 'reader-overlay';
   el.innerHTML = `
-    <div class="reader-topbar" id="reader-topbar">
-      <button class="reader-icon-btn" onclick="closeReader()" title="Close">✕</button>
-      <div class="reader-title" id="reader-title"></div>
-      <div class="reader-topbar-actions">
-        <button class="reader-icon-btn" id="reader-bookmark-btn" onclick="toggleReaderBookmark()" title="Bookmark">☆</button>
-        <button class="reader-icon-btn" onclick="toggleReaderSettings()" title="Settings">⚙</button>
-        <button class="reader-icon-btn" id="reader-fullscreen-btn" onclick="toggleReaderFullscreen()" title="Full screen">⛶</button>
-      </div>
-    </div>
+   <div class="reader-topbar" id="reader-topbar">
+  <button class="reader-icon-btn" id="reader-sidebar-btn" onclick="toggleReaderSidebar()" title="Contents">☰</button>
+  <button class="reader-icon-btn" onclick="closeReader()" title="Close">✕</button>
+  <div class="reader-title" id="reader-title"></div>
+  <div class="reader-topbar-actions">
+    <button class="reader-icon-btn" id="reader-bookmark-btn" onclick="toggleReaderBookmark()" title="Bookmark">☆</button>
+    <button class="reader-icon-btn" onclick="toggleReaderSettings()" title="Settings">⚙</button>
+    <button class="reader-icon-btn" id="reader-fullscreen-btn" onclick="toggleReaderFullscreen()" title="Full screen">⛶</button>
+  </div>
+</div>
 
     <div class="reader-body" id="reader-body"></div>
 
@@ -519,10 +520,21 @@ let _sidebarOpen = false;
 let _sidebarMode = 'thumbs';   /* 'thumbs' | 'toc' */
 
 async function toggleReaderSidebar(mode){
-  mode = mode || _sidebarMode;
   const sb = $('reader-sidebar');
   if(!sb) return;
 
+  /* No mode specified → toggle current state */
+  if(!mode){
+    if(_sidebarOpen){
+      _sidebarOpen = false;
+      sb.classList.remove('open');
+      return;
+    }
+    /* If closed and we have a previous mode, use it; else default to toc if available */
+    mode = _sidebarMode || (_readerToc.length ? 'toc' : 'thumbs');
+  }
+
+  /* Called with the same mode while already open → close it */
   if(_sidebarOpen && _sidebarMode === mode){
     _sidebarOpen = false;
     sb.classList.remove('open');
@@ -542,7 +554,11 @@ async function toggleReaderSidebar(mode){
 
 async function renderReaderThumbs(){
   const sb = $('reader-sidebar');
-  sb.innerHTML = `<div class="reader-sidebar-title">Pages</div>
+  sb.innerHTML = `
+    <div class="reader-sidebar-title">
+      <span>Pages</span>
+      <button class="reader-sidebar-close" onclick="toggleReaderSidebar()" title="Close">✕</button>
+    </div>
     <div class="reader-thumbs" id="reader-thumbs"></div>`;
   const host = $('reader-thumbs');
 
@@ -602,7 +618,11 @@ async function renderReaderThumbs(){
 
 function renderReaderToc(){
   const sb = $('reader-sidebar');
-  sb.innerHTML = `<div class="reader-sidebar-title">Table of contents</div>
+  sb.innerHTML = `
+    <div class="reader-sidebar-title">
+      <span>Contents</span>
+      <button class="reader-sidebar-close" onclick="toggleReaderSidebar()" title="Close">✕</button>
+    </div>
     <div class="reader-toc" id="reader-toc"></div>`;
   const host = $('reader-toc');
 

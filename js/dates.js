@@ -42,7 +42,7 @@ function getHijriParts(date){
     const out = { day: 1, month: 0, year: 1447 };
     for(const p of parts){
       if(p.type === 'day')   out.day   = parseInt(p.value, 10);
-      if(p.type === 'month') out.month = parseInt(p.value, 10) - 1;  /* 0-indexed */
+      if(p.type === 'month') out.month = parseInt(p.value, 10);  /* 1-indexed: 1=Muharram, 9=Ramadan */
       if(p.type === 'year')  out.year  = parseInt(p.value.replace(/[^0-9]/g, ''), 10);
     }
     out.monthNameAr = HIJRI_MONTHS_AR[out.month] || '';
