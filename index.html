@@ -19,68 +19,65 @@
 </head>
 <body>
 
+<!-- Icon sprite — loaded once, referenced everywhere via <use> -->
+<div id="svg-sprite-mount" style="display:none" aria-hidden="true"></div>
+
   <!-- Left group: menu, favorites, add -->
 <header>
-
   <div class="header-left">
-    <button class="icon-btn" onclick="toggleMainMenu(event)" id="btn-menu" title="Menu" aria-label="Menu">☰</button>
-    <button class="icon-btn" onclick="toggleFavsView()" id="btn-favs" title="Favorites">★</button>
-    <button class="icon-btn btn-add-icon" onclick="openForm()" title="Add dhikr">＋</button>
+    <button class="icon-btn" onclick="toggleMainMenu(event)" id="btn-menu" title="Menu" aria-label="Menu"></button>
+    <button class="icon-btn" onclick="toggleFavsView()" id="btn-favs" title="Favorites"></button>
+    <button class="icon-btn btn-add-icon" onclick="openForm()" title="Add dhikr"></button>
   </div>
-  
-  <!-- Right: logo -->
-<div class="header-right">
-  <div class="logo" onclick="goHomeView()" title="Home">
-    <div class="logo-icon"><img src="icons/icon.svg" alt="صاحب"></div>
+  <div class="header-right">
+    <div class="logo" onclick="goHomeView()" title="Home">
+      <div class="logo-icon"><img src="icons/icon.svg" alt="صاحب"></div>
+    </div>
+    <button class="icon-btn" onclick="toggleTheme()" id="theme-toggle-btn" title="Toggle theme"></button>
   </div>
-  <button class="icon-btn" onclick="toggleTheme()" id="theme-toggle-btn" title="Toggle theme">🌙</button>
-</div>
-  
 </header>
 
 <!-- MAIN MENU (dropdown) -->
 <div class="menu-overlay" id="menu-overlay" onclick="if(event.target===this)closeMainMenu()">
 
   <div class="menu-dropdown" id="menu-dropdown">
-  
-    <button class="menu-item" onclick="closeMainMenu();goHome()">
-    <span class="menu-icon">🏠</span>
+  <button class="menu-item" onclick="closeMainMenu();goHome()" data-icon="home">
+    <span class="menu-icon"></span>
     <span class="menu-label">Home</span>
   </button>
-  
-    <button class="menu-item" onclick="closeMainMenu();openPrayerView()">
-      <span class="menu-icon">🕌</span>
-      <span class="menu-label">Prayer times</span>
-    </button>
-	
-	<button class="menu-item" onclick="closeMainMenu();openHijriView()">
-	  <span class="menu-icon">📅</span>
-	  <span class="menu-label">Hijri calendar</span>
-	</button>
 
-  <button class="menu-item" onclick="closeMainMenu();openAsmaView()">
-    <span class="menu-icon">📿</span>
-    <span class="menu-label">99 Names of Allah</span>
+  <button class="menu-item" onclick="closeMainMenu();goToAdkarCategories()" data-icon="book-open">
+    <span class="menu-icon"></span>
+    <span class="menu-label">Adkar</span>
   </button>
-  
-    <button class="menu-item" onclick="closeMainMenu();openBooksView()">
-     <span class="menu-icon">📚</span>
-     <span class="menu-label">Library</span>
+
+  <button class="menu-item" onclick="closeMainMenu();openPrayerView()" data-icon="mosque">
+    <span class="menu-icon"></span>
+    <span class="menu-label">Prayer times</span>
   </button>
-  
-     <button class="menu-item" onclick="closeMainMenu();goToAdkarCategories()">
-      <span class="menu-icon">📖</span>
-      <span class="menu-label">Adkar</span>
+
+  <button class="menu-item" onclick="closeMainMenu();openHijriView()" data-icon="calendar">
+    <span class="menu-icon"></span>
+    <span class="menu-label">Hijri calendar</span>
   </button>
-	
-  </div>
+
+  <button class="menu-item" onclick="closeMainMenu();openAsmaView()" data-icon="sparkles">
+    <span class="menu-icon"></span>
+    <span class="menu-label">Names of Allah 99</span>
+  </button>
+
+  <button class="menu-item" onclick="closeMainMenu();openBooksView()" data-icon="library">
+    <span class="menu-icon"></span>
+    <span class="menu-label">Library</span>
+  </button>
+</div>
 </div>
 
-<div class="search-bar" id="search-bar">
+<div class="search-bar" id="search-bar" style="display:none">
   <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="search-input" placeholder="Search all adkar..." oninput="handleSearch()">
-    <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none">✕</button>
+    <span class="search-icon"></span>
+    <input type="text" id="search-input" placeholder="Search..." oninput="handleSearch()">
+    <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none" data-icon="x"><span class="btn-icon"></span></button>
   </div>
 </div>
 
@@ -112,8 +109,14 @@
 <!-- VIEW: ADKAR LIST -->
 <div class="view" id="view-adkar">
   <div class="back-bar">
-    <button class="btn-back" onclick="goToAdkarCategories()">← Back</button>
-    <button class="btn-session" onclick="startSession()">▶ Session</button>
+    <button class="btn-back" onclick="goToAdkarCategories()" data-icon="arrow-left">
+      <span class="btn-icon"></span>
+      <span>Back</span>
+    </button>
+    <button class="btn-session" onclick="startSession()" data-icon="play">
+      <span class="btn-icon"></span>
+      <span>Session</span>
+    </button>
     <div id="adkar-view-title" style="font-family:'Amiri',serif;font-size:17px;color:var(--accent)"></div>
   </div>
   <div class="adkar-grid" id="adkar-grid"></div>
@@ -167,17 +170,22 @@
 <!-- SESSION OVERLAY -->
 <div class="session-overlay" id="session-overlay">
   <div class="session-header">
-    <button class="session-back-btn" id="sess-back-btn" onclick="sessionPrev()">← Prev</button>
+    <button class="session-back-btn" id="sess-back-btn" onclick="sessionPrev()" data-icon="chevron-right">
+      <span class="btn-icon"></span>
+      <span>Prev</span>
+    </button>
     <div class="session-header-center">
       <div class="session-title" id="sess-title"></div>
       <div class="session-progress-text" id="sess-prog-text"></div>
     </div>
-    <button class="session-close-btn" onclick="closeSession()">✕</button>
+    <button class="session-close-btn" onclick="closeSession()" data-icon="x">
+      <span class="btn-icon"></span>
+    </button>
   </div>
   <div class="session-body" id="sess-body"></div>
   <div class="session-footer" id="sess-footer">
     <button class="btn-session-skip" onclick="sessionSkip()">Skip</button>
-    <button class="btn-session-next" id="sess-next-btn" onclick="sessionNext()">Next →</button>
+    <button class="btn-session-next" id="sess-next-btn" onclick="sessionNext()">Next</button>
   </div>
 </div>
 
@@ -328,6 +336,7 @@
 <!-- Load order matters -->
 <script src="js/config.js"></script>
 <script src="js/utils.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/scroll-preserve.js"></script>
 <script src="js/dict.js"></script>
 <script src="js/vendor/fuse.min.js"></script>

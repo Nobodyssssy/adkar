@@ -32,15 +32,53 @@ function fuzzyMatch(haystack, query){
   return tokens.every(t => h.includes(t));
 }
 
-/* ── Toast ── */
+/* ── TOAST ── */
 let _toastTimer;
 function toast(msg){
-  const t = $('toast');
+  const t = document.getElementById('toast');
   if(!t) return;
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── DEBOUNCE ── */
+function debounce(fn, wait){
+  let _t;
+  return function(...args){
+    clearTimeout(_t);
+    _t = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+/* ── ESCAPE HTML ── */
+function esc(s){
+  if(s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/* ── PROGRESS RING ── */
+function progressRing(pct, size){
+  size = size || 36;
+  const r = (size - 4) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c * (1 - Math.max(0, Math.min(1, pct)));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}"
+            fill="none" stroke="var(--border)" stroke-width="3"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}"
+            fill="none" stroke="var(--accent)" stroke-width="3"
+            stroke-dasharray="${c}"
+            stroke-dashoffset="${offset}"
+            stroke-linecap="round"
+            transform="rotate(-90 ${size/2} ${size/2})"/>
+  </svg>`;
 }
 
 /* ── Debounce ── */
@@ -66,7 +104,7 @@ function progressRing(pct, color, isDone){
   const r = 14, C = 2 * Math.PI * r;
   const dash = Math.round(C * pct / 100);
   const stroke = isDone ? '#4caf89' : color;
-  const label = isDone ? '✓' : (pct > 0 ? pct + '%' : '');
+  const label = (!isDone && pct > 0) ? pct + '%' : '';
   return `<svg style="transform:rotate(-90deg)" width="36" height="36" viewBox="0 0 36 36">
     <circle cx="18" cy="18" r="${r}" fill="none" stroke="var(--border)" stroke-width="2.5"/>
     ${pct>0 ? `<circle cx="18" cy="18" r="${r}" fill="none" stroke="${stroke}"

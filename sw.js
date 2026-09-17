@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.1.1';
+const VERSION = 'v2.1.3';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -19,6 +19,7 @@ const APP_SHELL = [
   './css/layout.css',
   './css/components.css',
   './css/responsive.css',
+  './assets/icons/sprite.svg',
   './assets/fonts/Amiri-Regular.woff2',
   './assets/fonts/Amiri-Bold.woff2',
   './assets/fonts/Tajawal-Regular.woff2',
