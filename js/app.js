@@ -18,11 +18,18 @@
     /* 3. Build the fuzzy search index (once data is loaded) */
     rebuildSearchIndex();
 
-    /* 4. Render header date */
-    if(typeof renderHeaderDate === 'function') renderHeaderDate();
+    /* 4. Restore theme preference */
+    const savedTheme = await store.getMeta('theme');
+    if(savedTheme === 'light'){
+      isLight = true;
+      document.body.classList.add('light');
+    }
+    /* Update header toggle icon */
+    const themeBtn = $('theme-toggle-btn');
+    if(themeBtn) themeBtn.textContent = isLight ? '🌙' : '☀️';
 
-    /* 5. Render initial view */
-    renderCatsGrid();
+    /* 5. Render home dashboard */
+    renderHome();
 
     /* 4. Global keyboard shortcuts */
     document.addEventListener('keydown', e => {
@@ -39,10 +46,10 @@
     if(isStandalone) document.documentElement.classList.add('pwa-standalone');
 
     /* 6. Log */
-    console.log(
-      '%cأذكاري · My Adkar' + (isStandalone ? ' (installed)' : ''),
-      'color:#c9a84c;font-weight:bold'
-    );
+  console.log(
+    '%cصاحب · Sahib' + (isStandalone ? ' (installed)' : ''),
+    'color:#c9a84c;font-weight:bold'
+  );
   }catch(err){
     console.error('[app] boot failed:', err);
     /* Fallback: still try to render, might work with partial state */

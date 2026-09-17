@@ -25,3 +25,9 @@ desktop.ini
 assets/audio/
 
 # Keep books and icons tracked — only exclude audio
+# PDF quality tools — local only
+_pdf_backup/
+_pdf_check_output/
+check-pdf-quality.py
+recompress-books.py
+pdf-quality-report.json

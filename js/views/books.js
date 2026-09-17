@@ -25,6 +25,12 @@ async function openBooksView(){
 }
 
 function closeBooksView(){
+  /* Smart back: if inside a category, go back one step */
+  if(_booksCategory){
+    closeBooksCategory();
+    return;
+  }
+  /* Otherwise, exit to home */
   goHome();
 }
 
@@ -166,7 +172,6 @@ function renderBookList(host, list, isSearch){
 
   host.innerHTML = `
     <div class="books-list-header">
-      <button class="books-back-btn" onclick="closeBooksCategory()">${backLabel}</button>
       <div class="books-list-title-wrap">
         <div class="books-list-title">${esc(title)}</div>
         <div class="books-list-sub">${subtitle}</div>

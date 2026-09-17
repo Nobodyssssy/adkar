@@ -9,9 +9,9 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="أذكاري">
+<meta name="apple-mobile-web-app-title" content="صاحب">
 <meta name="mobile-web-app-capable" content="yes">
-<title>أذكاري · My Adkar</title>
+<title>صاحب · Sahib</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
@@ -20,41 +20,38 @@
 </head>
 <body>
 
-<header>
   <!-- Left group: menu, favorites, add -->
+<header>
+
   <div class="header-left">
     <button class="icon-btn" onclick="toggleMainMenu(event)" id="btn-menu" title="Menu" aria-label="Menu">☰</button>
     <button class="icon-btn" onclick="toggleFavsView()" id="btn-favs" title="Favorites">★</button>
     <button class="icon-btn btn-add-icon" onclick="openForm()" title="Add dhikr">＋</button>
   </div>
-
-  <!-- Center: date (2 lines) -->
-  <div class="header-date-block" id="header-date-block">
-    <div class="header-date-ar" id="header-date-ar"></div>
-    <div class="header-date-en" id="header-date-en"></div>
-  </div>
-
+  
   <!-- Right: logo -->
-  <div class="logo" onclick="goHome()" title="Home">
-    <div>
-      <div class="logo-text">أذكاري</div>
-      <div class="logo-sub">My Adkar</div>
-    </div>
-    <div class="logo-icon">☽</div>
+<div class="header-right">
+  <div class="logo" onclick="goHomeView()" title="Home">
+    <div class="logo-icon"><img src="icons/icon.svg" alt="صاحب"></div>
   </div>
+  <button class="icon-btn" onclick="toggleTheme()" id="theme-toggle-btn" title="Toggle theme">🌙</button>
+</div>
+  
 </header>
 
 <!-- MAIN MENU (dropdown) -->
 <div class="menu-overlay" id="menu-overlay" onclick="if(event.target===this)closeMainMenu()">
+
   <div class="menu-dropdown" id="menu-dropdown">
+  
+    <button class="menu-item" onclick="closeMainMenu();goHome()">
+    <span class="menu-icon">🏠</span>
+    <span class="menu-label">Home</span>
+  </button>
+  
     <button class="menu-item" onclick="closeMainMenu();openPrayerView()">
       <span class="menu-icon">🕌</span>
       <span class="menu-label">Prayer times</span>
-    </button>
-	
-    <button class="menu-item" onclick="closeMainMenu();toggleTheme()">
-      <span class="menu-icon" id="menu-theme-icon">🌙</span>
-      <span class="menu-label" id="menu-theme-label">Dark mode</span>
     </button>
 	
 	<button class="menu-item" onclick="closeMainMenu();openHijriView()">
@@ -68,14 +65,14 @@
   </button>
   
     <button class="menu-item" onclick="closeMainMenu();openBooksView()">
-    <span class="menu-icon">📚</span>
-    <span class="menu-label">Library</span>
+     <span class="menu-icon">📚</span>
+     <span class="menu-label">Library</span>
   </button>
   
-    <button class="menu-item" onclick="closeMainMenu();openCatMgr()">
-      <span class="menu-icon">⚙️</span>
-      <span class="menu-label">Categories</span>
-    </button>
+     <button class="menu-item" onclick="closeMainMenu();goToAdkarCategories()">
+      <span class="menu-icon">📖</span>
+      <span class="menu-label">Adkar</span>
+  </button>
 	
   </div>
 </div>
@@ -94,21 +91,29 @@
   <div class="search-results" id="search-results"></div>
 </div>
 
-<!-- VIEW: CATEGORIES -->
-<div class="view active" id="view-cats">
+<!-- VIEW: HOME / DASHBOARD -->
+<div class="view active" id="view-home">
+  <div class="home-container" id="home-body"></div>
+</div>
+
+<!-- VIEW: CATEGORIES (adkar) -->
+<div class="view" id="view-cats">
+  <div class="back-bar">
+    <button class="btn-back" onclick="goHome()">← Back</button>
+  </div>
   <div class="page-header">
     <div>
       <div class="page-title">Categories · الفئات</div>
       <div class="page-sub" id="daily-reset-info"></div>
     </div>
   </div>
-  <div class="quote-card" id="quote-card"></div>
   <div class="cats-grid" id="cats-grid"></div>
 </div>
+
 <!-- VIEW: ADKAR LIST -->
 <div class="view" id="view-adkar">
   <div class="back-bar">
-    <button class="btn-back" onclick="goHome()">← Back</button>
+    <button class="btn-back" onclick="goToAdkarCategories()">← Back</button>
     <button class="btn-session" onclick="startSession()">▶ Session</button>
     <div id="adkar-view-title" style="font-family:'Amiri',serif;font-size:17px;color:var(--accent)"></div>
   </div>
@@ -347,6 +352,7 @@
 <script src="js/reader.js"></script>
 <script src="js/compass.js"></script>
 <script src="js/views/cats.js"></script>
+<script src="js/views/home.js"></script>
 <script src="js/views/quote.js"></script>
 <script src="js/views/adkar.js"></script>
 <script src="js/views/search.js"></script>

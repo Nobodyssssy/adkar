@@ -7,8 +7,8 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v1.9.1';
-const CACHE   = `adkar-${VERSION}`;
+const VERSION = 'v2.0.0';
+const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
   './',
@@ -47,6 +47,7 @@ const APP_SHELL = [
   './js/compass.js',
 
   './js/views/cats.js',
+  '.js/views/home.js',
   './js/views/adkar.js',
   './js/views/search.js',
   './js/views/favs.js',
@@ -84,7 +85,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((k) => k.startsWith('adkar-') && k !== CACHE)
+        keys.filter((k) => (k.startsWith('adkar-') || k.startsWith('sahib-')) && k !== CACHE)
             .map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())

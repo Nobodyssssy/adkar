@@ -121,7 +121,5 @@ function checkHeaderDateChange(){
   }
 }
 
-(function initDateWatcher(){
-  _lastDateStr = new Date().toDateString();
-  setInterval(checkHeaderDateChange, 60 * 1000);
-})();
+/* Date watcher moved to home dashboard */
+/* (kept as no-op for compatibility) */

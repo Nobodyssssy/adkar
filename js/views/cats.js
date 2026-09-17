@@ -9,6 +9,9 @@ function renderCatsGrid(){
   /* Render the daily quote card above the categories */
   if(typeof renderQuoteCard === 'function') renderQuoteCard();
 
+  /* Ensure the page header has the settings button */
+  ensureCatsSettingsButton();
+  
   const g = $('cats-grid');
   g.innerHTML = cats.map(c => {
     const items = data.filter(d =>
@@ -48,18 +51,43 @@ function showView(id){
   $(id).classList.add('active');
 }
 
-function goHome(){
+/* Navigate to adkar categories grid */
+function goToAdkarCategories(){
   showView('view-cats');
   currentCat = null;
   clearSearch();
   $('btn-favs').classList.remove('active');
   renderCatsGrid();
+  window.scrollTo(0, 0);
+}
+
+/* Navigate to the main dashboard (home) */
+function goHome(){
+  goHomeView();
+}
+
+/* Add ⚙️ settings button to the categories view header (one-time) */
+function ensureCatsSettingsButton(){
+  const header = document.querySelector('#view-cats .page-header');
+  if(!header) return;
+  if(header.querySelector('.cats-settings-btn')) return;  /* already added */
+
+  const btn = document.createElement('button');
+  btn.className = 'icon-btn cats-settings-btn';
+  btn.title = 'Manage categories';
+  btn.innerHTML = '⚙️';
+  btn.onclick = () => openCatMgr();
+  header.appendChild(btn);
 }
 
 function toggleTheme(){
   isLight = !isLight;
   document.body.classList.toggle('light', isLight);
-  const oldBtn = $('theme-btn');
-  if(oldBtn) oldBtn.textContent = isLight ? '☀️' : '🌙';
+  /* Update the header toggle button — shows the TARGET mode */
+  const btn = $('theme-toggle-btn');
+  if(btn) btn.textContent = isLight ? '🌙' : '☀️';
+  /* Persist preference */
+  store.setMeta('theme', isLight ? 'light' : 'dark');
+  /* Update menu if it's still open */
   if(typeof updateMenuState === 'function') updateMenuState();
 }
