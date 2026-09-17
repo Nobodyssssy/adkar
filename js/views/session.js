@@ -5,7 +5,16 @@ function startSession(){
     Array.isArray(d.categories) && d.categories.includes(currentCat)
   );
   if(!items.length){ toast('No adkar in this category'); return; }
-  sessItems = [...items];
+
+  /* Sort by repetition count ascending: 1× first, then 3×, 7×, 10×, 33×, 100×, etc.
+     Secondary sort by id for stability when repetitions are equal. */
+  sessItems = [...items].sort((a, b) => {
+    const ra = a.repeat || 1;
+    const rb = b.repeat || 1;
+    if(ra !== rb) return ra - rb;
+    return (a.id || 0) - (b.id || 0);
+  });
+
   sessIdx = 0;
   sessTapCount = 0;
   $('sess-title').textContent = getCat(currentCat).ar;

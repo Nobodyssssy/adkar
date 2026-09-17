@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.0.0';
+const VERSION = 'v2.1.1';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -19,6 +19,11 @@ const APP_SHELL = [
   './css/layout.css',
   './css/components.css',
   './css/responsive.css',
+  './assets/fonts/Amiri-Regular.woff2',
+  './assets/fonts/Amiri-Bold.woff2',
+  './assets/fonts/Tajawal-Regular.woff2',
+  './assets/fonts/Tajawal-Medium.woff2',
+  './assets/fonts/Tajawal-Bold.woff2',
 
   './js/config.js',
   './js/utils.js',
@@ -100,9 +105,9 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
 
   const isSameOrigin = url.origin === self.location.origin;
-  const isFont = url.hostname.endsWith('gstatic.com') || url.hostname.endsWith('googleapis.com');
 
-  if (!isSameOrigin && !isFont) return;
+  /* Only handle same-origin requests (fonts are now local) */
+  if (!isSameOrigin) return;
 
   /* HTML navigation → network-first, fall back to cache when offline */
   if (req.mode === 'navigate') {
@@ -114,22 +119,6 @@ self.addEventListener('fetch', (event) => {
           return res;
         })
         .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-
-  /* Fonts → stale-while-revalidate */
-  if (isFont) {
-    event.respondWith(
-      caches.open(CACHE).then((cache) =>
-        cache.match(req).then((cached) => {
-          const fetchPromise = fetch(req).then((res) => {
-            if (res && res.status === 200) cache.put(req, res.clone());
-            return res;
-          }).catch(() => cached);
-          return cached || fetchPromise;
-        })
-      )
     );
     return;
   }

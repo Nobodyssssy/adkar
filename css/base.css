@@ -1,17 +1,141 @@
-:root{
-  --bg:#0d0f14;--surface:#161920;--surface2:#1e2230;--surface3:#252a3a;
-  --border:#2e3450;--accent:#c9a84c;--accent2:#e8c97a;--glow:rgba(201,168,76,.15);
-  --text:#f0ead6;--text2:#9a9db5;--text3:#5c607a;
-  --green:#4caf89;--red:#c94c4c;--blue:#4c7fc9;--orange:#e07b2a;
-  --r:16px;--rs:10px;--sh:0 8px 32px rgba(0,0,0,.4);--tr:.22s cubic-bezier(.4,0,.2,1);
+/* ═══════════════════════════════════════════════════════════
+   Self-hosted fonts — Amiri (Arabic) + Tajawal (UI)
+   Downloaded once, cached by SW, works offline
+   ═══════════════════════════════════════════════════════════ */
+
+@font-face{
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/Amiri-Regular.woff2') format('woff2');
 }
-.light{
-  --bg:#f4efe4;--surface:#fdfaf3;--surface2:#ede8d8;--surface3:#e4ddc8;
-  --border:#cfc59e;--accent:#7a5c10;--accent2:#9b7520;--glow:rgba(122,92,16,.1);
-  --text:#1a1710;--text2:#5a5240;--text3:#9a9080;--sh:0 8px 32px rgba(0,0,0,.1);
+@font-face{
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/Amiri-Bold.woff2') format('woff2');
 }
 
-*{margin:0;padding:0;box-sizing:border-box;}
+@font-face{
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/Tajawal-Regular.woff2') format('woff2');
+}
+@font-face{
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/Tajawal-Medium.woff2') format('woff2');
+}
+@font-face{
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/Tajawal-Bold.woff2') format('woff2');
+}
+
+
+:root{
+  /* ─── Surfaces ─── */
+  --bg:      #0d0f14;
+  --surface: #161920;
+  --surface2:#1e2230;
+  --surface3:#252a3a;
+  --border:  #2e3450;
+
+  /* ─── Accent (gold) ─── */
+  --accent:  #c9a84c;
+  --accent2: #e8c97a;
+  --glow:    rgba(201,168,76,.15);
+
+  /* ─── Text — contrast-checked against --bg ─── */
+  --text:    #f0ead6;   /* 14.8:1 — headings, primary content */
+  --text2:   #b8bcd0;   /* 8.2:1  — body, secondary */
+  --text3:   #8b90aa;   /* 4.6:1  — meta, captions, timestamps */
+
+  /* ─── Semantic ─── */
+  --green:   #4caf89;
+  --red:     #c94c4c;
+  --blue:    #4c7fc9;
+  --orange:  #e07b2a;
+
+  /* ─── Shape & motion ─── */
+  --r:  16px;   /* deprecated — use --radius-lg instead */
+  --rs: 10px;   /* deprecated — use --radius-sm instead */
+  --sh: 0 8px 32px rgba(0,0,0,.4);
+  --tr: .22s cubic-bezier(.4,0,.2,1);
+  
+    /* ─── Type scale — 7 sizes, 12px base ─── */
+  --fs-xs:  10px;   /* tiny — meta, badges */
+  --fs-sm:  12px;   /* small — captions, labels */
+  --fs-md:  14px;   /* body — default UI text */
+  --fs-lg:  16px;   /* emphasis — headlines, inputs */
+  --fs-xl:  20px;   /* heading — card titles, sections */
+  --fs-2xl: 26px;   /* major heading — page titles */
+  --fs-3xl: 34px;   /* display — counters, big numbers */
+
+  /* ─── Radius scale — 4 values ─── */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-pill: 9999px;
+
+  /* ─── Spacing scale — 6 values ─── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+}
+
+.light{
+  /* ─── Surfaces — increased contrast for clear card boundaries ─── */
+  --bg:      #faf8f3;
+  --surface: #ffffff;
+  --surface2:#f4efe4;
+  --surface3:#ebe5d4;
+  --border:  #e5dfc8;
+
+  /* ─── Accent — brighter, less muddy on light ─── */
+  --accent:  #8a6914;
+  --accent2: #a17f1a;
+  --glow:    rgba(138,105,20,.12);
+
+  /* ─── Text — same contrast discipline ─── */
+  --text:    #1a1710;   /* 16.2:1 */
+  --text2:   #4a4538;   /* 8.9:1  */
+  --text3:   #6a6250;   /* 4.7:1  */
+
+  /* ─── Semantic ─── */
+  --green:   #3d8f6f;
+  --red:     #a83a3a;
+  --blue:    #3b6aad;
+  --orange:  #c4671f;
+
+  /* ─── Shape & motion ─── */
+  --sh: 0 8px 32px rgba(0,0,0,.08);
+}
+
+/* ─── Light mode cards get a subtle shadow so they lift off the page ─── */
+.light .adkar-card,
+.light .cat-card,
+.light .book-card,
+.light .continue-card,
+.light .home-feature-card,
+.light .home-today-card,
+.light .asma-card,
+.light .hijri-cell,
+.light .book-card,
+.light .quote-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.03);
+}
 
 /* ── Mobile baseline ── */
 html{
