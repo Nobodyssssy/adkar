@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v1.9.0';
+const VERSION = 'v1.9.1';
 const CACHE   = `adkar-${VERSION}`;
 
 const APP_SHELL = [
@@ -22,6 +22,7 @@ const APP_SHELL = [
 
   './js/config.js',
   './js/utils.js',
+  './js/scroll-preserve.js',
   './js/dict.js',
   './js/vendor/fuse.min.js',
   './js/db.js',

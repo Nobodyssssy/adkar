@@ -307,9 +307,8 @@
 /* ── Body scroll lock when any modal is open ── */
 body.modal-open {
   overflow: hidden;
-  /* prevent iOS rubber-band */
-  position: fixed;
-  width: 100%;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 /* Prevent the modal sheet itself from chaining scroll to the page */
 .modal-sheet, .modal-box {

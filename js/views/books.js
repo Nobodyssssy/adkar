@@ -292,6 +292,9 @@ function openBookDetail(id){
   if(!b) return;
   _booksDetailId = id;
 
+  /* Save scroll position BEFORE locking body */
+  window._booksSavedScroll = window.scrollY || window.pageYOffset || 0;
+
   ensureBookDetailModal();
   renderBookDetail(b);
 
@@ -367,7 +370,13 @@ function closeBookDetail(){
   if(modal) modal.classList.remove('open');
   unlockBody();
   _booksDetailId = null;
+
   renderBooksGrid();
+
+  requestAnimationFrame(() => {
+    const y = window._booksSavedScroll || 0;
+    window.scrollTo(0, y);
+  });
 }
 
 function ensureBookDetailModal(){

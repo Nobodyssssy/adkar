@@ -4,6 +4,9 @@ function openDetail(id){
   const d = data.find(x => x.id === id);
   if(!d) return;
   detailId = id;
+  
+    /* Save scroll position BEFORE locking body */
+  window._adkarSavedScroll = window.scrollY || window.pageYOffset || 0;
 
   const catKey = Array.isArray(d.categories) ? d.categories[0] : null;
   const cat = getCat(catKey);
@@ -60,8 +63,14 @@ function closeDetail(){
   $('ov-detail').classList.remove('open');
   detailId = null;
   unlockBody();
+
   if(currentCat) renderAdkarGrid();
   renderCatsGrid();
+
+  requestAnimationFrame(() => {
+    const y = window._adkarSavedScroll || 0;
+    window.scrollTo(0, y);
+  });
 }
 
 function inc(id){

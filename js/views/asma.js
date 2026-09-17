@@ -122,14 +122,14 @@ function asmaCardHTML(n){
 /* ═══════════════════════════════════════════════════════════
    UI handlers
    ═══════════════════════════════════════════════════════════ */
-function setAsmaLang(lang){
-  _asmaLang = lang;
+async function openAsmaView(){
+  await loadMemorized();
+  _asmaQuery = '';
+  _asmaFilter = 'all';
+  showView('view-asma');
   renderAsmaGrid();
-}
-
-function setAsmaFilter(filter){
-  _asmaFilter = filter;
-  renderAsmaGrid();
+  /* Always start at top when opening the view */
+  window.scrollTo(0, 0);
 }
 
 let _asmaSearchTimer;
@@ -152,6 +152,9 @@ function onAsmaSearch(value){
 function openAsmaDetail(id){
   const n = getAsmaById(id);
   if(!n) return;
+
+  /* Save scroll position BEFORE locking body */
+  window._asmaSavedScroll = window.scrollY || window.pageYOffset || 0;
 
   ensureAsmaDetailModal();
   renderAsmaDetail(n, _asmaLang);
@@ -198,6 +201,15 @@ function closeAsmaDetail(){
   const modal = $('ov-asma-detail');
   if(modal) modal.classList.remove('open');
   unlockBody();
+
+  /* Refresh grid first, then restore scroll position */
+  renderAsmaGrid();
+
+  /* Restore saved position after layout settles */
+  requestAnimationFrame(() => {
+    const y = window._asmaSavedScroll || 0;
+    window.scrollTo(0, y);
+  });
 }
 
 function setAsmaDetailLang(id, lang){
@@ -211,7 +223,8 @@ async function toggleAsmaMemo(id){
   await toggleMemorized(id);
   const n = getAsmaById(id);
   if(n) renderAsmaDetail(n, _asmaLang);
-  renderAsmaGrid();
+  /* Don't re-render the grid while modal is open — it's visible behind
+     and would reset scroll. We refresh it on close instead. */
 }
 
 function ensureAsmaDetailModal(){
