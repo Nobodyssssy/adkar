@@ -15,6 +15,7 @@ const PRAYER_CACHE_DAYS = 90;   /* Prefetch this many days ahead */
    LOCATION — cached for 30 days, refreshed on demand
    ═══════════════════════════════════════════════════════════ */
 async function getLocation(forceRefresh = false){
+  /* Return cached location if we have one and it's not stale */
   if(!forceRefresh){
     const cached = await store.getMeta('location');
     if(cached && cached.lat && cached.lng && cached.ts){
@@ -23,17 +24,26 @@ async function getLocation(forceRefresh = false){
     }
   }
 
+  /* No cached location. Do NOT call GPS here — that's an explicit user action.
+     Throw a marker error so callers can prompt the user to pick a location. */
+  const err = new Error('No location set');
+  err.code = 'NO_LOCATION';
+  throw err;
+}
+
+/* ── Explicit GPS request — ONLY called from a user gesture ── */
+async function requestGPSLocation(){
+  if(!navigator.geolocation){
+    throw new Error('Geolocation not supported by this browser');
+  }
   return new Promise((resolve, reject) => {
-    if(!navigator.geolocation){
-      reject(new Error('Geolocation not supported by this browser'));
-      return;
-    }
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const loc = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           ts: Date.now(),
+          manual: false,
         };
         await store.setMeta('location', loc);
         resolve(loc);
@@ -43,7 +53,6 @@ async function getLocation(forceRefresh = false){
     );
   });
 }
-
 /* Strip "(CEST)" or any suffix from a time string: "05:22 (CEST)" → "05:22" */
 function cleanTime(t){
   if(!t) return '00:00';

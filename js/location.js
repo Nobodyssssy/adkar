@@ -113,27 +113,82 @@ function ensureLocationModal(){
     <div class="modal-box" style="max-width:460px">
       <div class="mh">
         <h2>Choose Location</h2>
-        <button class="btn-close" onclick="closeLocationPicker()">✕</button>
+        <button class="btn-close" onclick="closeLocationPicker()" data-icon="x"><span class="btn-icon"></span></button>
       </div>
       <div class="mb" style="gap:10px">
-        <div class="fg">
+        <div class="fg" style="direction:ltr">
           <label class="fl">Search any city worldwide</label>
           <input class="fi" id="location-search" placeholder="e.g. Zurich, Collo, Paris…"
-                 oninput="onLocationSearchInput(this.value)" autocomplete="off">
+                 oninput="onLocationSearchInput(this.value)" autocomplete="off"
+                 dir="ltr" style="text-align:left;direction:ltr">
         </div>
-        <div id="location-list" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
-        <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:10px">
-          <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em;text-transform:uppercase">Or enter coordinates</div>
-          <div class="fr2">
-            <input class="fi" id="loc-lat" type="number" step="0.0001" placeholder="Latitude" style="direction:ltr">
-            <input class="fi" id="loc-lng" type="number" step="0.0001" placeholder="Longitude" style="direction:ltr">
-          </div>
-          <button class="btn-save" onclick="applyManualCoords()">Use these coordinates</button>
-        </div>
-        <button class="btn-cancel" style="width:100%" onclick="useGPSLocation()">📍 Use my GPS instead</button>
+        <div id="location-list" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+
+		<button class="io-btn" onclick="openCoordsModal()" data-icon="map-pin" style="margin-top:4px;direction:ltr;justify-content:center">
+		<span class="btn-icon"></span><span>Enter coordinates manually</span>
+		</button>
+
+<button class="btn-cancel" style="width:100%;direction:ltr;justify-content:center" onclick="useGPSLocation()" data-icon="compass">
+  <span class="btn-icon"></span><span>Use my GPS instead</span>
+</button>
       </div>
     </div>`;
+
+  /* Coordinates sub-modal */
+  const coordsModal = document.createElement('div');
+  coordsModal.className = 'ov center';
+  coordsModal.id = 'ov-coords';
+  coordsModal.setAttribute('onclick', 'if(event.target===this)closeCoordsModal()');
+  coordsModal.style.zIndex = '360';   /* above the location picker */
+  coordsModal.innerHTML = `
+    <div class="modal-box" style="max-width:360px">
+      <div class="mh">
+        <h2>Enter coordinates</h2>
+        <button class="btn-close" onclick="closeCoordsModal()" data-icon="x"><span class="btn-icon"></span></button>
+      </div>
+      <div class="mb" style="gap:12px;direction:ltr">
+        <div class="fg">
+          <label class="fl">Latitude</label>
+          <input class="fi" id="loc-lat" type="number" step="0.0001" placeholder="e.g. 37.0072"
+                 style="direction:ltr;text-align:left" dir="ltr">
+        </div>
+        <div class="fg">
+          <label class="fl">Longitude</label>
+          <input class="fi" id="loc-lng" type="number" step="0.0001" placeholder="e.g. 6.5612"
+                 style="direction:ltr;text-align:left" dir="ltr">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button class="btn-cancel" style="flex:1" onclick="closeCoordsModal()">Cancel</button>
+          <button class="btn-save" style="flex:1" onclick="applyManualCoords()">Apply</button>
+        </div>
+      </div>
+    </div>`;
+
   document.body.appendChild(modal);
+  document.body.appendChild(coordsModal);
+
+  /* Inject icons in both modals */
+  [modal, coordsModal].forEach(m => {
+    m.querySelectorAll('[data-icon] > .btn-icon').forEach(span => {
+      const name = span.parentElement.getAttribute('data-icon');
+      if(name && typeof icon === 'function') span.innerHTML = icon(name, 15);
+    });
+  });
+}
+
+/* ── Coordinates sub-modal handlers ── */
+function openCoordsModal(){
+  const modal = $('ov-coords');
+  if(modal) modal.classList.add('open');
+  setTimeout(() => $('loc-lat')?.focus(), 100);
+}
+
+function closeCoordsModal(){
+  const modal = $('ov-coords');
+  if(modal) modal.classList.remove('open');
+  /* Clear inputs to prevent stale values */
+  const lat = $('loc-lat'); if(lat) lat.value = '';
+  const lng = $('loc-lng'); if(lng) lng.value = '';
 }
 
 /* Debounce geocoding as user types */
@@ -229,16 +284,17 @@ async function applyManualCoords(){
   const lat = parseFloat($('loc-lat').value);
   const lng = parseFloat($('loc-lng').value);
   if(Number.isNaN(lat) || Number.isNaN(lng)){
-    toast('⚠️ Enter both latitude and longitude');
+    toast('Enter both latitude and longitude');
     return;
   }
   if(lat < -90 || lat > 90 || lng < -180 || lng > 180){
-    toast('⚠️ Coordinates out of range');
+    toast('Coordinates out of range');
     return;
   }
   await setManualLocation(lat, lng, `${lat.toFixed(3)}, ${lng.toFixed(3)}`);
+  closeCoordsModal();
   closeLocationPicker();
-  toast(`📍 Location saved`);
+  toast('Location saved');
   if($('view-prayer').classList.contains('active')){
     openPrayerView();
   }
@@ -248,8 +304,8 @@ async function useGPSLocation(){
   closeLocationPicker();
   toast('📍 Requesting GPS…');
   try{
-    const loc = await getLocation(true);
-    await store.setMeta('location', { ...loc, manual: false, label: null });
+    const loc = await requestGPSLocation();   // ← explicit GPS request
+    await store.setMeta('location', loc);
     toast('✅ GPS location saved');
     if($('view-prayer').classList.contains('active')){
       openPrayerView();

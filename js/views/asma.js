@@ -84,15 +84,12 @@ function renderAsmaGrid(){
     </div>
 
     <div class="asma-filters">
-      <button class="filter-chip ${_asmaFilter==='all'?'on':''}" onclick="setAsmaFilter('all')">
-        ${_asmaLang === 'ar' ? 'الكل' : 'All'} (${total})
-      </button>
-      <button class="filter-chip ${_asmaFilter==='memorized'?'on':''}" onclick="setAsmaFilter('memorized')">
-        ${_asmaLang === 'ar' ? '✅ محفوظة' : '✅ Memorized'} (${memo})
-      </button>
-      <button class="filter-chip ${_asmaFilter==='not-memorized'?'on':''}" onclick="setAsmaFilter('not-memorized')">
-        ${_asmaLang === 'ar' ? '⏳ غير محفوظة' : '⏳ Not yet'} (${total - memo})
-      </button>
+<button class="filter-chip ${_asmaFilter==='memorized'?'on':''}" onclick="setAsmaFilter('memorized')">
+  ${_asmaLang === 'ar' ? 'محفوظة' : 'Memorized'} (${memo})
+</button>
+<button class="filter-chip ${_asmaFilter==='not-memorized'?'on':''}" onclick="setAsmaFilter('not-memorized')">
+  ${_asmaLang === 'ar' ? 'غير محفوظة' : 'Not yet'} (${total - memo})
+</button>
     </div>
 
     ${list.length === 0
@@ -104,6 +101,9 @@ function renderAsmaGrid(){
            ${list.map(n => asmaCardHTML(n)).join('')}
          </div>`}
   `;
+    if(typeof injectHeaderIcons === 'function'){
+    setTimeout(() => injectHeaderIcons(), 0);
+  }
 }
 
 function asmaCardHTML(n){
@@ -115,7 +115,7 @@ function asmaCardHTML(n){
     <div class="asma-card-num">${n.id}</div>
     <div class="asma-card-ar">${display}</div>
     <div class="asma-card-sub">${esc(sub)}</div>
-    ${isMemo ? '<div class="asma-card-check">✅</div>' : ''}
+    ${isMemo ? `<div class="asma-card-check">${icon('check', 16)}</div>` : ''}
   </div>`;
 }
 
@@ -174,10 +174,13 @@ function renderAsmaDetail(n, lang){
       <div class="asma-detail-meaning">${esc(n.meaningEn)}</div>
     </div>
 
-    <div class="asma-detail-tabs">
-      <button class="quote-lang-btn ${lang==='ar'?'on':''}" onclick="setAsmaDetailLang(${n.id},'ar')">عربي</button>
-      <button class="quote-lang-btn ${lang==='en'?'on':''}" onclick="setAsmaDetailLang(${n.id},'en')">EN</button>
-    </div>
+  <div class="asma-detail-actions">
+    <button class="btn-save ${isMemo?'memo':''}" onclick="toggleAsmaMemo(${n.id})">
+      ${isMemo
+        ? (lang === 'ar' ? 'محفوظ ✓' : 'Memorized ✓')
+        : (lang === 'ar' ? 'ضع علامة محفوظ' : 'Mark as memorized')}
+    </button>
+  </div>
 
     <div class="asma-detail-tafsir ${lang==='ar'?'ar':'en'}">
       ${lang === 'ar' ? n.tafsirAr : n.tafsirEn}

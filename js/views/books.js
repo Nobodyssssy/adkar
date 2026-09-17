@@ -17,7 +17,7 @@ let _booksDetailId = null;
    ═══════════════════════════════════════════════════════════ */
 async function openBooksView(){
   await loadReadingProgress();
-  await loadBookmarks();
+  await loadBookmarks();          // ← add this line
   _booksQuery = '';
   _booksCategory = null;
   showView('view-books');
@@ -100,6 +100,9 @@ function renderCategoryLanding(host){
       </div>
     </div>
   `;
+    if(typeof injectHeaderIcons === 'function'){
+    setTimeout(() => injectHeaderIcons(), 0);
+  }
 
   /* Attach covers to continue-reading cards */
   if(typeof generateCoversForGrid === 'function'){
@@ -143,10 +146,14 @@ function continueCardHTML(b){
     : 0;
   const title = _booksLang === 'ar' ? b.titleAr : (b.titleEn || b.titleAr);
 
-  return `
+const pinnedIds = (_bookmarks && _bookmarks['_pinned']) || [];
+const isPinned = pinnedIds.includes(b.id);
+
+return `
     <div class="continue-card" onclick="openBookDetail('${b.id}')">
+      ${isPinned ? `<div class="continue-pin-badge">★</div>` : ''}
       <div class="continue-cover" id="cover-${b.id}">
-        <div class="book-cover-placeholder">📖</div>
+        <div class="book-cover-placeholder">${icon('book-open', 30)}</div>
       </div>
       <div class="continue-title">${esc(title)}</div>
       <div class="continue-progress-bar">
@@ -231,7 +238,7 @@ function bookCardHTML(b){
 
   return `<div class="book-card" style="--cc:${cat.color}" onclick="openBookDetail('${b.id}')">
     <div class="book-cover" id="cover-${b.id}">
-      <div class="book-cover-placeholder">📖</div>
+      <div class="book-cover-placeholder">${icon('book-open', 30)}</div>
     </div>
     <div class="book-info">
       <div class="book-cat-badge" style="background:${cat.color}22;color:${cat.color};border-color:${cat.color}">${_booksLang === 'ar' ? cat.ar : cat.en}</div>
@@ -247,12 +254,41 @@ function bookCardHTML(b){
    ═══════════════════════════════════════════════════════════ */
 function getRecentlyReadBooks(limit){
   limit = limit || 3;
-  if(!_readingProgress) return [];
-  const entries = Object.entries(_readingProgress)
+  if(!_readingProgress) _readingProgress = {};
+
+  /* Pinned book IDs — books the user starred to pin to Continue reading */
+  const pinnedIds = (_bookmarks && _bookmarks['_pinned']) || [];
+
+  /* Combine: pinned (in pin order) + recently-read (unfinished, by lastRead desc) */
+  const seen = new Set();
+  const result = [];
+
+  /* 1. Pinned books first, in the order they were pinned */
+  for(const id of pinnedIds){
+    if(seen.has(id)) continue;
+    const book = getBookById(id);
+    if(book){
+      result.push(book);
+      seen.add(id);
+    }
+  }
+
+  /* 2. Recently-read unfinished books, in reverse-chronological order */
+  const recent = Object.entries(_readingProgress)
     .filter(([_, p]) => p && p.lastRead && (!p.totalPages || p.page < p.totalPages))
-    .sort((a, b) => b[1].lastRead - a[1].lastRead)
-    .slice(0, limit);
-  return entries.map(([id]) => getBookById(id)).filter(Boolean);
+    .sort((a, b) => b[1].lastRead - a[1].lastRead);
+
+  for(const [id] of recent){
+    if(result.length >= limit) break;
+    if(seen.has(id)) continue;
+    const book = getBookById(id);
+    if(book){
+      result.push(book);
+      seen.add(id);
+    }
+  }
+
+  return result.slice(0, limit);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -323,7 +359,7 @@ function renderBookDetail(b){
   $('book-detail-body').innerHTML = `
     <div class="book-detail-hero">
       <div class="book-detail-cover" id="detail-cover-${b.id}">
-        <div class="book-cover-placeholder">📖</div>
+        <div class="book-cover-placeholder">${icon('book-open', 30)}</div>
       </div>
       <div class="book-detail-meta">
         <div class="book-cat-badge" style="background:${cat.color}22;color:${cat.color};border-color:${cat.color}">

@@ -16,10 +16,9 @@ let _readerMode = 'scroll';      /* 'scroll' | 'flip' */
 let _readerZoom = 1;             /* 1 = fit width */
 let _readerControlsVisible = true;
 let _readerToc = [];
-let _readerRenderedPages = new Set();   /* in scroll mode, which pages are rendered */
-let _readerObserver = null;      /* IntersectionObserver for scroll mode */
+let _readerRenderedPages = new Set();
+let _readerObserver = null;
 let _readerAutoSaveTimer = null;
-let _readerBookmarked = false;
 let _readerScrolledToRestore = false;
 
 /* ═══════════════════════════════════════════════════════════
@@ -36,22 +35,25 @@ async function openReader(bookId){
   _readerRenderedPages.clear();
   _readerScrolledToRestore = false;
 
-  /* Show the overlay in loading state */
   ensureReaderOverlay();
   $('reader-overlay').classList.add('open');
   lockBody();
-  renderReaderLoading();
 
+  /* Reset the pin button state — ensures a fresh pin state for the new book */
+  const pinBtn = $('reader-bookmark-btn');
+  if(pinBtn){
+    pinBtn.classList.remove('pinned');
+    pinBtn.style.color = '';
+  }
+
+  renderReaderLoading();
   try{
-    /* Load PDF */
     _readerPdf = await loadPdfDocument(bookId);
     _readerTotalPages = _readerPdf.numPages;
 
-    /* Load progress + bookmarks */
     await loadReadingProgress();
     await loadBookmarks();
 
-    /* Restore last page */
     const progress = getBookProgress(bookId);
     if(progress && progress.page > 1){
       _readerCurrentPage = Math.min(progress.page, _readerTotalPages);
@@ -59,19 +61,10 @@ async function openReader(bookId){
       _readerCurrentPage = 1;
     }
 
-    /* Load TOC (optional) */
     _readerToc = await getPdfOutline(_readerPdf);
 
-    /* Render main UI */
     renderReaderUI();
-
-    /* Render pages */
     await renderReaderContent();
-
-    /* Auto-open TOC sidebar on desktop if available */
-    if(_readerToc && _readerToc.length > 0 && window.innerWidth > 700){
-      setTimeout(() => toggleReaderSidebar('toc'), 400);
-    }
 
   }catch(err){
     console.error('[reader]', err);
@@ -89,23 +82,23 @@ function ensureReaderOverlay(){
   el.className = 'reader-overlay';
   el.id = 'reader-overlay';
   el.innerHTML = `
-   <div class="reader-topbar" id="reader-topbar">
-  <button class="reader-icon-btn" id="reader-sidebar-btn" onclick="toggleReaderSidebar()" title="Contents">☰</button>
-  <button class="reader-icon-btn" onclick="closeReader()" title="Close">✕</button>
-  <div class="reader-title" id="reader-title"></div>
-  <div class="reader-topbar-actions">
-    <button class="reader-icon-btn" id="reader-bookmark-btn" onclick="toggleReaderBookmark()" title="Bookmark">☆</button>
-    <button class="reader-icon-btn" onclick="toggleReaderSettings()" title="Settings">⚙</button>
-    <button class="reader-icon-btn" id="reader-fullscreen-btn" onclick="toggleReaderFullscreen()" title="Full screen">⛶</button>
-  </div>
-</div>
+    <div class="reader-topbar" id="reader-topbar">
+      <div class="reader-topbar-actions">
+        <button class="reader-icon-btn" id="reader-sidebar-btn" onclick="toggleReaderSidebar()" title="Contents" data-icon="panel-left"><span class="btn-icon"></span></button>
+        <button class="reader-icon-btn" id="reader-bookmark-btn" onclick="toggleReaderPin()" title="Pin to Continue reading" data-icon="bookmark"><span class="btn-icon"></span></button>
+        <button class="reader-icon-btn" onclick="toggleReaderSettings()" title="Settings" data-icon="sliders"><span class="btn-icon"></span></button>
+        <button class="reader-icon-btn" id="reader-fullscreen-btn" onclick="toggleReaderFullscreen()" title="Full screen" data-icon="maximize"><span class="btn-icon"></span></button>
+      </div>
+      <div class="reader-title" id="reader-title"></div>
+      <button class="reader-icon-btn" onclick="closeReader()" title="Close" data-icon="x"><span class="btn-icon"></span></button>
+    </div>
 
     <div class="reader-body" id="reader-body"></div>
 
     <div class="reader-bottombar" id="reader-bottombar">
-      <button class="reader-icon-btn" onclick="readerPrevPage()" title="Previous">‹</button>
+      <button class="reader-icon-btn" onclick="readerPrevPage()" title="Previous" data-icon="chevron-right"><span class="btn-icon"></span></button>
       <div class="reader-page-info" id="reader-page-info"></div>
-      <button class="reader-icon-btn" onclick="readerNextPage()" title="Next">›</button>
+      <button class="reader-icon-btn" onclick="readerNextPage()" title="Next" data-icon="chevron-left"><span class="btn-icon"></span></button>
     </div>
 
     <div class="reader-settings-panel" id="reader-settings-panel">
@@ -126,13 +119,8 @@ function ensureReaderOverlay(){
         </div>
       </div>
 
-      ${_readerToc && _readerToc.length ? `
       <div class="reader-setting-group">
-        <button class="reader-setting-btn wide" onclick="toggleReaderSidebar()">📑 Table of contents</button>
-      </div>` : ''}
-
-      <div class="reader-setting-group">
-        <button class="reader-setting-btn wide" onclick="toggleReaderSidebar()">📄 Page thumbnails</button>
+        <button class="reader-setting-btn wide" onclick="toggleReaderSidebar('thumbs')">Page thumbnails</button>
       </div>
 
       <div class="reader-setting-group">
@@ -145,6 +133,10 @@ function ensureReaderOverlay(){
     <div class="reader-sidebar" id="reader-sidebar"></div>
   `;
   document.body.appendChild(el);
+
+  if(typeof injectHeaderIcons === 'function'){
+    injectHeaderIcons();
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -164,7 +156,7 @@ function renderReaderLoading(){
 function renderReaderError(msg){
   $('reader-body').innerHTML = `
     <div class="reader-error">
-      <div style="font-size:40px;margin-bottom:12px">📕</div>
+      <div style="font-size:40px;margin-bottom:12px">${icon('book-open', 40)}</div>
       <div style="font-weight:700;margin-bottom:6px">Could not open book</div>
       <div style="font-size:12px;color:var(--text3)">${esc(msg)}</div>
       <button class="btn-cancel" style="margin-top:16px" onclick="closeReader()">Close</button>
@@ -183,15 +175,12 @@ function renderReaderUI(){
   $('reader-jump-input').max = _readerTotalPages;
   $('reader-jump-input').value = _readerCurrentPage;
 
-  /* Bookmark state */
   updateReaderBookmarkBtn();
 
-  /* Mode button states */
   document.querySelectorAll('.reader-setting-btn[data-mode]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.mode === _readerMode);
   });
 
-  /* Show bars */
   $('reader-bottombar').style.display = 'flex';
   $('reader-topbar').style.display = 'flex';
 }
@@ -199,9 +188,9 @@ function renderReaderUI(){
 function updateReaderBookmarkBtn(){
   const btn = $('reader-bookmark-btn');
   if(!btn) return;
-  const isBm = isBookPageBookmarked(_readerBookId, _readerCurrentPage);
-  btn.textContent = isBm ? '★' : '☆';
-  btn.style.color = isBm ? '#e8c97a' : '';
+  const starred = _bookmarks?.['_pinned'] || [];
+  const isPinned = starred.includes(_readerBookId);
+  btn.classList.toggle('pinned', isPinned);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -223,10 +212,8 @@ async function renderScrollMode(){
   body.innerHTML = `<div class="reader-scroll" id="reader-scroll"></div>`;
   const container = $('reader-scroll');
 
-  /* Compute page width for canvas rendering */
   const width = Math.min(container.clientWidth || 700, 900);
 
-  /* Render every page as a canvas container, in order */
   for(let i = 1; i <= _readerTotalPages; i++){
     const wrap = document.createElement('div');
     wrap.className = 'reader-page-wrap';
@@ -246,8 +233,6 @@ async function renderScrollMode(){
     container.appendChild(wrap);
   }
 
-  /* If restoring to a page > 1, pre-render pages 1..target so the
-     container's height is correct and the target is at the right position. */
   if(_readerCurrentPage > 1){
     for(let i = 1; i <= _readerCurrentPage; i++){
       const wrap = $(`reader-page-${i}`);
@@ -256,21 +241,17 @@ async function renderScrollMode(){
         _readerRenderedPages.add(i);
       }
     }
-    /* Now scroll to the target */
     const target = $(`reader-page-${_readerCurrentPage}`);
     if(target){
       target.scrollIntoView({ block: 'start', behavior: 'auto' });
     }
-    /* Wait for layout to settle, then flip the flag */
     setTimeout(() => {
       _readerScrolledToRestore = true;
     }, 300);
   } else {
-    /* Starting at page 1 — nothing to restore, unlock immediately */
     _readerScrolledToRestore = true;
   }
 
-  /* Start observing other pages lazily */
   setupScrollObserver(width);
 }
 
@@ -279,12 +260,10 @@ async function renderScrollPage(pageNum, wrapEl, width){
     const canvas = wrapEl.querySelector('canvas');
     const size = await renderPageToCanvas(_readerPdf, pageNum, canvas, width, _readerZoom);
     wrapEl.style.minHeight = size.height + 'px';
-
   }catch(err){
     console.warn('[reader] page', pageNum, 'failed', err);
   }
 }
-
 
 function setupScrollObserver(pageWidth){
   if(_readerObserver) _readerObserver.disconnect();
@@ -293,17 +272,13 @@ function setupScrollObserver(pageWidth){
     entries.forEach(entry => {
       const pageNum = parseInt(entry.target.dataset.page, 10);
 
-      /* Render when visible */
       if(entry.isIntersecting && !_readerRenderedPages.has(pageNum)){
         renderScrollPage(pageNum, entry.target, pageWidth);
         _readerRenderedPages.add(pageNum);
       }
 
-         /* Update current page indicator when scrolled into view significantly.
-         Skip until restore scroll has finished — otherwise we'd overwrite
-         the saved page with page 1 immediately after opening. */
       if(entry.isIntersecting && entry.intersectionRatio > 0.4){
-        if(!_readerScrolledToRestore) return;   /* still restoring */
+        if(!_readerScrolledToRestore) return;
         _readerCurrentPage = pageNum;
         updateReaderProgressUI();
         scheduleAutoSave();
@@ -317,6 +292,7 @@ function setupScrollObserver(pageWidth){
 
   document.querySelectorAll('.reader-page-wrap').forEach(el => _readerObserver.observe(el));
 }
+
 /* ═══════════════════════════════════════════════════════════
    FLIP MODE — one page at a time
    ═══════════════════════════════════════════════════════════ */
@@ -344,23 +320,18 @@ async function renderFlipCurrentPage(width){
   scheduleAutoSave();
 }
 
-
 function closeReader(){
-  /* Save progress before closing */
   if(_readerBookId && _readerCurrentPage){
     saveBookProgress(_readerBookId, _readerCurrentPage, _readerTotalPages);
   }
 
-  /* Cleanup timers + observers */
   if(_readerObserver){ _readerObserver.disconnect(); _readerObserver = null; }
   if(_readerAutoSaveTimer){ clearTimeout(_readerAutoSaveTimer); _readerAutoSaveTimer = null; }
 
-  /* Hide overlay + unlock body */
   const el = $('reader-overlay');
   if(el) el.classList.remove('open');
   unlockBody();
 
-  /* Reset state */
   _readerBookId = null;
   _readerPdf = null;
   _readerTotalPages = 0;
@@ -368,7 +339,6 @@ function closeReader(){
   _readerRenderedPages.clear();
   _readerScrolledToRestore = true;
 
-  /* Refresh the book list to show updated progress */
   if(typeof renderBooksGrid === 'function') renderBooksGrid();
 }
 
@@ -417,9 +387,7 @@ function updateReaderProgressUI(){
   if(jump) jump.value = _readerCurrentPage;
 }
 
-/* ── Auto-save progress (throttled) ── */
 function scheduleAutoSave(){
-  /* Don't save until we've finished restoring position */
   if(!_readerScrolledToRestore) return;
 
   if(_readerAutoSaveTimer) clearTimeout(_readerAutoSaveTimer);
@@ -440,12 +408,10 @@ async function setReaderMode(mode){
   _readerMode = mode;
   _readerRenderedPages.clear();
 
-  /* Update button states */
   document.querySelectorAll('.reader-setting-btn[data-mode]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.mode === mode);
   });
 
-  /* Re-render content in new mode, preserving current page */
   await renderReaderContent();
 }
 
@@ -468,7 +434,6 @@ async function readerZoomReset(){
 
 async function refreshReaderPages(){
   if(_readerMode === 'scroll'){
-    /* Redraw visible pages at the new zoom */
     _readerRenderedPages.clear();
     const width = Math.min($('reader-scroll').clientWidth || 700, 900);
     const visiblePages = [];
@@ -477,7 +442,6 @@ async function refreshReaderPages(){
         visiblePages.push(el.dataset.page);
       }
     });
-    /* Also redraw pages around current page to avoid blanks */
     for(let i = Math.max(1, _readerCurrentPage - 2); i <= Math.min(_readerTotalPages, _readerCurrentPage + 2); i++){
       visiblePages.push(String(i));
     }
@@ -501,40 +465,56 @@ function toggleReaderSettings(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   BOOKMARK
+   BOOKMARK (Pin)
    ═══════════════════════════════════════════════════════════ */
-async function toggleReaderBookmark(){
+async function toggleReaderPin(){
   if(!_readerBookId) return;
-  await toggleBookBookmark(_readerBookId, _readerCurrentPage);
+  await loadBookmarks();
+
+  if(!_bookmarks) _bookmarks = {};
+  if(!Array.isArray(_bookmarks['_pinned'])) _bookmarks['_pinned'] = [];
+
+  const starred = _bookmarks['_pinned'];
+  const idx = starred.indexOf(_readerBookId);
+  const isPinned = idx >= 0;
+
+  if(isPinned){
+    starred.splice(idx, 1);
+  } else {
+    starred.push(_readerBookId);
+  }
+
+  await store.setMeta('books-bookmarks', _bookmarks);
+
   updateReaderBookmarkBtn();
-  const isBm = isBookPageBookmarked(_readerBookId, _readerCurrentPage);
-  toast(isBm
-    ? `★ Bookmarked page ${_readerCurrentPage}`
-    : `☆ Removed bookmark for page ${_readerCurrentPage}`);
+
+  const book = getBookById(_readerBookId);
+  toast(isPinned
+    ? `Unpinned "${book?.titleAr || 'book'}"`
+    : `Pinned "${book?.titleAr || 'book'}" to Continue reading`);
 }
+
+function toggleReaderBookmark(){ return toggleReaderPin(); }
 
 /* ═══════════════════════════════════════════════════════════
    SIDEBAR — thumbnails or TOC
    ═══════════════════════════════════════════════════════════ */
 let _sidebarOpen = false;
-let _sidebarMode = 'thumbs';   /* 'thumbs' | 'toc' */
+let _sidebarMode = 'thumbs';
 
 async function toggleReaderSidebar(mode){
   const sb = $('reader-sidebar');
   if(!sb) return;
 
-  /* No mode specified → toggle current state */
   if(!mode){
     if(_sidebarOpen){
       _sidebarOpen = false;
       sb.classList.remove('open');
       return;
     }
-    /* If closed and we have a previous mode, use it; else default to toc if available */
     mode = _sidebarMode || (_readerToc.length ? 'toc' : 'thumbs');
   }
 
-  /* Called with the same mode while already open → close it */
   if(_sidebarOpen && _sidebarMode === mode){
     _sidebarOpen = false;
     sb.classList.remove('open');
@@ -557,12 +537,13 @@ async function renderReaderThumbs(){
   sb.innerHTML = `
     <div class="reader-sidebar-title">
       <span>Pages</span>
-      <button class="reader-sidebar-close" onclick="toggleReaderSidebar()" title="Close">✕</button>
+      <button class="reader-sidebar-close" onclick="toggleReaderSidebar()" title="Close" data-icon="x"><span class="btn-icon"></span></button>
     </div>
     <div class="reader-thumbs" id="reader-thumbs"></div>`;
   const host = $('reader-thumbs');
 
-  /* Only render thumbnails lazily — generate as user scrolls the sidebar too */
+  if(typeof injectHeaderIcons === 'function') injectHeaderIcons();
+
   const THUMB_WIDTH = 80;
 
   const observer = new IntersectionObserver((entries) => {
@@ -609,7 +590,6 @@ async function renderReaderThumbs(){
     observer.observe(thumb);
   }
 
-  /* Scroll to current page thumbnail */
   setTimeout(() => {
     const current = host.querySelector('.reader-thumb.current');
     if(current) current.scrollIntoView({ block: 'center' });
@@ -621,10 +601,12 @@ function renderReaderToc(){
   sb.innerHTML = `
     <div class="reader-sidebar-title">
       <span>Contents</span>
-      <button class="reader-sidebar-close" onclick="toggleReaderSidebar()" title="Close">✕</button>
+      <button class="reader-sidebar-close" onclick="toggleReaderSidebar()" title="Close" data-icon="x"><span class="btn-icon"></span></button>
     </div>
     <div class="reader-toc" id="reader-toc"></div>`;
   const host = $('reader-toc');
+
+  if(typeof injectHeaderIcons === 'function') injectHeaderIcons();
 
   function renderItems(items, depth){
     items.forEach(item => {
@@ -634,7 +616,6 @@ function renderReaderToc(){
       row.textContent = item.title;
       row.onclick = async () => {
         try{
-          /* Resolve destination to page number */
           let pageNum = 1;
           if(item.dest){
             const dest = typeof item.dest === 'string'
@@ -670,13 +651,17 @@ function toggleReaderFullscreen(){
   const el = $('reader-overlay');
   if(!document.fullscreenElement){
     if(el.requestFullscreen) el.requestFullscreen().catch(() => {});
-    const btn = $('reader-fullscreen-btn');
-    if(btn) btn.textContent = '⤡';
   } else {
     if(document.exitFullscreen) document.exitFullscreen().catch(() => {});
-    const btn = $('reader-fullscreen-btn');
-    if(btn) btn.textContent = '⛶';
   }
+}
+
+function updateReaderFullscreenIcon(){
+  const btn = $('reader-fullscreen-btn');
+  if(!btn) return;
+  btn.innerHTML = `<span class="btn-icon" data-injected="1">${icon(
+    document.fullscreenElement ? 'minimize' : 'maximize', 15
+  )}</span>`;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -691,7 +676,7 @@ function toggleReaderControls(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   FLIP MODE GESTURES — swipe left/right + tap to toggle controls
+   FLIP MODE GESTURES
    ═══════════════════════════════════════════════════════════ */
 function setupFlipGestures(){
   const body = $('reader-body');
@@ -700,7 +685,6 @@ function setupFlipGestures(){
   let startX = 0, startY = 0, startTime = 0;
 
   body.onclick = (e) => {
-    /* Don't toggle on button taps */
     if(e.target.closest('.reader-icon-btn')) return;
     toggleReaderControls();
   };
@@ -716,17 +700,12 @@ function setupFlipGestures(){
     const dy = e.changedTouches[0].clientY - startY;
     const dt = Date.now() - startTime;
 
-    /* Tap detection */
     if(Math.abs(dx) < 12 && Math.abs(dy) < 12 && dt < 300){
       toggleReaderControls();
       return;
     }
 
-    /* Swipe detection — horizontal dominant */
     if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 700){
-      /* RTL support: swipe right = next page in Arabic books? Most PDFs
-         are laid out LTR (numbered pages), so right = prev, left = next.
-         We keep LTR for simplicity. */
       if(dx < 0) readerNextPage();
       else readerPrevPage();
     }
@@ -780,9 +759,5 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-
 /* Sync fullscreen button icon */
-document.addEventListener('fullscreenchange', () => {
-  const btn = $('reader-fullscreen-btn');
-  if(btn) btn.textContent = document.fullscreenElement ? '⤡' : '⛶';
-});
+document.addEventListener('fullscreenchange', updateReaderFullscreenIcon);

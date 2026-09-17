@@ -41,6 +41,10 @@ async function renderHome(){
       }
     }, 60 * 1000);
   }
+  
+    if(typeof injectHeaderIcons === 'function'){
+    setTimeout(() => injectHeaderIcons(), 0);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -62,31 +66,37 @@ async function renderTodayCardHTML(){
   /* Gregorian line */
   const gregorianLine = `${weekdayEn} ${date.getDate()} ${monthEn} ${date.getFullYear()}`;
 
-  /* Next prayer — only if prayer data exists */
-  let prayerLine = '';
-  try{
-    if(typeof getToday === 'function'){
-      const result = await getToday();
-      if(result && result.today){
-        const next = findNextPrayer(result.today.timings);
-        if(next){
-          const timeStr = next.time;
-          const countdown = formatCountdown(next.minutesLeft);
-          prayerLine = `
-            <div class="home-today-prayer">
-              <span class="home-prayer-icon">🕌</span>
-              <span class="home-prayer-label">${next.name}${next.tomorrow ? ' (tomorrow)' : ''}</span>
-              <span class="home-prayer-time">${timeStr}</span>
-              <span class="home-prayer-countdown">in ${countdown}</span>
-            </div>
-          `;
-        }
+ /* Next prayer — only if we have a cached location */
+let prayerLine = '';
+try{
+  if(typeof getToday === 'function'){
+    const result = await getToday();
+    if(result && result.today){
+      const next = findNextPrayer(result.today.timings);
+      if(next){
+        const timeStr = next.time;
+        const countdown = formatCountdown(next.minutesLeft);
+        prayerLine = `
+          <div class="home-today-prayer" onclick="openPrayerView()" style="cursor:pointer">
+            <span class="home-prayer-icon">${icon('mosque', 16)}</span>
+            <span class="home-prayer-label">${next.name}${next.tomorrow ? ' (tomorrow)' : ''}</span>
+            <span class="home-prayer-time">${timeStr}</span>
+            <span class="home-prayer-countdown">in ${countdown}</span>
+          </div>
+        `;
       }
     }
-  }catch(err){
-    /* No prayer times set up yet — hide the line */
-    prayerLine = '';
   }
+}catch(err){
+  /* NO_LOCATION or fetch error — show a friendly prompt instead of hiding */
+  prayerLine = `
+    <div class="home-today-prayer" onclick="openLocationPicker()" style="cursor:pointer">
+      <span class="home-prayer-icon">${icon('map-pin', 16)}</span>
+      <span class="home-prayer-label">Set your location</span>
+      <span class="home-prayer-countdown">for prayer times</span>
+    </div>
+  `;
+}
 
   /* Today's special event — from Hijri events */
   let eventLine = '';
@@ -209,17 +219,17 @@ function renderHomeFeaturesHTML(){
   const features = [
     {
       id: 'adkar',
-      icon: '📖',
+      icon: 'book-open',
       color: '#f5a623',
       labelAr: 'الأذكار',
       labelEn: 'Adkar',
       subAr: 'حصن المسلم',
       subEn: 'Fortress of the Muslim',
-      action: 'goToAdkar',
+      action: 'goToAdkarCategories',
     },
     {
       id: 'prayer',
-      icon: '🕌',
+      icon: 'mosque',       /* custom icon we'll add */
       color: '#4caf89',
       labelAr: 'الصلاة',
       labelEn: 'Prayer times',
@@ -229,7 +239,7 @@ function renderHomeFeaturesHTML(){
     },
     {
       id: 'hijri',
-      icon: '📅',
+      icon: 'calendar',
       color: '#8b4cc9',
       labelAr: 'التقويم',
       labelEn: 'Hijri calendar',
@@ -239,7 +249,7 @@ function renderHomeFeaturesHTML(){
     },
     {
       id: 'asma',
-      icon: '📿',
+      icon: 'sparkles',
       color: '#c9604c',
       labelAr: 'أسماء الله',
       labelEn: '99 Names of Allah',
@@ -249,7 +259,7 @@ function renderHomeFeaturesHTML(){
     },
     {
       id: 'books',
-      icon: '📚',
+      icon: 'library',
       color: '#4c7fc9',
       labelAr: 'المكتبة',
       labelEn: 'Library',
@@ -262,14 +272,14 @@ function renderHomeFeaturesHTML(){
   /* Language detection — use Arabic if any field shows Arabic, else English */
   const useArabic = true; /* dashboard defaults to Arabic labels (matches app's soul) */
 
-  return `
+ return `
     <div class="home-features-grid">
       ${features.map(f => `
         <div class="home-feature-card" style="--cc:${f.color}" onclick="${f.action}()">
-          <div class="home-feature-icon">${f.icon}</div>
+          <div class="home-feature-icon">${icon(f.icon, 40)}</div>
           <div class="home-feature-label-ar">${f.labelAr}</div>
           <div class="home-feature-label-en">${f.labelEn}</div>
-          <div class="home-feature-sub">${useArabic ? f.subAr : f.subEn}</div>
+          <div class="home-feature-sub">${f.subAr}</div>
         </div>
       `).join('')}
     </div>

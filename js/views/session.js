@@ -19,12 +19,21 @@ function startSession(){
   sessTapCount = 0;
   $('sess-title').textContent = getCat(currentCat).ar;
   $('session-overlay').classList.add('open');
+  $('session-overlay').classList.remove('is-done');
+  $('sess-body').style.borderBottom = '';
+  $('sess-body').style.borderRadius = '';
   lockBody();
   renderSessionStep();
+  $('sess-body').style.borderBottom = '';
+$('sess-body').style.borderRadius = '';
 }
 
 function closeSession(){
   $('session-overlay').classList.remove('open');
+  $('session-overlay').classList.remove('is-done');
+  var body = $('sess-body');
+  body.style.borderBottom = '';
+  body.style.borderRadius = '';
   unlockBody();
   renderAdkarGrid();
   renderCatsGrid();
@@ -60,21 +69,25 @@ function renderSessionStep(){
       ${relBadge}
       ${renderTagChips(d.tags)}
     </div>
-    ${d.hadith ? `<div class="session-info session-hadith"><strong style="color:var(--accent)">📖</strong> ${d.hadith}</div>` : ''}
-    ${d.virtue ? `<div class="session-info session-virtue"><strong style="color:var(--green)">✨</strong> ${d.virtue}</div>` : ''}
+    ${d.hadith ? `<div class="session-info session-hadith">${d.hadith}</div>` : ''}
+    ${d.virtue ? `<div class="session-info session-virtue">${d.virtue}</div>` : ''}
     <div class="session-counter-area">
       <button class="session-tap-btn ${isDone?'done':''}" id="sess-tap" onclick="sessionTap(${d.id},${d.repeat})">
         <span id="sess-tap-num">${sessTapCount}</span>
         <span class="session-tap-label">TAP</span>
       </button>
-      <div class="session-count-display" id="sess-count-disp">${isDone ? '✅ Done' : remaining + ' left'}</div>
+      <div class="session-count-display" id="sess-count-disp">${isDone ? 'Done' : remaining + ' left'}</div>
       <div class="session-prog-bar">
         <div class="session-prog-fill ${isDone?'done-fill':''}" id="sess-pfill" style="width:${pct}%"></div>
       </div>
     </div>`;
 
-  $('sess-next-btn').textContent = sessIdx < sessItems.length - 1 ? 'Next →' : 'Finish ✓';
+  $('sess-next-btn').textContent = sessIdx < sessItems.length - 1 ? 'Next' : 'Finish';
   $('sess-footer').style.display = 'flex';
+    /* Clear any done-state inline styling from a previous step */
+  var body = $('sess-body');
+  body.style.borderBottom = '';
+  body.style.borderRadius = '';
 }
 
 function sessionTap(id, target){
@@ -85,13 +98,13 @@ function sessionTap(id, target){
   const pct = Math.min(100, Math.round(sessTapCount / target * 100));
   const isDone = sessTapCount >= target;
   $('sess-tap-num').textContent = sessTapCount;
-  $('sess-count-disp').textContent = isDone ? '✅ Done' : Math.max(0, target - sessTapCount) + ' left';
+  $('sess-count-disp').textContent = isDone ? 'Done' : Math.max(0, target - sessTapCount) + ' left';
   $('sess-pfill').style.width = pct + '%';
   const tapBtn = $('sess-tap');
   if(isDone){
     tapBtn.classList.add('done');
     $('sess-pfill').classList.add('done-fill');
-    toast('✅ Completed');
+    toast('✓ Completed');
   }
 }
 
@@ -116,13 +129,22 @@ function sessionPrev(){
 function renderSessionDone(){
   $('sess-body').innerHTML = `
     <div class="session-done">
-      <div class="session-done-icon">🌟</div>
+      <div class="session-done-icon">${icon('check-circle', 64)}</div>
       <div class="session-done-title">Session complete!</div>
       <div class="session-done-title" style="font-size:18px">جزاك الله خيراً</div>
       <div class="session-done-sub">You completed all ${sessItems.length} adkar in this session.</div>
-      <button class="btn-session-next" onclick="closeSession()" style="margin-top:8px">Back ←</button>
+      <button class="btn-session-next" onclick="closeSession()" style="margin-top:8px">Back</button>
     </div>`;
   $('sess-footer').style.display = 'none';
+  $('session-overlay').classList.add('is-done');
+
+  /* Apply the bottom edge directly — inline styles win over any CSS rule */
+  if(window.innerWidth >= 768){
+    var body = $('sess-body');
+    body.style.borderBottom = '1px solid var(--border)';
+    body.style.borderRadius = '0 0 20px 20px';
+  }
+
   $('sess-back-btn').style.opacity = '0.3';
   $('sess-back-btn').style.pointerEvents = 'none';
 }

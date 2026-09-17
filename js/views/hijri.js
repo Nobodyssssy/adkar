@@ -115,7 +115,7 @@ function renderHijriCalendar(){
 
   host.innerHTML = `
     <div class="hijri-header">
-      <button class="hijri-nav-btn" onclick="hijriPrevMonth()">‹</button>
+      <button class="hijri-nav-btn" onclick="hijriPrevMonth()" data-icon="chevron-right"><span class="btn-icon"></span></button>
       <div class="hijri-title-wrap" onclick="toggleCalendarLang()">
         <div class="hijri-month-title">${monthName}</div>
         <div class="hijri-year-sub">
@@ -123,7 +123,7 @@ function renderHijriCalendar(){
           <span class="hijri-lang-badge">${_calendarLang === 'ar' ? 'EN' : 'عربي'}</span>
         </div>
       </div>
-      <button class="hijri-nav-btn" onclick="hijriNextMonth()">›</button>
+      <button class="hijri-nav-btn" onclick="hijriNextMonth()" data-icon="chevron-left"><span class="btn-icon"></span></button>
     </div>
 
     <div class="hijri-grid">
@@ -132,7 +132,10 @@ function renderHijriCalendar(){
     </div>
 
     <div class="hijri-today-btn-wrap">
-      <button class="btn-cancel" onclick="hijriGoToday()">↻ ${_calendarLang === 'ar' ? 'اليوم' : 'Today'}</button>
+      <button class="btn-cancel" onclick="hijriGoToday()" data-icon="rotate-ccw">
+        <span class="btn-icon"></span>
+        <span>${_calendarLang === 'ar' ? 'اليوم' : 'Today'}</span>
+      </button>
     </div>
 
     ${upcoming.length ? `
@@ -151,8 +154,12 @@ function renderHijriCalendar(){
 
   /* Store grid on window for click handlers */
   window._hijriGrid = grid;
-}
 
+  /* Inject any SVG icons in the freshly-rendered calendar */
+  if(typeof injectHeaderIcons === 'function'){
+    setTimeout(() => injectHeaderIcons(), 0);
+  }
+ }
 /* ── Get events that fall inside the currently displayed month ── */
 function _getUpcomingListForView(grid){
   const seen = new Set();

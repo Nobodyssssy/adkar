@@ -174,3 +174,32 @@ header{
 .session-footer{
   padding-bottom:calc(16px + env(safe-area-inset-bottom));
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Icons — sizing and color
+   ═══════════════════════════════════════════════════════════ */
+
+svg[aria-hidden="true"]{
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  /* Stroke color inherits from parent text color */
+}
+
+/* Icon inside a button that should show "filled" state */
+.icon-filled use{
+  fill: currentColor;
+}
+
+/* Icon rotation helper for chevrons */
+.icon-rotate-90{ transform: rotate(90deg); }
+.icon-rotate-180{ transform: rotate(180deg); }
+.icon-rotate-270{ transform: rotate(270deg); }
+
+/* Spin animation for loader */
+.icon-spin{
+  animation: icon-spin 1s linear infinite;
+}
+@keyframes icon-spin{
+  to{ transform: rotate(360deg); }
+}

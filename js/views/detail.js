@@ -15,8 +15,13 @@ function openDetail(id){
 
   const isFav = favs.includes(id);
   $('d-cat-lbl').textContent = cat.ar;
-  $('d-fav-btn').textContent = isFav ? '★' : '☆';
-  $('d-fav-btn').style.color = isFav ? '#e8c97a' : 'var(--text3)';
+  $('d-fav-btn').innerHTML = icon('star', 20);
+$('d-fav-btn').innerHTML = icon('star', 20);
+$('d-fav-btn').style.color = isFav ? '#e8c97a' : 'var(--text3)';
+const favSvg = $('d-fav-btn').querySelector('svg');
+if(favSvg){
+  favSvg.style.fill = isFav ? 'currentColor' : 'none';
+}
 
   const relBadge = d.reliability
     ? `<div style="display:flex;justify-content:center">
@@ -45,18 +50,25 @@ function openDetail(id){
     <div class="counter-wrap">
       <div class="info-label" style="text-align:center;margin-bottom:12px;direction:ltr">Counter</div>
       <div class="counter-row">
-        <button class="cbtn" onclick="dec(${id})">−</button>
+        <button class="cbtn" onclick="dec(${id})">${icon('minus', 20)}</button>
         <div>
           <div class="cval" id="cv-${id}">${counters[k]}</div>
           <div class="ctgt">Target: ${d.repeat}×</div>
         </div>
-        <button class="cbtn" onclick="inc(${id})">+</button>
+        <button class="cbtn" onclick="inc(${id})">${icon('plus', 20)}</button>
       </div>
       <div class="pbar"><div class="pfill" id="cp-${id}" style="width:${Math.min(100, Math.round(counters[k]/d.repeat*100))}%"></div></div>
-      <button class="reset-btn" onclick="resetCtr(${id})">↺ Reset</button>
+      <button class="reset-btn" onclick="resetCtr(${id})" data-icon="rotate-ccw">
+        <span class="btn-icon"></span>
+        <span>Reset</span>
+      </button>
     </div>`;
   $('ov-detail').classList.add('open');
   lockBody();
+  
+    if(typeof injectHeaderIcons === 'function'){
+    setTimeout(() => injectHeaderIcons(), 0);
+  }
 }
 
 function closeDetail(){

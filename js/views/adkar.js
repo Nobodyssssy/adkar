@@ -22,8 +22,6 @@ function renderAdkarGrid(){
 }
 
 function adkarCardHTML(d, catObj){
-  /* For cards shown in a specific category, use that category's color.
-     For cards shown in favorites (no specific cat), use the first category. */
   const catKey = catObj ? catObj.key
                         : (Array.isArray(d.categories) ? d.categories[0] : null);
   const cat = catObj || getCat(catKey);
@@ -42,13 +40,10 @@ function adkarCardHTML(d, catObj){
     ? `<div class="adkar-translit">${esc(d.transliteration.slice(0, 120))}</div>`
     : '';
 
-  /* Show category chips only in favorites view (where catKey is null) */
   const catChips = catObj ? '' : renderCatChips(d.categories);
-
-  /* Show tag chips if any */
   const tagChips = renderTagChips(d.tags);
 
-  return `<div class="adkar-card ${isFav?'fav-glow':''}" style="--cc:${cat.color}" onclick="openDetail(${d.id})">
+  const html = `<div class="adkar-card ${isFav?'fav-glow':''}" style="--cc:${cat.color}" onclick="openDetail(${d.id})">
     <div class="adkar-left">
       ${d.situation ? `<div class="adkar-situation">${d.situation}</div>` : ''}
       <div class="adkar-text">${d.arabic.length > 110 ? d.arabic.slice(0,110)+'...' : d.arabic}</div>
@@ -61,12 +56,19 @@ function adkarCardHTML(d, catObj){
       </div>
     </div>
     <div class="adkar-meta">${progressRing(pct, cat.color, isDone)}</div>
+
     <div class="adkar-actions" onclick="event.stopPropagation()">
-      <button class="adkar-btn fav ${isFav?'on':''}" onclick="toggleFav(${d.id})">★</button>
-      <button class="adkar-btn edit" onclick="openForm(${d.id})">✏️</button>
-      <button class="adkar-btn del" onclick="askDelDhikr(${d.id})">🗑️</button>
+      <button class="adkar-btn fav ${isFav?'on':''}" onclick="toggleFav(${d.id})" title="Favorite">${icon('star', 14)}</button>
+      <button class="adkar-btn edit" onclick="openForm(${d.id})" title="Edit">${icon('pencil', 14)}</button>
+      <button class="adkar-btn del" onclick="askDelDhikr(${d.id})" title="Delete">${icon('trash', 14)}</button>
     </div>
   </div>`;
+
+  if(typeof injectHeaderIcons === 'function'){
+    setTimeout(() => injectHeaderIcons(), 0);
+  }
+
+  return html;
 }
 
 /* Small helpers for chips — used in favorites + detail views */
