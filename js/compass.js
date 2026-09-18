@@ -63,10 +63,19 @@ function _handleOrientation(e){
     const beta  = e.beta  || 0;
     const gamma = e.gamma || 0;
 
-    /* Samsung (and some other Android) devices report alpha 180°
-       out of phase with what the standard formula expects.
-       Compensate by adding 180° before normalizing. */
-    let compass = -(alpha + beta * gamma / 90) + 180;
+    /* Two formulas to handle different device behaviors:
+       - Formula A (standard): alpha with tilt compensation
+       - Formula B (Samsung/Chrome): adds 180° compensation
+       We'll use Formula A when e.absolute is true (true north reference),
+       otherwise try Formula B for Samsung-like devices. */
+    let compass;
+    if(e.absolute === true){
+      /* Device reports absolute orientation (true north reference) */
+      compass = -(alpha + beta * gamma / 90);
+    } else {
+      /* Device reports relative orientation - try Samsung compensation */
+      compass = -(alpha + beta * gamma / 90) + 180;
+    }
     compass = ((compass % 360) + 360) % 360;
     heading = compass;
   }
