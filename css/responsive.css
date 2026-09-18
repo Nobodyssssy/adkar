@@ -93,14 +93,13 @@
   .mf{padding:11px 16px;}
   .btn-save,.btn-cancel{padding:11px 18px;min-height:44px;}
   .fr2{grid-template-columns:1fr;}
+  .fi,.fta,.fse{font-size:16px;}
 
   /* Session */
   .session-header{padding:12px 14px;gap:8px;}
-  .session-arabic{font-size:20px;padding:16px;line-height:1.85;}
+  .session-arabic{font-size:18px;padding:14px;line-height:1.85;}
   .session-tap-btn{width:88px;height:88px;font-size:26px;}
-  .session-arabic{font-size:18px;padding:14px;}
   .session-body{padding:18px 14px;gap:16px;}
-}
   .session-tap-btn:active{transform:scale(.9);}
   .session-situation{font-size:12px;}
   .session-info{font-size:12px;padding:10px 12px;}

@@ -50,7 +50,7 @@ header{
   border-radius: var(--radius-md);
   padding: 12px 44px 12px 44px;
   color: var(--text);
-  font-size: 14px;
+  font-size: 16px;
   outline: none;
   transition: border-color var(--tr);
   box-sizing: border-box;

@@ -17,8 +17,16 @@ const APP_SHELL = [
 
   './css/base.css',
   './css/layout.css',
+  './css/views/home.css',
+  './css/views/adkar.css',
+  './css/views/prayer.css',
+  './css/views/hijri.css',
+  './css/views/asma.css',
+  './css/views/flashcards.css',
+  './css/views/books.css',
   './css/components.css',
   './css/responsive.css',
+  
   './assets/icons/sprite.svg',
   './assets/fonts/Amiri-Regular.woff2',
   './assets/fonts/Amiri-Bold.woff2',
@@ -28,6 +36,7 @@ const APP_SHELL = [
 
   './js/config.js',
   './js/utils.js',
+  './js/icons.js',
   './js/scroll-preserve.js',
   './js/dict.js',
   './js/vendor/fuse.min.js',
@@ -53,7 +62,7 @@ const APP_SHELL = [
   './js/compass.js',
 
   './js/views/cats.js',
-  '.js/views/home.js',
+  './js/views/home.js',
   './js/views/adkar.js',
   './js/views/search.js',
   './js/views/favs.js',
@@ -109,6 +118,11 @@ self.addEventListener('fetch', (event) => {
 
   /* Only handle same-origin requests (fonts are now local) */
   if (!isSameOrigin) return;
+
+  /* PDFs and Range requests are handled natively by the browser for streaming */
+  if (url.pathname.includes('/assets/books/') || url.pathname.endsWith('.pdf') || req.headers.has('range')) {
+    return;
+  }
 
   /* HTML navigation → network-first, fall back to cache when offline */
   if (req.mode === 'navigate') {

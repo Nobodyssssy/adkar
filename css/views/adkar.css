@@ -1,0 +1,220 @@
+/* ═══════════════════════════════════════════════════════════
+   ADKAR CARD
+   ═══════════════════════════════════════════════════════════ */
+.adkar-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all var(--tr);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.adkar-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--cc, var(--accent));
+}
+.adkar-card:hover {
+  border-color: var(--cc, var(--accent));
+  transform: translateX(-2px);
+  box-shadow: var(--sh);
+}
+.adkar-card.fav-glow {
+  border-color: var(--accent);
+}
+
+.adkar-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.adkar-situation {
+  font-size: 11px;
+  color: var(--text3);
+  font-weight: 600;
+  direction: rtl;
+  text-align: right;
+}
+.adkar-text {
+  font-family: 'Amiri', serif;
+  font-size: 17px;
+  line-height: 1.7;
+  direction: rtl;
+  text-align: right;
+  color: var(--text);
+}
+.adkar-translit {
+  font-size: 11px;
+  color: var(--text3);
+  font-style: italic;
+  direction: ltr;
+  text-align: left;
+}
+.adkar-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 50px;
+  border: 1px solid;
+}
+.badge-repeat {
+  background: var(--glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.badge-sahih {
+  background: rgba(76, 175, 137, .12);
+  border-color: var(--green);
+  color: var(--green);
+}
+.badge-hasan {
+  background: rgba(76, 127, 201, .12);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+.badge-daif {
+  background: rgba(201, 76, 76, .12);
+  border-color: var(--red);
+  color: var(--red);
+}
+.badge-tag {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--text3);
+}
+
+.adkar-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.adkar-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.adkar-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text3);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--tr);
+  position: relative;
+}
+.adkar-btn::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+}
+.adkar-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+.adkar-btn.fav.on {
+  color: #e8c97a;
+  border-color: #e8c97a;
+  background: rgba(232, 201, 122, .1);
+}
+.adkar-btn.fav.on svg {
+  fill: #e8c97a;
+}
+.adkar-btn.fav:hover {
+  color: #e8c97a;
+  border-color: #e8c97a;
+}
+.adkar-btn.edit:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+  background: rgba(76, 127, 201, .1);
+}
+.adkar-btn.del:hover {
+  color: var(--red);
+  border-color: var(--red);
+  background: rgba(201, 76, 76, .1);
+}
+
+.adkar-empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text3);
+}
+.adkar-empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH RESULT CARD
+   ═══════════════════════════════════════════════════════════ */
+.search-result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all var(--tr);
+  position: relative;
+  overflow: hidden;
+}
+.search-result-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--cc, var(--accent));
+}
+.search-result-card:hover {
+  border-color: var(--accent);
+  transform: translateX(-2px);
+}
+.src-cat-label {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.src-situation {
+  font-size: 11px;
+  color: var(--text3);
+  margin-bottom: 5px;
+  font-style: italic;
+}
+.src-text {
+  font-family: 'Amiri', serif;
+  font-size: 16px;
+  line-height: 1.7;
+  direction: rtl;
+  text-align: right;
+}
