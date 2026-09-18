@@ -59,7 +59,6 @@ const APP_SHELL = [
   './js/reader.js',
   './js/vendor/pdf.min.js',
   './js/vendor/pdf.worker.min.js',
-  './js/compass.js',
 
   './js/views/cats.js',
   './js/views/home.js',

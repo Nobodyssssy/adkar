@@ -128,178 +128,20 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  padding: 22px 18px;
+  padding: 16px 18px;
   text-align: center;
-  transition: border-color var(--tr), box-shadow var(--tr);
 }
 .prayer-qibla-head {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text3);
-  margin-bottom: 16px;
-}
-
-.qibla-compass-wrap {
-  width: 220px;
-  height: 220px;
-  margin: 0 auto;
-  position: relative;
-}
-.qibla-pointer-fixed {
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 14px solid var(--accent);
-  z-index: 5;
-  filter: drop-shadow(0 0 6px rgba(201, 168, 76, .6));
-}
-.qibla-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: radial-gradient(circle at center,
-              var(--surface2) 0%,
-              var(--surface) 70%,
-              var(--surface) 100%);
-  transition: transform 0.15s linear;
-  will-change: transform;
-}
-.qibla-mark {
-  position: absolute;
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text2);
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.qibla-mark.n {
-  top: 8px; left: 50%; transform: translateX(-50%);
-  color: var(--accent);
-}
-.qibla-mark.e {
-  right: 8px; top: 50%; transform: translateY(-50%);
-}
-.qibla-mark.s {
-  bottom: 8px; left: 50%; transform: translateX(-50%);
-}
-.qibla-mark.w {
-  left: 8px; top: 50%; transform: translateY(-50%);
-}
-.qibla-kaaba {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.qibla-kaaba-icon {
-  position: absolute;
-  top: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 28px;
-  line-height: 1;
-  filter: drop-shadow(0 0 8px rgba(201, 168, 76, .5));
-}
-.qibla-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 8px rgba(201, 168, 76, .6);
-}
-.qibla-readout {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, calc(-50% + 34px));
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--accent);
-  direction: ltr;
-  pointer-events: none;
+  margin-bottom: 8px;
 }
 .prayer-qibla-info {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text2);
-  margin-top: 14px;
   direction: ltr;
-}
-.qibla-compass-status {
-  font-size: 11px;
-  text-align: center;
-  color: var(--text3);
-  margin-top: 10px;
-  min-height: 16px;
-  transition: color var(--tr);
-}
-.qibla-compass-status.active { color: var(--accent); font-weight: 600; }
-.qibla-compass-status.active.good { color: var(--green); }
-.qibla-compass-status.active.fair { color: var(--orange); }
-.qibla-compass-status.active.poor { color: var(--red); }
-.qibla-compass-status.error { color: var(--red); }
-.qibla-compass-status.loading { color: var(--text3); }
-
-#qibla-debug {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--text3);
-  margin-top: 6px;
-  direction: ltr;
-  text-align: center;
-  line-height: 1.6;
-}
-
-.prayer-qibla-card.aligned .qibla-pointer-fixed {
-  border-top-color: var(--green);
-  filter: drop-shadow(0 0 8px rgba(76, 175, 137, .8));
-  animation: qibla-pulse 1.2s ease-in-out infinite;
-}
-.prayer-qibla-card.aligned .qibla-kaaba-icon {
-  filter: drop-shadow(0 0 12px rgba(76, 175, 137, .9));
-}
-.prayer-qibla-card.aligned .qibla-readout { color: var(--green); }
-.prayer-qibla-card.aligned .qibla-center {
-  background: var(--green);
-  box-shadow: 0 0 12px rgba(76, 175, 137, .8);
-}
-.prayer-qibla-card.close{
-  border-color: var(--orange);
-  box-shadow: 0 0 12px rgba(224, 123, 42, .3);
-}
-.prayer-qibla-card.close .qibla-pointer-fixed{
-  border-top-color: var(--orange);
-}
-.prayer-qibla-card.close .qibla-readout{
-  color: var(--orange);
-}
-@keyframes qibla-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
-}
-@media (max-width: 480px) {
-  .qibla-compass-wrap { width: 190px; height: 190px; }
-  .qibla-kaaba-icon { font-size: 24px; top: -14px; }
-  .qibla-mark { font-size: 11px; }
-  .qibla-readout { font-size: 12px; transform: translate(-50%, calc(-50% + 30px)); }
-  .prayer-container { padding: 12px 14px 90px; gap: 12px; }
-  .prayer-row { padding: 12px 14px; gap: 10px; font-size: 14px; }
-  .prayer-countdown-name { font-size: 22px; }
-  .prayer-countdown-time { font-size: 24px; }
 }
 
 .prayer-loading,

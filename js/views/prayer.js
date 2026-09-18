@@ -4,14 +4,11 @@
    Prayer times view
    • Loads today's times via prayer.js
    • Renders the list with next prayer highlighted
-   • Shows Qibla direction with a rotating-ring compass
+   • Shows Qibla direction (text bearing only — compass removed)
    ═══════════════════════════════════════════════════════════ */
 
 let _prayerData = null;
 let _countdownTimer = null;
-let _compassUnsub = null;
-let _compassAccuracyTimer = null;
-let _currentQibla = null;
 
 /* ═══════════════════════════════════════════════════════════
    ENTRY POINTS
@@ -33,7 +30,6 @@ async function openPrayerView(){
 
 function closePrayerView(){
   if(_countdownTimer){ clearInterval(_countdownTimer); _countdownTimer = null; }
-  stopLiveCompass();
   goHome();
 }
 
@@ -83,6 +79,7 @@ function renderPrayerView(){
   const qibla = qiblaBearing(location.lat, location.lng);
   const dist = distanceToKaaba(location.lat, location.lng);
   const cardinal = bearingToCardinal(qibla);
+  const qiblaText = `${cardinal} · ${dist.toFixed(0)} km to Makkah`;
 
   const hijri = today.hijri
     ? `${today.hijri.day} ${today.hijri.month} ${today.hijri.year} AH`
@@ -131,52 +128,18 @@ function renderPrayerView(){
     </div>
 
     <div class="prayer-qibla-card">
-        <div class="prayer-qibla-head">
-        Qibla Direction
-        <button class="qibla-help-btn" onclick="showCalibrationHelp()" title="How to calibrate">?</button>
-      </div>
-      <div class="qibla-compass-wrap">
-        <div class="qibla-pointer-fixed"></div>
-
-        <div class="qibla-ring" id="qibla-ring" style="transform:rotate(0deg)">
-          <div class="qibla-mark n">N</div>
-          <div class="qibla-mark e">E</div>
-          <div class="qibla-mark s">S</div>
-          <div class="qibla-mark w">W</div>
-
-          <div class="qibla-kaaba" id="qibla-kaaba" style="transform:rotate(${qibla}deg)">
-            <div class="qibla-kaaba-icon">🕋</div>
-          </div>
-
-          <div class="qibla-center"></div>
-        </div>
-
-        <div class="qibla-readout" id="qibla-degrees">—</div>
-      </div>
-
-      <div class="prayer-qibla-info">
-        ${cardinal} · ${dist.toFixed(0)} km to Makkah
-      </div>
-
-      <div class="qibla-compass-status" id="qibla-compass-status"></div>
-	        <div id="qibla-debug"></div>
-
-      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-        <button class="btn-save" style="flex:1;min-width:140px" onclick="enableLiveCompass(${qibla})" data-icon="compass">
-          <span class="btn-icon"></span><span id="compass-btn-label">Enable live compass</span>
-        </button>
-        <button class="btn-cancel" style="flex:1;min-width:140px" onclick="openLocationPicker()" data-icon="map-pin">
-          <span class="btn-icon"></span><span>Choose location</span>
-        </button>
-        <button class="btn-cancel" style="flex:1;min-width:140px" onclick="refreshLocation()" data-icon="rotate-ccw">
-          <span class="btn-icon"></span><span>Refresh</span>
-        </button>
-      </div>
+      <div class="prayer-qibla-head">Qibla Direction</div>
+      <div class="prayer-qibla-info">${qiblaText}</div>
     </div>
   `;
-
-  _currentQibla = qibla;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   LIVE COMPASS REMOVED (2026-09-18)
+   Browser DeviceOrientationEvent produces unreliable headings
+   on Android devices (~110° off true north). Native sensor
+   fusion required for accurate results.
+   ═══════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════
    COUNTDOWN — updates every 60 seconds
@@ -212,140 +175,3 @@ async function refreshLocation(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   LIVE COMPASS — fixed pointer + rotating ring + Kaaba marker
-   ═══════════════════════════════════════════════════════════ */
-async function enableLiveCompass(qiblaDeg){
-  const status = $('qibla-compass-status');
-  const ring   = $('qibla-ring');
-  const deg    = $('qibla-degrees');
-  const card   = document.querySelector('.prayer-qibla-card');
-
-  if(!status || !ring) return;
-
-  if(isCompassActive()){
-    stopLiveCompass();
-    status.textContent = 'Compass off';
-    status.className = 'qibla-compass-status';
-    if(card) card.classList.remove('aligned');
-    return;
-  }
-
-  status.textContent = 'Activating compass…';
-  status.className = 'qibla-compass-status loading';
-
-  const res = await startCompass();
-  if(!res.ok){
-    status.textContent = res.reason;
-    status.className = 'qibla-compass-status error';
-    return;
-  }
-
-  _compassUnsub = onCompassChange((heading) => {
-    /* Since Android's `alpha` is not true north, we don't rely on it.
-       Instead, we rotate the ring so that when the phone's raw
-       heading equals the qibla bearing, the Kaaba marker is at the
-       fixed pointer. This works regardless of the phone's reference frame. */
-    const ringAngle = qiblaDeg - heading;
-    ring.style.transform = `rotate(${ringAngle}deg)`;
-
-    /* How far off we are from the qibla */
-    let diff = qiblaDeg - heading;
-    while(diff > 180)  diff -= 360;
-    while(diff < -180) diff += 360;
-
-    const absDiff = Math.abs(diff);
-    /* Phone compasses have ~±10° physical accuracy; matching iOS Compass
-       uses ~10° for the "aligned" state. */
-    const aligned = absDiff <= 10;
-    const close   = absDiff <= 25 && !aligned;
-
-    if(deg) deg.textContent = Math.round(absDiff) + '°';
-    if(card){
-      card.classList.toggle('aligned', aligned);
-      card.classList.toggle('close',   close);
-    }
-  });
-
-  _compassAccuracyTimer = setInterval(() => {
-    const isAligned = document.querySelector('.prayer-qibla-card.aligned');
-    if(isAligned){
-      status.textContent = '✓ Facing Qibla';
-      status.className = 'qibla-compass-status active good';
-      return;
-    }
-    const acc = compassAccuracy();
-    const map = {
-      good:    { label: 'Live · Facing reading stable',                cls: 'good' },
-      fair:    { label: 'Live · Reading stable',                       cls: 'fair' },
-      poor:    { label: 'Live · Slight movement — holding still helps',cls: 'poor' },
-      unknown: { label: 'Live · Starting…',                            cls: 'loading' },
-    };
-    const info = map[acc] || map.unknown;
-    status.textContent = info.label;
-    status.className = 'qibla-compass-status active ' + info.cls;
-  }, 2000);
-
-  const btnLabel = document.getElementById('compass-btn-label');
-  if(btnLabel) btnLabel.textContent = 'Stop compass';
-}
-
-function stopLiveCompass(){
-  if(_compassUnsub){ _compassUnsub(); _compassUnsub = null; }
-  if(_compassAccuracyTimer){ clearInterval(_compassAccuracyTimer); _compassAccuracyTimer = null; }
-  stopCompass();
-
-  const ring = $('qibla-ring');
-  if(ring) ring.style.transform = 'rotate(0deg)';
-  if($('qibla-degrees')) $('qibla-degrees').textContent = isCompassActive() ? (_currentQibla || 0).toFixed(0) + '°' : '—';
-
-  const card = document.querySelector('.prayer-qibla-card');
-  if(card) card.classList.remove('aligned');
-
-  const btnLabel = document.getElementById('compass-btn-label');
-  if(btnLabel) btnLabel.textContent = 'Enable live compass';
-}
-
-/* ═══════════════════════════════════════════════════════════
-   Compass calibration help modal
-   ═══════════════════════════════════════════════════════════ */
-function showCalibrationHelp(){
-  let modal = $('ov-qibla-help');
-  if(!modal){
-    modal = document.createElement('div');
-    modal.className = 'ov center';
-    modal.id = 'ov-qibla-help';
-    modal.setAttribute('onclick', 'if(event.target===this)closeCalibrationHelp()');
-    modal.innerHTML = `
-      <div class="modal-box" style="max-width:380px">
-        <div class="mh">
-          <h2>Calibrate compass</h2>
-          <button class="btn-close" onclick="closeCalibrationHelp()" data-icon="x"><span class="btn-icon"></span></button>
-        </div>
-        <div class="mb" style="text-align:center;gap:14px">
-          <img src="assets/compass/calibrate.avif"
-               alt="Move phone in figure-8 motion"
-               style="max-width:100%;border-radius:var(--rs);background:var(--surface2)">
-          <div style="font-size:14px;color:var(--text2);line-height:1.7">
-            Hold your phone and move it in a
-            <strong style="color:var(--accent)">figure-8</strong>
-            motion a few times.
-          </div>
-          <div style="font-size:12px;color:var(--text3);line-height:1.6">
-            This helps the compass find true north. Do it away from metal
-            objects and electronics for best results.
-          </div>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-    if(typeof injectHeaderIcons === 'function') injectHeaderIcons();
-  }
-  modal.classList.add('open');
-  lockBody();
-}
-
-function closeCalibrationHelp(){
-  const modal = $('ov-qibla-help');
-  if(modal) modal.classList.remove('open');
-  unlockBody();
-}
