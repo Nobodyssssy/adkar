@@ -268,16 +268,31 @@ function cityRowHTML(c, isRecent){
 /* ═══════════════════════════════════════════════════════════
    Actions
    ═══════════════════════════════════════════════════════════ */
+/* Re-render whichever view is currently showing prayer data */
+function refreshPrayerConsumers(){
+  /* Prayer view active → reopen it (fetches fresh data) */
+  const prayerView = $('view-prayer');
+  if(prayerView && prayerView.classList.contains('active')){
+    openPrayerView();
+    return;
+  }
+
+  /* Home view active → re-render the home dashboard */
+  const homeView = $('view-home');
+  if(homeView && homeView.classList.contains('active')){
+    renderHome();
+  }
+}
 
 async function applyCity(name, country, admin, lat, lng){
   const label = [name, admin, country].filter(Boolean).join(', ');
   await setManualLocation(lat, lng, label);
   await addRecentCity({ name, country, admin1: admin, lat, lng });
   closeLocationPicker();
-  toast(`📍 ${name} saved`);
-  if($('view-prayer').classList.contains('active')){
-    openPrayerView();
-  }
+  toast(`${name} saved`);
+
+  /* Refresh whichever view is showing prayer data */
+  refreshPrayerConsumers();
 }
 
 async function applyManualCoords(){
@@ -295,21 +310,19 @@ async function applyManualCoords(){
   closeCoordsModal();
   closeLocationPicker();
   toast('Location saved');
-  if($('view-prayer').classList.contains('active')){
-    openPrayerView();
-  }
+
+  refreshPrayerConsumers();
 }
 
 async function useGPSLocation(){
   closeLocationPicker();
-  toast('📍 Requesting GPS…');
+  toast('Requesting GPS…');
   try{
-    const loc = await requestGPSLocation();   // ← explicit GPS request
+    const loc = await requestGPSLocation();
     await store.setMeta('location', loc);
-    toast('✅ GPS location saved');
-    if($('view-prayer').classList.contains('active')){
-      openPrayerView();
-    }
+    toast('GPS location saved');
+
+    refreshPrayerConsumers();
   }catch(err){
     toast('⚠️ ' + err.message);
   }

@@ -14,9 +14,6 @@ let _smoothedHeading = null;   /* last SMOOTHED heading */
 let _compassListeners = [];    /* callbacks for heading changes */
 let _compassSupported = null;  /* null = unknown, true/false after first check */
 
-/* ── Smoothing buffer ── */
-const SMOOTH_WINDOW = 8;       /* how many readings to average */
-let _headingBuffer = [];       /* recent raw headings */
 
 /* ═══════════════════════════════════════════════════════════
    Circular mean — averages angles correctly (no 359/0 wrap issues)
@@ -52,36 +49,71 @@ function compassSupported(){
 function _handleOrientation(e){
   let heading = null;
 
-  /* iOS gives `webkitCompassHeading` — most accurate absolute heading */
-  if(typeof e.webkitCompassHeading === 'number' && !Number.isNaN(e.webkitCompassHeading)){
+  /* ── iOS: webkitCompassHeading is already true magnetic north ── */
+  if(typeof e.webkitCompassHeading === 'number' &&
+     !Number.isNaN(e.webkitCompassHeading)){
     heading = e.webkitCompassHeading;
   }
-  /* Android: use absolute alpha (degrees from north, counterclockwise) */
-  else if(e.absolute === true && typeof e.alpha === 'number'){
-    heading = (360 - e.alpha) % 360;
+  /* ── Android: combined Euler-angle formula ──
+     This is more forgiving than the pure alpha approach and doesn't
+     suffer the 180° flip that the rotation-matrix formula had.
+     Reference: known-good Qibla apps use this pattern. */
+  else if(typeof e.alpha === 'number' && !Number.isNaN(e.alpha)){
+    const alpha = e.alpha;
+    const beta  = e.beta  || 0;
+    const gamma = e.gamma || 0;
+
+    /* Samsung (and some other Android) devices report alpha 180°
+       out of phase with what the standard formula expects.
+       Compensate by adding 180° before normalizing. */
+    let compass = -(alpha + beta * gamma / 90) + 180;
+    compass = ((compass % 360) + 360) % 360;
+    heading = compass;
   }
-  /* Some browsers give compass heading directly */
-  else if(typeof e.alpha === 'number'){
-    heading = (360 - e.alpha) % 360;
+
+  /* ── Debug readout (visible in the compass card if the element exists) ── */
+  const dbg = document.getElementById('qibla-debug');
+  if(dbg){
+    dbg.textContent =
+      `a:${e.alpha != null ? e.alpha.toFixed(0) : '--'}  ` +
+      `b:${e.beta  != null ? e.beta.toFixed(0)  : '--'}  ` +
+      `g:${e.gamma != null ? e.gamma.toFixed(0) : '--'}  ` +
+      `abs:${e.absolute ? 'Y' : 'N'}  ` +
+      `h:${heading != null ? heading.toFixed(0) : '--'}`;
   }
 
   if(heading === null || Number.isNaN(heading)) return;
 
   _compassHeading = heading;
 
-  /* Push to buffer, keep the last N */
-  _headingBuffer.push(heading);
-  if(_headingBuffer.length > SMOOTH_WINDOW) _headingBuffer.shift();
+  /* ── Low-pass filter (exponential smoothing) ──
+     This is more responsive than a buffer average and
+     doesn't introduce the "spin the long way around" lag.
+     smoothingFactor: 0.15 = fairly smooth, still responsive.
+     Lower = smoother but more lag. Higher = more jitter. */
+  const smoothingFactor = 0.15;
 
-  /* Emit smoothed heading once we have enough samples */
-  if(_headingBuffer.length >= 3){
-    _smoothedHeading = circularMean(_headingBuffer);
-    _compassListeners.forEach(fn => {
-      try{ fn(_smoothedHeading); }catch(err){ /* ignore listener errors */ }
-    });
+  if(_smoothedHeading === null){
+    /* First reading — just take it as-is */
+    _smoothedHeading = heading;
+  } else {
+    /* Compute the shortest-path difference (handles 0/360 wrap) */
+    let diff = heading - _smoothedHeading;
+    while(diff > 180)  diff -= 360;
+    while(diff < -180) diff += 360;
+
+    /* Apply the filter */
+    _smoothedHeading = _smoothedHeading + smoothingFactor * diff;
+
+    /* Normalize back to [0, 360) */
+    _smoothedHeading = ((_smoothedHeading % 360) + 360) % 360;
   }
-}
 
+  /* Emit */
+  _compassListeners.forEach(fn => {
+    try{ fn(_smoothedHeading); }catch(err){ /* ignore */ }
+  });
+}
 /* ═══════════════════════════════════════════════════════════
    startCompass()
    Returns: Promise<{ ok: boolean, reason?: string }>
@@ -108,7 +140,6 @@ async function startCompass(){
   window.addEventListener('deviceorientationabsolute', _handleOrientation, true);
   window.addEventListener('deviceorientation', _handleOrientation, true);
   _compassActive = true;
-  _headingBuffer = [];
   return { ok: true };
 }
 
@@ -120,7 +151,6 @@ function stopCompass(){
   _compassActive = false;
   _compassHeading = null;
   _smoothedHeading = null;
-  _headingBuffer = [];
 }
 
 /* ── Subscribe to heading changes ── */
@@ -142,7 +172,7 @@ function isCompassActive(){
 
 /* ── Reset calibration buffer ── */
 function resetCompassCalibration(){
-  _headingBuffer = [];
+	  _smoothedHeading = null;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -168,7 +198,6 @@ let _recentRawHeadings = [];
 function compassAccuracy(){
   if(_recentRawHeadings.length < 6) return 'unknown';
 
-  /* Circular variance: how spread out are the readings? */
   const angles = _recentRawHeadings.slice(-8);
   let sumSin = 0, sumCos = 0;
   for(const deg of angles){
@@ -177,11 +206,11 @@ function compassAccuracy(){
     sumCos += Math.cos(rad);
   }
   const r = Math.sqrt(sumSin * sumSin + sumCos * sumCos) / angles.length;
-  /* r = 1 → perfect agreement; r = 0 → totally random
-     We map r to accuracy: > 0.995 good, > 0.95 fair, else poor */
 
-  if(r > 0.995) return 'good';
-  if(r > 0.95)  return 'fair';
+  /* Loosened thresholds: most phones produce r in the 0.97-0.999 range
+     even when "stable". Only flag genuinely chaotic readings as poor. */
+  if(r > 0.98) return 'good';
+  if(r > 0.90) return 'fair';
   return 'poor';
 }
 

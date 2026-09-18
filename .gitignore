@@ -30,5 +30,6 @@ _pdf_backup/
 _pdf_check_output/
 check-pdf-quality.py
 recompress-books.py
-pdf-quality-report.jsonauto-icons.ps1
+pdf-quality-report.json
+auto-icons.ps1
 build-icons.ps1

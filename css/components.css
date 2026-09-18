@@ -1634,6 +1634,16 @@ body.modal-open {
   background: var(--green);
   box-shadow: 0 0 12px rgba(76, 175, 137, .8);
 }
+.prayer-qibla-card.close{
+  border-color: var(--orange);
+  box-shadow: 0 0 12px rgba(224, 123, 42, .3);
+}
+.prayer-qibla-card.close .qibla-pointer-fixed{
+  border-top-color: var(--orange);
+}
+.prayer-qibla-card.close .qibla-readout{
+  color: var(--orange);
+}
 @keyframes qibla-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }

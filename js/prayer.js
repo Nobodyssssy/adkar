@@ -48,7 +48,19 @@ async function requestGPSLocation(){
         await store.setMeta('location', loc);
         resolve(loc);
       },
-      (err) => reject(new Error('Location error: ' + err.message)),
+      (err) => {
+        let msg = 'Could not get location';
+        if(err.code === 1){
+          msg = 'Location blocked. Enable it in your browser settings, then try again.';
+        } else if(err.code === 2){
+          msg = 'Location unavailable. Try again outdoors.';
+        } else if(err.code === 3){
+          msg = 'Location timed out. Try again.';
+        } else {
+          msg = 'Location error: ' + err.message;
+        }
+        reject(new Error(msg));
+      },
       { enableHighAccuracy: false, timeout: 15000, maximumAge: 3600000 }
     );
   });
@@ -103,14 +115,14 @@ function monthKey(lat, lng, year, month){
    PUBLIC — getToday()
    Cache-first; fetches the current month if missing.
    ═══════════════════════════════════════════════════════════ */
-async function getToday(){
-  const loc = await getLocation();
+async function getToday(forceRefresh = false){
+  const loc = await getLocation(forceRefresh);
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
   const key = monthKey(loc.lat, loc.lng, year, month);
 
-  let cached = await store.getMeta(key);
+  let cached = forceRefresh ? null : await store.getMeta(key);
 
   if(!cached){
     console.log('[prayer] Fetching month', month, year);

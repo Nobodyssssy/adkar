@@ -131,8 +131,10 @@ function renderPrayerView(){
     </div>
 
     <div class="prayer-qibla-card">
-      <div class="prayer-qibla-head">Qibla Direction</div>
-
+        <div class="prayer-qibla-head">
+        Qibla Direction
+        <button class="qibla-help-btn" onclick="showCalibrationHelp()" title="How to calibrate">?</button>
+      </div>
       <div class="qibla-compass-wrap">
         <div class="qibla-pointer-fixed"></div>
 
@@ -157,6 +159,7 @@ function renderPrayerView(){
       </div>
 
       <div class="qibla-compass-status" id="qibla-compass-status"></div>
+	        <div id="qibla-debug" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px;direction:ltr;text-align:center;line-height:1.6"></div>
 
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
         <button class="btn-save" style="flex:1;min-width:140px" onclick="enableLiveCompass(${qibla})" data-icon="compass">
@@ -239,15 +242,23 @@ async function enableLiveCompass(qiblaDeg){
   }
 
   _compassUnsub = onCompassChange((heading) => {
-    ring.style.transform = `rotate(${-heading}deg)`;
+    /* Since Android's `alpha` is not true north, we don't rely on it.
+       Instead, we rotate the ring so that when the phone's raw
+       heading equals the qibla bearing, the Kaaba marker is at the
+       fixed pointer. This works regardless of the phone's reference frame. */
+    const ringAngle = qiblaDeg - heading;
+    ring.style.transform = `rotate(${ringAngle}deg)`;
 
+    /* How far off we are from the qibla */
     let diff = qiblaDeg - heading;
     while(diff > 180)  diff -= 360;
     while(diff < -180) diff += 360;
 
     const absDiff = Math.abs(diff);
-    const aligned = absDiff <= 5;
-    const close   = absDiff <= 15 && !aligned;
+    /* Phone compasses have ~±10° physical accuracy; matching iOS Compass
+       uses ~10° for the "aligned" state. */
+    const aligned = absDiff <= 10;
+    const close   = absDiff <= 25 && !aligned;
 
     if(deg) deg.textContent = Math.round(absDiff) + '°';
     if(card){
@@ -265,10 +276,10 @@ async function enableLiveCompass(qiblaDeg){
     }
     const acc = compassAccuracy();
     const map = {
-      good:    { label: 'Live · Strong signal',                        cls: 'good' },
-      fair:    { label: 'Live · Signal ok',                            cls: 'fair' },
-      poor:    { label: 'Live · Noisy — wave phone in a figure-8',     cls: 'poor' },
-      unknown: { label: 'Live · Calibrating…',                         cls: 'loading' },
+      good:    { label: 'Live · Facing reading stable',                cls: 'good' },
+      fair:    { label: 'Live · Reading stable',                       cls: 'fair' },
+      poor:    { label: 'Live · Slight movement — holding still helps',cls: 'poor' },
+      unknown: { label: 'Live · Starting…',                            cls: 'loading' },
     };
     const info = map[acc] || map.unknown;
     status.textContent = info.label;
@@ -293,4 +304,48 @@ function stopLiveCompass(){
 
   const btnLabel = document.getElementById('compass-btn-label');
   if(btnLabel) btnLabel.textContent = 'Enable live compass';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Compass calibration help modal
+   ═══════════════════════════════════════════════════════════ */
+function showCalibrationHelp(){
+  let modal = $('ov-qibla-help');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.className = 'ov center';
+    modal.id = 'ov-qibla-help';
+    modal.setAttribute('onclick', 'if(event.target===this)closeCalibrationHelp()');
+    modal.innerHTML = `
+      <div class="modal-box" style="max-width:380px">
+        <div class="mh">
+          <h2>Calibrate compass</h2>
+          <button class="btn-close" onclick="closeCalibrationHelp()" data-icon="x"><span class="btn-icon"></span></button>
+        </div>
+        <div class="mb" style="text-align:center;gap:14px">
+          <img src="assets/compass/calibrate.avif"
+               alt="Move phone in figure-8 motion"
+               style="max-width:100%;border-radius:var(--rs);background:var(--surface2)">
+          <div style="font-size:14px;color:var(--text2);line-height:1.7">
+            Hold your phone and move it in a
+            <strong style="color:var(--accent)">figure-8</strong>
+            motion a few times.
+          </div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.6">
+            This helps the compass find true north. Do it away from metal
+            objects and electronics for best results.
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    if(typeof injectHeaderIcons === 'function') injectHeaderIcons();
+  }
+  modal.classList.add('open');
+  lockBody();
+}
+
+function closeCalibrationHelp(){
+  const modal = $('ov-qibla-help');
+  if(modal) modal.classList.remove('open');
+  unlockBody();
 }
