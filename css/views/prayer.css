@@ -254,6 +254,16 @@
 .qibla-compass-status.error { color: var(--red); }
 .qibla-compass-status.loading { color: var(--text3); }
 
+#qibla-debug {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 6px;
+  direction: ltr;
+  text-align: center;
+  line-height: 1.6;
+}
+
 .prayer-qibla-card.aligned .qibla-pointer-fixed {
   border-top-color: var(--green);
   filter: drop-shadow(0 0 8px rgba(76, 175, 137, .8));

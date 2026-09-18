@@ -151,7 +151,7 @@ function renderPrayerView(){
           <div class="qibla-center"></div>
         </div>
 
-        <div class="qibla-readout" id="qibla-degrees">${qibla.toFixed(0)}°</div>
+        <div class="qibla-readout" id="qibla-degrees">—</div>
       </div>
 
       <div class="prayer-qibla-info">
@@ -159,7 +159,7 @@ function renderPrayerView(){
       </div>
 
       <div class="qibla-compass-status" id="qibla-compass-status"></div>
-	        <div id="qibla-debug" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px;direction:ltr;text-align:center;line-height:1.6"></div>
+	        <div id="qibla-debug"></div>
 
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
         <button class="btn-save" style="flex:1;min-width:140px" onclick="enableLiveCompass(${qibla})" data-icon="compass">
@@ -297,7 +297,7 @@ function stopLiveCompass(){
 
   const ring = $('qibla-ring');
   if(ring) ring.style.transform = 'rotate(0deg)';
-  if($('qibla-degrees')) $('qibla-degrees').textContent = (_currentQibla || 0).toFixed(0) + '°';
+  if($('qibla-degrees')) $('qibla-degrees').textContent = isCompassActive() ? (_currentQibla || 0).toFixed(0) + '°' : '—';
 
   const card = document.querySelector('.prayer-qibla-card');
   if(card) card.classList.remove('aligned');
