@@ -34,6 +34,12 @@
   flex-shrink: 0;
 }
 .hijri-nav-btn svg { width: 20px; height: 20px; }
+.hijri-nav-btn::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+}
 .hijri-nav-btn:hover {
   background: var(--glow);
   border-color: var(--accent);
