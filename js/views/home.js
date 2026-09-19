@@ -1,5 +1,6 @@
 'use strict';
-
+/* Home dashboard tab state */
+window._homeTab = window._homeTab || 0;   /* 0 = today card, 1 = daily cycle */
 /* ═══════════════════════════════════════════════════════════
    Home dashboard
    • Today card (Hijri + Gregorian date, next prayer, event)
@@ -27,22 +28,16 @@ async function renderHome(){
     ${quoteHTML}
     ${featuresHTML}
   `;
+    if(typeof _attachHomeTabsSwipe === 'function'){
+    setTimeout(_attachHomeTabsSwipe, 0);
+  }
 
   /* Reuse existing quote expand toggle */
   if(typeof _quoteExpanded !== 'undefined'){
     /* nothing extra needed — quote card already has its own click handler */
   }
 
-  /* Start date refresh watcher */
-  if(!window._homeDateWatcher){
-    window._homeDateWatcher = setInterval(() => {
-      if(document.getElementById('home-today-date-en')){
-        refreshHomeDate();
-      }
-    }, 60 * 1000);
-  }
-  
-    if(typeof injectHeaderIcons === 'function'){
+  if(typeof injectHeaderIcons === 'function'){
     setTimeout(() => injectHeaderIcons(), 0);
   }
 }
@@ -66,37 +61,53 @@ async function renderTodayCardHTML(){
   /* Gregorian line */
   const gregorianLine = `${weekdayEn} ${date.getDate()} ${monthEn} ${date.getFullYear()}`;
 
- /* Next prayer — only if we have a cached location */
-let prayerLine = '';
-try{
-  if(typeof getToday === 'function'){
-    const result = await getToday();
-    if(result && result.today){
-      const next = findNextPrayer(result.today.timings);
-      if(next){
-        const timeStr = next.time;
-        const countdown = formatCountdown(next.minutesLeft);
-        prayerLine = `
-          <div class="home-today-prayer" onclick="openPrayerView()" style="cursor:pointer">
-            <span class="home-prayer-icon">${icon('mosque', 16)}</span>
-            <span class="home-prayer-label">${next.name}${next.tomorrow ? ' (tomorrow)' : ''}</span>
-            <span class="home-prayer-time">${timeStr}</span>
-            <span class="home-prayer-countdown">in ${countdown}</span>
-          </div>
-        `;
+  /* Next prayer — only if we have a cached location */
+  let prayerLine = '';
+  let todayData = null;
+  let location = null;
+  let nextDay = null;
+
+  try{
+    if(typeof getToday === 'function'){
+      const result = await getToday();
+      if(result && result.today){
+        todayData = result.today;
+        location = result.location;
+
+        const next = findNextPrayer(result.today.timings);
+        if(next){
+          const timeStr = next.time;
+          const countdown = formatCountdown(next.minutesLeft);
+          prayerLine = `
+            <div class="home-today-prayer" onclick="openPrayerView()" style="cursor:pointer">
+              <span class="home-prayer-icon">${icon('mosque', 16)}</span>
+              <span class="home-prayer-label">${next.name}${next.tomorrow ? ' (tomorrow)' : ''}</span>
+              <span class="home-prayer-time">${timeStr}</span>
+              <span class="home-prayer-countdown">in ${countdown}</span>
+            </div>
+          `;
+        }
+
+        /* Look up tomorrow's data — needed for the daily cycle bar */
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const key = monthKey(location.lat, location.lng, tomorrow.getFullYear(), tomorrow.getMonth() + 1);
+        const cached = await store.getMeta(key);
+        if(cached && cached.data && typeof _findDayInMonth === 'function'){
+          nextDay = _findDayInMonth(cached.data, tomorrow);
+        }
       }
     }
+  }catch(err){
+    /* NO_LOCATION or fetch error — show a friendly prompt instead of hiding */
+    prayerLine = `
+      <div class="home-today-prayer" onclick="openLocationPicker()" style="cursor:pointer">
+        <span class="home-prayer-icon">${icon('map-pin', 16)}</span>
+        <span class="home-prayer-label">Set your location</span>
+        <span class="home-prayer-countdown">for prayer times</span>
+      </div>
+    `;
   }
-}catch(err){
-  /* NO_LOCATION or fetch error — show a friendly prompt instead of hiding */
-  prayerLine = `
-    <div class="home-today-prayer" onclick="openLocationPicker()" style="cursor:pointer">
-      <span class="home-prayer-icon">${icon('map-pin', 16)}</span>
-      <span class="home-prayer-label">Set your location</span>
-      <span class="home-prayer-countdown">for prayer times</span>
-    </div>
-  `;
-}
 
   /* Today's special event — from Hijri events */
   let eventLine = '';
@@ -118,7 +129,8 @@ try{
     eventLine = '';
   }
 
-  return `
+  /* Build tab 1: today card */
+  const todayTabHTML = `
     <div class="home-today-card">
       <div class="home-today-date-ar" id="home-today-date-ar">${hijriLine}</div>
       <div class="home-today-date-en" id="home-today-date-en">${gregorianLine}</div>
@@ -126,23 +138,85 @@ try{
       ${eventLine}
     </div>
   `;
+
+  /* Build tab 2: daily cycle bar — only if data available */
+  let cycleTabHTML = '';
+  if(
+    todayData && nextDay &&
+    typeof _computeDailyCycle === 'function' &&
+    typeof _renderDailyCycleHTML === 'function'
+  ){
+    try{
+      const cycle = _computeDailyCycle(todayData, nextDay);
+      if(cycle){
+        /* Expose data so the on-bar taps work on the home page too */
+        window._homeCycleData = { today: todayData, nextDay: nextDay };
+        cycleTabHTML = _renderDailyCycleHTML(cycle, todayData, nextDay);
+      }
+    }catch(err){
+      console.warn('[home] daily cycle render failed', err);
+    }
+  }
+
+  /* If we can't render the cycle, just return the today card (no tabs) */
+  if(!cycleTabHTML){
+    return todayTabHTML;
+  }
+
+   /* Two-tab swiper */
+  const tab = window._homeTab || 0;
+  return `
+    <div class="home-tabs" id="home-tabs" data-tab="${tab}">
+      <div class="home-tabs-header">
+        <div class="home-tabs-dots">
+          <span class="home-tab-dot ${tab === 0 ? 'on' : ''}" onclick="setHomeTab(0)"></span>
+          <span class="home-tab-dot ${tab === 1 ? 'on' : ''}" onclick="setHomeTab(1)"></span>
+        </div>
+        <div class="home-tabs-arrows">
+          <button class="home-tab-arrow" onclick="setHomeTab(0)" ${tab === 0 ? 'disabled' : ''}>‹</button>
+          <button class="home-tab-arrow" onclick="setHomeTab(1)" ${tab === 1 ? 'disabled' : ''}>›</button>
+        </div>
+      </div>
+      <div class="home-tabs-body">
+        <div class="home-tab home-tab-today" data-index="0">
+          ${todayTabHTML}
+        </div>
+        <div class="home-tab home-tab-cycle" data-index="1">
+          ${cycleTabHTML}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
-function refreshHomeDate(){
-  const date = new Date();
-  const hijri = (typeof getHijriParts === 'function') ? getHijriParts(date) : null;
-  const weekdayAr = (typeof WEEKDAYS_AR !== 'undefined') ? WEEKDAYS_AR[date.getDay()] : '';
+function setHomeTab(idx){
+  window._homeTab = idx;
+  const tabs = document.getElementById('home-tabs');
+  const dots = document.querySelectorAll('.home-tab-dot');
+  const arrows = document.querySelectorAll('.home-tab-arrow');
+  if(tabs) tabs.dataset.tab = String(idx);
+  dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+  if(arrows[0]) arrows[0].disabled = (idx === 0);
+  if(arrows[1]) arrows[1].disabled = (idx === 1);
+}
 
-  if(hijri){
-    const arEl = $('home-today-date-ar');
-    if(arEl) arEl.textContent = `${weekdayAr} ${hijri.day} ${hijri.monthNameAr} ${hijri.year}`;
-  }
-  const enEl = $('home-today-date-en');
-  if(enEl){
-    const weekdayEn = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const monthEn = date.toLocaleDateString('en-US', { month: 'short' });
-    enEl.textContent = `${weekdayEn} ${date.getDate()} ${monthEn} ${date.getFullYear()}`;
-  }
+function _attachHomeTabsSwipe(){
+  const body = document.getElementById('home-tabs-body');
+  if(!body || body.dataset.swipeAttached === '1') return;
+  let startX = 0;
+  body.addEventListener('touchstart', e => {
+    if(e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+  }, { passive: true });
+  body.addEventListener('touchend', e => {
+    if(!e.changedTouches.length) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if(Math.abs(dx) < 50) return;
+    const cur = window._homeTab || 0;
+    if(dx > 0 && cur > 0) setHomeTab(cur - 1);
+    else if(dx < 0 && cur < 1) setHomeTab(cur + 1);
+  }, { passive: true });
+  body.dataset.swipeAttached = '1';
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -229,7 +303,7 @@ function renderHomeFeaturesHTML(){
     },
     {
       id: 'prayer',
-      icon: 'mosque',       /* custom icon we'll add */
+      icon: 'mosque',
       color: '#4caf89',
       labelAr: 'الصلاة',
       labelEn: 'Prayer times',
@@ -269,10 +343,7 @@ function renderHomeFeaturesHTML(){
     },
   ];
 
-  /* Language detection — use Arabic if any field shows Arabic, else English */
-  const useArabic = true; /* dashboard defaults to Arabic labels (matches app's soul) */
-
- return `
+  return `
     <div class="home-features-grid">
       ${features.map(f => `
         <div class="home-feature-card" style="--cc:${f.color}" onclick="${f.action}()">
@@ -290,7 +361,6 @@ function renderHomeFeaturesHTML(){
    NAVIGATION HELPERS
    ═══════════════════════════════════════════════════════════ */
 function goToAdkar(){
-  /* Alias for backward compatibility — routes to the categories grid */
   goToAdkarCategories();
 }
 

@@ -32,6 +32,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
 }
 .hijri-nav-btn svg { width: 20px; height: 20px; }
 .hijri-nav-btn::before {

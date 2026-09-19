@@ -50,14 +50,46 @@ function hijriGoToday(){
   }
   renderHijriCalendar();
 }
+/* ═══════════════════════════════════════════════════════════
+   SWIPE NAVIGATION
+   Attach once — handles touch on the calendar grid.
+   Swipe right → prev month (RTL natural); swipe left → next month.
+   ═══════════════════════════════════════════════════════════ */
+function _attachHijriSwipe(){
+  const grid = document.querySelector('.hijri-grid');
+  if(!grid || grid.dataset.swipeAttached === '1') return;
 
-function hijriGoToday(){
-  const today = getTodayHijri();
-  if(today){
-    _hijriYear  = today.year;
-    _hijriMonth = today.month;
-  }
-  renderHijriCalendar();
+  let startX = 0;
+  let startY = 0;
+  let startTime = 0;
+
+  grid.addEventListener('touchstart', (e) => {
+    if(e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    startTime = Date.now();
+  }, { passive: true });
+
+  grid.addEventListener('touchend', (e) => {
+    if(!e.changedTouches.length) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    const dt = Date.now() - startTime;
+
+    /* Ignore long-press, slow drags, or vertical gestures */
+    if(dt > 600) return;
+    if(Math.abs(dx) < 50) return;
+    if(Math.abs(dx) < Math.abs(dy) * 1.2) return;
+
+    /* RTL: swipe right reveals the previous month */
+    if(dx > 0){
+      hijriPrevMonth();
+    } else {
+      hijriNextMonth();
+    }
+  }, { passive: true });
+
+  grid.dataset.swipeAttached = '1';
 }
 
 /* ── Toggle labels AR/EN ── */
@@ -159,7 +191,10 @@ function renderHijriCalendar(){
   if(typeof injectHeaderIcons === 'function'){
     setTimeout(() => injectHeaderIcons(), 0);
   }
- }
+
+  /* Attach swipe handler (idempotent — safe to call every render) */
+  _attachHijriSwipe();
+}
 /* ── Get events that fall inside the currently displayed month ── */
 function _getUpcomingListForView(grid){
   const seen = new Set();

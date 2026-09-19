@@ -1,6 +1,19 @@
 'use strict';
 
 /* ═══════════════════════════════════════════════════════════
+   Forbidden prayer times — hadith reference
+   Sahih Muslim 1373 — 'Uqbah ibn 'Amir al-Juhani
+   ═══════════════════════════════════════════════════════════ */
+const FORBIDDEN_TIMES_HADITH = {
+  ar: 'عَنْ عُقْبَةَ بْنِ عَامِرٍ الْجُهَنِيِّ قَالَ: «ثَلَاثُ سَاعَاتٍ كَانَ رَسُولُ اللَّهِ ﷺ يَنْهَانَا أَنْ نُصَلِّيَ فِيهِنَّ أَوْ أَنْ نَقْبُرَ فِيهِنَّ مَوْتَانَا: حِينَ تَطْلُعُ الشَّمْسُ بَازِغَةً حَتَّى تَرْتَفِعَ، وَحِينَ يَقُومُ قَائِمُ الظَّهِيرَةِ حَتَّى تَزُولَ الشَّمْسُ، وَحِينَ تَضَيَّفُ الشَّمْسُ لِلْغُرُوبِ حَتَّى تَغْرُبَ».',
+  en: '‘Uqbah ibn ‘Amir al-Juhani said: "There are three times at which the Messenger of Allah ﷺ forbade us to pray or to bury our dead: when the sun has clearly started to rise until it is fully risen, when it is directly overhead at midday until it has passed its zenith, and when the sun starts to set until it has fully set."',
+  source: 'Sahih Muslim 1373',
+  sourceUrl: 'https://sunnah.com/muslim:1373',
+  noteEn: 'Voluntary prayers are forbidden in these windows. Fard prayers and the 2 sunnah rak\'ahs before Fajr are exempt (per the more correct view).',
+  noteAr: 'تُنهى الصلوات التطوعية في هذه الأوقات. أما الفرائض وسنة الفجر القبلية فمستثناة (على القول الراجح).',
+};
+
+/* ═══════════════════════════════════════════════════════════
    Prayer times — Aladhan API + IndexedDB cache
    • Method 19 = Algeria (Ministry of Religious Affairs)
    • Fetches a full month at a time
@@ -88,11 +101,12 @@ async function fetchMonth(lat, lng, year, month){
   return json.data.map(day => ({
     date: day.date.gregorian.date,       /* DD-MM-YYYY */
     weekday: day.date.gregorian.weekday.en,
-    hijri: {
-      day: day.date.hijri.day,
-      month: day.date.hijri.month.en,
-      year: day.date.hijri.year,
-    },
+hijri: {
+  day: day.date.hijri.day,
+  month:      day.date.hijri.month.en,       /* e.g. "Rabi' al-thani" */
+  monthAr:    day.date.hijri.month.ar,       /* e.g. "ربيع الآخر" */
+  year: day.date.hijri.year,
+},
     timings: {
       Fajr:    cleanTime(day.timings.Fajr),
       Sunrise: cleanTime(day.timings.Sunrise),

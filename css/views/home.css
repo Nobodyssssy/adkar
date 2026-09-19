@@ -188,3 +188,75 @@
 @media (min-width: 900px) {
   .home-features-grid { grid-template-columns: repeat(3, 1fr); }
 }
+/* ═══════════════════════════════════════════════════════════
+   HOME TABS (today card / daily cycle)
+   ═══════════════════════════════════════════════════════════ */
+.home-tabs { position: relative; width: 100%; }
+
+.home-tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 8px;
+  min-height: 26px;
+}
+.home-tabs-dots { display: flex; gap: 6px; }
+.home-tab-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.22);
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.home-tab-dot.on { background: var(--accent); transform: scale(1.25); }
+
+.home-tabs-arrows { display: flex; gap: 4px; }
+.home-tab-arrow {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all .2s;
+}
+.home-tab-arrow:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.home-tab-arrow:disabled { opacity: .3; cursor: default; }
+
+/* Stack tabs; only the active one takes flow space */
+.home-tabs-body { position: relative; width: 100%; }
+
+.home-tabs-body > .home-tab {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity .28s ease, transform .28s ease;
+}
+
+.home-tabs-body > .home-tab[data-index="0"] { transform: translateY(0); }
+
+/* Active tab is in normal flow — determines container height */
+.home-tabs[data-tab="0"] .home-tabs-body > .home-tab[data-index="0"],
+.home-tabs[data-tab="1"] .home-tabs-body > .home-tab[data-index="1"] {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.home-tab-cycle { padding: 0; }
+.home-tab-cycle .prayer-daily-cycle-card {
+  border-radius: var(--r);
+  width: 100%;
+  box-sizing: border-box;
+}

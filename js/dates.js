@@ -45,7 +45,7 @@ function getHijriParts(date){
       if(p.type === 'month') out.month = parseInt(p.value, 10);  /* 1-indexed: 1=Muharram, 9=Ramadan */
       if(p.type === 'year')  out.year  = parseInt(p.value.replace(/[^0-9]/g, ''), 10);
     }
-    out.monthNameAr = HIJRI_MONTHS_AR[out.month] || '';
+    out.monthNameAr = HIJRI_MONTHS_AR[out.month - 1] || '';
     return out;
   }catch(err){
     console.warn('[dates] Hijri format failed', err);
