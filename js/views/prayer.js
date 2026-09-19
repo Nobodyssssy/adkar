@@ -76,10 +76,6 @@ function renderPrayerView(){
   const { today, location } = _prayerData;
   const t = today.timings;
   const next = findNextPrayer(t);
-  const qibla = qiblaBearing(location.lat, location.lng);
-  const dist = distanceToKaaba(location.lat, location.lng);
-  const cardinal = bearingToCardinal(qibla);
-  const qiblaText = `${cardinal} · ${dist.toFixed(0)} km to Makkah`;
 
   const hijri = today.hijri
     ? `${today.hijri.day} ${today.hijri.month} ${today.hijri.year} AH`
@@ -125,11 +121,6 @@ function renderPrayerView(){
 
     <div class="prayer-list-card">
       ${list}
-    </div>
-
-    <div class="prayer-qibla-card">
-      <div class="prayer-qibla-head">Qibla Direction</div>
-      <div class="prayer-qibla-info">${qiblaText}</div>
     </div>
   `;
 }
