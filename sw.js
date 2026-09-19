@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.1.5';
+const VERSION = 'v2.3.2';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -24,6 +24,7 @@ const APP_SHELL = [
   './css/views/asma.css',
   './css/views/flashcards.css',
   './css/views/books.css',
+  './css/views/tasbih.css',
   './css/components.css',
   './css/responsive.css',
   
@@ -76,6 +77,7 @@ const APP_SHELL = [
   './js/views/hijri.js',
   './js/views/asma.js',
   './js/views/books.js',
+  './js/views/tasbih.js',
   './js/views/reader.js',
   './js/io.js',
   './js/app.js',

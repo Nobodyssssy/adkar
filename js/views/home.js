@@ -341,6 +341,16 @@ function renderHomeFeaturesHTML(){
       subEn: 'Islamic books',
       action: 'openBooksView',
     },
+	    {
+      id: 'tasbih',
+      icon: 'beads',
+      color: '#fab387',
+      labelAr: 'التسبيح',
+      labelEn: 'Tasbih',
+      subAr: 'مسبحة إلكترونية',
+      subEn: 'Digital counter',
+      action: 'openTasbihView',
+    },
   ];
 
   return `

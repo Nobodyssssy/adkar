@@ -1,0 +1,328 @@
+/* ═══════════════════════════════════════════════════════════
+   TASBIH COUNTER
+   ═══════════════════════════════════════════════════════════ */
+.tasbih-wrap {
+  position: relative;
+  padding: 24px 20px 40px;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  min-height: calc(100vh - 120px);
+  min-height: calc(100dvh - 120px);
+  box-sizing: border-box;
+}
+
+/* ── Settings gear (top-right of the wrap) ── */
+.tasbih-settings-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .18s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+.tasbih-settings-btn:hover {
+  border-color: var(--tb-accent, var(--accent));
+  color: var(--tb-accent, var(--accent));
+  transform: rotate(30deg);
+}
+.tasbih-settings-btn:active {
+  transform: rotate(30deg) scale(0.94);
+}
+
+/* ── Progress ring + count ── */
+.tasbih-ring-wrap {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  flex-shrink: 0;
+  margin-top: 12px;
+}
+.tasbih-ring {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.tasbih-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+}
+.tasbih-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--tb-accent);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition: color .2s ease;
+}
+.tasbih-count.done {
+  color: #a6e3a1;
+  text-shadow: 0 0 20px rgba(166, 227, 161, .5);
+}
+.tasbih-target {
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  color: var(--text3);
+  letter-spacing: 0.02em;
+}
+
+/* ── Big tap button ── */
+.tasbih-tap-btn {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: radial-gradient(circle at 30% 25%,
+              color-mix(in srgb, var(--tb-accent) 95%, white 5%),
+              var(--tb-accent));
+  color: #1a1200;
+  box-shadow:
+    0 8px 32px var(--tb-glow),
+    inset 0 -6px 16px rgba(0, 0, 0, .15),
+    inset 0 4px 12px rgba(255, 255, 255, .25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: transform .12s cubic-bezier(.34, 1.56, .64, 1),
+              box-shadow .12s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  flex-shrink: 0;
+}
+.tasbih-tap-btn:hover {
+  box-shadow:
+    0 12px 40px var(--tb-glow),
+    inset 0 -6px 16px rgba(0, 0, 0, .15),
+    inset 0 4px 12px rgba(255, 255, 255, .3);
+}
+.tasbih-tap-btn:active {
+  transform: scale(0.94);
+  box-shadow:
+    0 4px 16px var(--tb-glow),
+    inset 0 -4px 12px rgba(0, 0, 0, .2),
+    inset 0 2px 8px rgba(255, 255, 255, .2);
+}
+.tasbih-tap-btn.pop {
+  animation: tasbihPop .28s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes tasbihPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.tasbih-tap-plus {
+  font-family: 'DM Mono', monospace;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+}
+.tasbih-tap-hint {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+  font-weight: 700;
+}
+
+/* ── Sections (used in settings modal) ── */
+.tasbih-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.tasbih-section-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+  font-weight: 700;
+  text-align: center;
+}
+.tasbih-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.tasbih-chip {
+  padding: 8px 14px;
+  border-radius: 9999px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s ease;
+  min-width: 52px;
+  -webkit-tap-highlight-color: transparent;
+}
+.tasbih-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.tasbih-chip.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1200;
+  font-weight: 700;
+}
+
+/* ── Colour swatches ── */
+.tasbih-colors {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.tasbih-color {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--c);
+  cursor: pointer;
+  transition: all .15s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  position: relative;
+}
+.tasbih-color:hover {
+  transform: scale(1.1);
+}
+.tasbih-color.on {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--c);
+}
+
+/* ── Hotkeys ── */
+.tasbih-info-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+.tasbih-info-btn:hover {
+  border-color: var(--accent);
+  background: var(--glow);
+}
+.tasbih-hotkeys {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.tasbih-hotkey-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.tasbih-hotkey-row kbd {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 3px 9px;
+  color: var(--text);
+  min-width: 46px;
+  text-align: center;
+}
+.tasbih-hotkey-note {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text3);
+  text-align: center;
+}
+
+/* ── Reset ── */
+.tasbih-actions {
+  margin-top: auto;
+  padding-top: 12px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.tasbih-reset {
+  padding: 12px 28px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.tasbih-reset:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(201, 76, 76, .08);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .tasbih-wrap { padding: 20px 16px 32px; gap: 20px; }
+  .tasbih-ring-wrap { width: 200px; height: 200px; }
+  .tasbih-count { font-size: 46px; }
+  .tasbih-target { font-size: 13px; }
+  .tasbih-tap-btn { width: 150px; height: 150px; }
+  .tasbih-tap-plus { font-size: 36px; }
+  .tasbih-color { width: 28px; height: 28px; }
+  .tasbih-chip { padding: 6px 11px; font-size: 12px; min-width: 46px; }
+}
+
+@media (max-height: 700px) {
+  .tasbih-wrap { gap: 16px; padding: 16px; }
+  .tasbih-ring-wrap { width: 180px; height: 180px; margin-top: 0; }
+  .tasbih-tap-btn { width: 130px; height: 130px; }
+  .tasbih-count { font-size: 42px; }
+  .tasbih-tap-plus { font-size: 32px; }
+}
