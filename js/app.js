@@ -27,6 +27,7 @@
       isLight = true;
       document.body.classList.add('light');
     }
+    updateThemeColorMeta();
 
     /* 5. Inject header icons */
     injectHeaderIcons();
@@ -124,4 +125,12 @@ function updateThemeToggleIcon(){
   if(!btn) return;
   /* In light mode, show moon (to switch to dark); in dark mode, show sun */
   btn.innerHTML = isLight ? icon('moon', 18) : icon('sun', 18);
+}
+
+/* Sync the theme-color meta tag with the current theme */
+function updateThemeColorMeta(){
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(!meta) return;
+  const isLight = document.body.classList.contains('light');
+  meta.setAttribute('content', isLight ? '#faf8f3' : '#0d0f14');
 }

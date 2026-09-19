@@ -110,6 +110,8 @@ function toggleTheme(){
   document.body.classList.toggle('light', isLight);
   /* Update the header toggle icon via helper */
   if(typeof updateThemeToggleIcon === 'function') updateThemeToggleIcon();
+  /* Sync the theme-color meta tag */
+  if(typeof updateThemeColorMeta === 'function') updateThemeColorMeta();
   /* Persist preference */
   store.setMeta('theme', isLight ? 'light' : 'dark');
   /* Update menu if it's still open */

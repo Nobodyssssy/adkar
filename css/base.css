@@ -44,10 +44,10 @@
 :root{
   /* ─── Surfaces ─── */
   --bg:      #0d0f14;
-  --surface: #161920;
-  --surface2:#1e2230;
-  --surface3:#252a3a;
-  --border:  #2e3450;
+  --surface: #1a1d26;
+  --surface2:#232734;
+  --surface3:#2c3040;
+  --border:  #3a3f55;
 
   /* ─── Accent (gold) ─── */
   --accent:  #c9a84c;
@@ -72,7 +72,7 @@
   --tr: .22s cubic-bezier(.4,0,.2,1);
   
     /* ─── Type scale — 7 sizes, 12px base ─── */
-  --fs-xs:  10px;   /* tiny — meta, badges */
+  --fs-xs:  11px;   /* tiny — meta, badges */
   --fs-sm:  12px;   /* small — captions, labels */
   --fs-md:  14px;   /* body — default UI text */
   --fs-lg:  16px;   /* emphasis — headlines, inputs */
@@ -97,11 +97,11 @@
 
 .light{
   /* ─── Surfaces — increased contrast for clear card boundaries ─── */
-  --bg:      #faf8f3;
+  --bg:      #efede7;
   --surface: #ffffff;
-  --surface2:#f4efe4;
-  --surface3:#ebe5d4;
-  --border:  #e5dfc8;
+  --surface2:#f5f2ea;
+  --surface3:#eae5d8;
+  --border:  #d9d3c2;
 
   /* ─── Accent — brighter, less muddy on light ─── */
   --accent:  #8a6914;
