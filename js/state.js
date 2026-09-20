@@ -55,6 +55,45 @@ async function initState(){
     data = cache.adkar;
   }
 
+  /* ── One-time merge of Hisn al-Muslim dataset (js/hisn-data.js) ──
+     Uses HISN_VERSION for idempotent re-merge: bump it in hisn-data.js
+     every time you edit the dataset, and this runs again automatically. */
+  if(typeof HISN_ADKAR !== 'undefined' && HISN_ADKAR.length){
+    const storedVersion  = (await store.getMeta('hisnMergedV2')) || 0;
+    const currentVersion = (typeof HISN_VERSION === 'number') ? HISN_VERSION : 1;
+
+    if(storedVersion < currentVersion){
+      const norm = (typeof hisnNormalize === 'function') ? hisnNormalize : (s => String(s || ''));
+      const existing = new Set(data.map(d => norm(d.arabic)));
+      let hid = Math.max(0, ...data.map(d => d.id)) + 1;
+      let added = 0;
+
+      HISN_ADKAR.forEach(item => {
+        const key = norm(item.arabic);
+        if(key && !existing.has(key)){
+          existing.add(key);
+          data.push({
+            id: hid++,
+            categories: [item.cat],
+            tags: item.tags || [],
+            repeat: item.repeat || 1,
+            reliability: item.reliability || null,
+            situation: item.situation || '',
+            arabic: item.arabic,
+            hadith: item.hadith || '',
+            virtue: item.virtue || '',
+            transliteration: item.transliteration || ''
+          });
+          added++;
+        }
+      });
+
+      if(added) await store.saveAdkar(data);
+      await store.setMeta('hisnMergedV2', currentVersion);
+      console.log('[hisn] merged ' + added + ' new adkar, skipped ' + (HISN_ADKAR.length - added) + ' duplicates (v' + currentVersion + ')');
+    }
+  }
+
   /* Favorites + counters + meta */
   favs     = cache.favs;
   counters = cache.counters;

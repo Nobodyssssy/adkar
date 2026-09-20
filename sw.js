@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.4.3';
+const VERSION = 'v2.5.3';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -44,6 +44,7 @@ const APP_SHELL = [
   './js/db.js',
   './js/store.js',
   './js/data-defaults.js',
+  './js/hisn-data.js',
   './js/state.js',
   './js/search.js',
   './js/prayer.js',
