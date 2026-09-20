@@ -88,11 +88,47 @@ async function initState(){
         }
       });
 
-      if(added) await store.saveAdkar(data);
-      await store.setMeta('hisnMergedV2', currentVersion);
-      console.log('[hisn] merged ' + added + ' new adkar, skipped ' + (HISN_ADKAR.length - added) + ' duplicates (v' + currentVersion + ')');
-    }
-  }
+if(added) await store.saveAdkar(data);
+await store.setMeta('hisnMergedV2', currentVersion);
+console.log('[hisn] merged ' + added + ' new adkar, skipped ' + (HISN_ADKAR.length - added) + ' duplicates (v' + currentVersion + ')');
+}
+
+/* ── Self-heal: if the DB is somehow missing Hisn entries, re-merge now.
+This runs on every boot and is cheap (a Set lookup over ~267 items).
+It makes the merge immune to stale flags, race conditions, or a
+first-install where hisn-data.js loaded a beat after initState ran. */
+const hisnInData = data.filter(d => d.hadith && String(d.hadith).indexOf('Hisn al-Muslim') === 0).length;
+if(hisnInData < HISN_ADKAR.length * 0.5){
+const norm = (typeof hisnNormalize === 'function') ? hisnNormalize : (s => String(s || ''));
+const existing = new Set(data.map(d => norm(d.arabic)));
+let hid = Math.max(0, ...data.map(d => d.id)) + 1;
+let healed = 0;
+HISN_ADKAR.forEach(item => {
+const key = norm(item.arabic);
+if(key && !existing.has(key)){
+existing.add(key);
+data.push({
+id: hid++,
+categories: [item.cat],
+tags: item.tags || [],
+repeat: item.repeat || 1,
+reliability: item.reliability || null,
+situation: item.situation || '',
+arabic: item.arabic,
+hadith: item.hadith || '',
+virtue: item.virtue || '',
+transliteration: item.transliteration || ''
+});
+healed++;
+}
+});
+if(healed){
+await store.saveAdkar(data);
+await store.setMeta('hisnMergedV2', currentVersion);
+console.log('[hisn] self-heal re-merged ' + healed + ' entries (found only ' + hisnInData + '/' + HISN_ADKAR.length + ')');
+}
+}
+}
 
   /* Favorites + counters + meta */
   favs     = cache.favs;

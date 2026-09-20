@@ -65,6 +65,17 @@
   }
 })();
 
+    /* 9. Re-check daily reset when the app comes back to the foreground
+          (handles the "left open past midnight" case) */
+    document.addEventListener('visibilitychange', async () => {
+      if(document.visibilityState !== 'visible') return;
+      const didReset = await store.checkDailyReset();
+      if(didReset){
+        if(typeof renderCatsGrid === 'function') renderCatsGrid();
+        if(typeof renderAdkarGrid === 'function') renderAdkarGrid();
+      }
+    });
+
 /* Load sprite.svg into the hidden mount, so <use> can find icons */
 async function loadIconSprite(){
   const mount = document.getElementById('svg-sprite-mount');
@@ -224,3 +235,37 @@ document.addEventListener('click', (e) => {
   }
   updateSettingsUI();
 });
+
+/* ═══════════════════════════════════════════════════════════
+Attribution footer (v2) — appended into the Settings modal body
+every time it opens. Append-only: safe even if an older
+injectAttribution exists (this one wins).
+═══════════════════════════════════════════════════════════ */
+window.injectAttribution = function(){
+  const ov = document.getElementById('ov-settings');
+  if(!ov) return;
+  if(ov.querySelector('.settings-attribution')) return;
+  const body = ov.querySelector('.mb') || ov.querySelector('.modal-body') || ov.querySelector('.modal-box') || ov;
+  const footer = document.createElement('div');
+  footer.className = 'settings-attribution';
+  footer.style.cssText = 'margin-top:18px; padding-top:14px; border-top:1px solid var(--border); font-size:11px; color:var(--text3); line-height:1.7; text-align:center; direction:ltr;';
+  footer.innerHTML =
+    '<strong style="color:var(--text2); display:block; margin-bottom:6px; letter-spacing:.05em; text-transform:uppercase;">Attribution & Sources</strong>' +
+    'Adhkar: <a href="https://sunnah.com/hisn" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none;">Hisn al-Muslim</a> · ' +
+    'Prayer: <a href="https://aladhan.com" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none;">Aladhan API</a><br>' +
+    'Palette: <a href="https://catppuccin.com" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none;">Catppuccin</a> · ' +
+    'Fonts: Amiri & Tajawal (OFL)<br>' +
+    'Icons: Lucide (ISC) · PDF: PDF.js (Apache 2.0)<br>' +
+    '<span style="opacity:.6; margin-top:8px; display:block; font-style:italic;">Built for personal and community use.</span>';
+  body.appendChild(footer);
+};
+(function(){
+  const orig = window.openSettings;
+  if(typeof orig === 'function'){
+    window.openSettings = function(){
+      const r = orig.apply(this, arguments);
+      try{ window.injectAttribution(); }catch(e){ console.warn('[attrib]', e); }
+      return r;
+    };
+  }
+})();

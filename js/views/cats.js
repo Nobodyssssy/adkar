@@ -53,7 +53,7 @@ function showView(id){
   /* Search bar visibility — only on Adkar and Library views */
   const searchBar = document.getElementById('search-bar');
   if(searchBar){
-    const showSearch = (id === 'view-cats' || id === 'view-books');
+const showSearch = (id === 'view-cats' || id === 'view-books' || id === 'view-search');
     searchBar.style.display = showSearch ? '' : 'none';
 
     /* Update placeholder + behavior based on context */
@@ -66,8 +66,7 @@ function showView(id){
         input.placeholder = 'Search all adkar...';
         input.oninput = function(){ if(typeof handleSearch === 'function') handleSearch(); };
       }
-      input.value = '';
-    }
+if(id !== 'view-search'){ input.value = ''; }    }
   }
 
   /* Inject any SVG icons in the newly-shown view */

@@ -414,3 +414,11 @@ color: var(--accent2) !important;
 border-color: var(--accent2) !important;
 background: color-mix(in srgb, var(--accent2) 15%, transparent) !important;
 }
+
+/* Search bar now lives outside the views — visible only where needed */
+.search-bar { display: none; }
+body:has(#view-cats.active) .search-bar,
+body:has(#view-search.active) .search-bar { display: block; }
+
+/* Count line: force LTR so `53 result(s) — "a"` reads correctly */
+#search-count { direction: ltr; }

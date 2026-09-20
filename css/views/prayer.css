@@ -556,17 +556,7 @@ letter-spacing: 0.1em;
 font-weight: 700;
 height: 100%;
 }
-.cycle-caption-night {
-left: var(--night-left);
-width: var(--night-width);
-color: var(--c-night);
-border-bottom: 1px solid color-mix(in srgb, var(--c-night) 45%, transparent);
-}
-.cycle-caption-day {
-left: var(--day-left);
-width: var(--day-width);
-color: var(--c-day);
-border-bottom: 1px solid color-mix(in srgb, var(--c-day) 45%, transparent);
+.cycle-caption
 }
 .cycle-caption-icon { font-size: 12px; }
 .cycle-caption-ar {

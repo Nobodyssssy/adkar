@@ -218,3 +218,202 @@ border-color: var(--accent2);
   direction: rtl;
   text-align: right;
 }
+
+.adkar-tagbar {
+display: flex;
+gap: 6px;
+flex-wrap: wrap;
+padding: 0 0 6px;
+}
+.adkar-group-head {
+display: flex;
+align-items: center;
+gap: 8px;
+margin: 12px 0 2px;
+font-size: 12px;
+font-weight: 700;
+color: var(--accent);
+letter-spacing: .04em;
+}
+.adkar-group-head::after {
+content: '';
+flex: 1;
+height: 1px;
+background: var(--border);
+}
+.adkar-group-count {
+font-family: 'DM Mono', monospace;
+font-size: 10px;
+color: var(--text3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Session & Adkar palette
+
+   Rule:
+     idle  → var(--accent)   (follows user theme selection)
+     done  → var(--ctp-green) (semantic, always green)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Session tap button — accent idle, green done ── */
+.session-tap-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: var(--on-accent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent);
+  transition: background var(--tr), box-shadow var(--tr), color var(--tr);
+}
+.session-tap-btn:hover {
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.session-tap-btn.done {
+  background: linear-gradient(135deg, var(--ctp-green), var(--ctp-teal));
+  color: var(--ctp-crust);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ctp-green) 45%, transparent);
+}
+
+/* ── Session progress bar — accent idle, green done ── */
+.session-prog-fill {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.session-prog-fill.done-fill {
+  background: linear-gradient(90deg, var(--ctp-green), var(--ctp-teal));
+}
+
+/* ── Done icon ── */
+.session-done-icon { color: var(--ctp-green); }
+
+/* ── Session info boxes ── */
+.session-hadith {
+  background: color-mix(in srgb, var(--ctp-yellow) 12%, transparent);
+  border-color: var(--ctp-yellow);
+  color: var(--text2);
+}
+.session-virtue {
+  background: color-mix(in srgb, var(--ctp-green) 10%, transparent);
+  border-color: var(--ctp-green);
+  color: var(--text2);
+}
+
+/* ── Badges ── */
+.badge-repeat {
+  background: color-mix(in srgb, var(--ctp-blue) 15%, transparent);
+  border-color: var(--ctp-blue);
+  color: var(--ctp-blue);
+}
+.badge-sahih {
+  background: color-mix(in srgb, var(--ctp-green) 12%, transparent);
+  border-color: var(--ctp-green);
+  color: var(--ctp-green);
+}
+.badge-hasan {
+  background: color-mix(in srgb, var(--ctp-blue) 12%, transparent);
+  border-color: var(--ctp-blue);
+  color: var(--ctp-blue);
+}
+.badge-daif {
+  background: color-mix(in srgb, var(--ctp-red) 12%, transparent);
+  border-color: var(--ctp-red);
+  color: var(--ctp-red);
+}
+.badge-tag {
+  background: color-mix(in srgb, var(--ctp-mauve) 10%, transparent);
+  border-color: var(--ctp-mauve);
+  color: var(--ctp-mauve);
+}
+
+/* ── Adkar card hover glow ── */
+.adkar-card:hover {
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--cc) 25%, transparent);
+}
+
+/* ── Filter chips ── */
+.filter-chip.on {
+  background: var(--glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Session header/footer ── */
+.session-header,
+.session-footer {
+  border-color: var(--border);
+}
+
+/* ── Next button — same accent as the tap button ── */
+.btn-session-next {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: var(--on-accent);
+  border: none;
+  transition: background var(--tr), box-shadow var(--tr), color var(--tr);
+}
+.btn-session-next.done {
+  background: linear-gradient(135deg, var(--ctp-green), var(--ctp-teal));
+  color: var(--ctp-crust);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--ctp-green) 40%, transparent);
+}
+.btn-session-skip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+.btn-session-skip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Light mode tweaks ── */
+.light .session-tap-btn,
+.light .btn-session-next {
+  color: var(--on-accent);
+}
+.light .badge-repeat,
+.light .badge-sahih,
+.light .badge-hasan,
+.light .badge-daif,
+.light .badge-tag {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Session overlay — overrides components.css
+   ═══════════════════════════════════════════════════════════ */
+.session-overlay .session-situation { color: var(--accent); }
+
+.session-overlay .session-hadith {
+  background: color-mix(in srgb, var(--ctp-yellow) 10%, transparent);
+  border-color: color-mix(in srgb, var(--ctp-yellow) 55%, transparent);
+}
+.session-overlay .session-virtue {
+  background: color-mix(in srgb, var(--ctp-green) 10%, transparent);
+  border-color: color-mix(in srgb, var(--ctp-green) 55%, transparent);
+}
+
+.session-overlay .session-tap-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: var(--on-accent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.session-overlay .session-tap-btn:active {
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.session-overlay .session-tap-btn.done {
+  background: linear-gradient(135deg, var(--ctp-green), var(--ctp-teal));
+  color: var(--ctp-crust);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ctp-green) 40%, transparent);
+}
+
+.session-overlay .session-prog-fill {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.session-overlay .session-prog-fill.done-fill {
+  background: linear-gradient(90deg, var(--ctp-green), var(--ctp-teal));
+}
+
+.session-overlay .btn-session-next {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: var(--on-accent);
+}
+.session-overlay .btn-session-next.done {
+  background: linear-gradient(135deg, var(--ctp-green), var(--ctp-teal));
+  color: var(--ctp-crust);
+}

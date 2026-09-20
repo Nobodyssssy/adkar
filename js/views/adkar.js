@@ -6,19 +6,67 @@
    `currentCat` filtering is done via categories.includes().
    ═══════════════════════════════════════════════════════════ */
 
+/* Per-category subcategory (tag) filter */
+let _tagFilters = {};
+
+function _catItems(catKey){
+return data.filter(d =>
+Array.isArray(d.categories) && d.categories.includes(catKey)
+);
+}
+
+function _tagLabel(tag){
+if(!tag) return '';
+if(typeof HISN_TAGS !== 'undefined' && HISN_TAGS[tag]){
+return HISN_TAGS[tag].ar + ' · ' + HISN_TAGS[tag].en;
+}
+return tag;
+}
+
+function setTagFilter(tag){
+_tagFilters[currentCat] = tag || null;
+renderAdkarGrid();
+}
+
+function renderTagFilterRow(catKey){
+const tags = [...new Set(_catItems(catKey).flatMap(d => Array.isArray(d.tags) ? d.tags : []))];
+if(!tags.length) return '';
+const active = _tagFilters[catKey] || null;
+const chips = ['', ...tags].map(t => {
+const on = (t === '' && !active) || (t !== '' && active === t);
+const label = t === '' ? 'الكل · All' : _tagLabel(t);
+return `<button class="filter-chip tag ${on ? 'on' : ''}" onclick="setTagFilter('${t}')">${label}</button>`;
+}).join('');
+return `<div class="adkar-tagbar">${chips}</div>`;
+}
+
 function renderAdkarGrid(){
-  const items = data.filter(d =>
-    Array.isArray(d.categories) && d.categories.includes(currentCat)
-  );
-  const g = $('adkar-grid');
-  if(!items.length){
-    g.innerHTML = `<div class="adkar-empty">
-      <div class="adkar-empty-icon">📿</div>
-      <div>No adkar yet.<br>Tap ＋ Add to create one.</div>
-    </div>`;
-    return;
-  }
-  g.innerHTML = items.map(d => adkarCardHTML(d, getCat(currentCat))).join('');
+const catKey = currentCat;
+let items = _catItems(catKey);
+const active = _tagFilters[catKey] || null;
+if(active){
+items = items.filter(d => Array.isArray(d.tags) && d.tags.includes(active));
+}
+const g = $('adkar-grid');
+if(!items.length){
+g.innerHTML = `<div class="adkar-empty"> <div class="adkar-empty-icon">${icon('beads', 40)}</div> <div>No adkar here yet.</div> </div>`;
+return;
+}
+/* Group by first tag = subcategory */
+const groups = new Map();
+items.forEach(d => {
+const key = (Array.isArray(d.tags) && d.tags.length) ? d.tags[0] : '';
+if(!groups.has(key)) groups.set(key, []);
+groups.get(key).push(d);
+});
+let html = renderTagFilterRow(catKey);
+groups.forEach((list, key) => {
+if(groups.size > 1){
+html += `<div class="adkar-group-head"><span>${key ? _tagLabel(key) : 'أخرى · Other'}</span><span class="adkar-group-count">${list.length}</span></div>`;
+}
+html += list.map(d => adkarCardHTML(d, getCat(catKey))).join('');
+});
+g.innerHTML = html;
 }
 
 function adkarCardHTML(d, catObj){

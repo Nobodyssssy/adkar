@@ -1,13 +1,15 @@
 'use strict';
 
-function startSession(){
-  const items = data.filter(d =>
+async function startSession(){
+  let items = data.filter(d =>
     Array.isArray(d.categories) && d.categories.includes(currentCat)
   );
-  if(!items.length){ toast('No adkar in this category'); return; }
+  const activeTag = (typeof _tagFilters !== 'undefined' && _tagFilters[currentCat]) ? _tagFilters[currentCat] : null;
+  if(activeTag){
+    items = items.filter(d => Array.isArray(d.tags) && d.tags.includes(activeTag));
+  }
+  if(!items.length){ toast('No adkar in this selection'); return; }
 
-  /* Sort by repetition count ascending: 1× first, then 3×, 7×, 10×, 33×, 100×, etc.
-     Secondary sort by id for stability when repetitions are equal. */
   sessItems = [...items].sort((a, b) => {
     const ra = a.repeat || 1;
     const rb = b.repeat || 1;
@@ -17,18 +19,34 @@ function startSession(){
 
   sessIdx = 0;
   sessTapCount = 0;
-  $('sess-title').textContent = getCat(currentCat).ar;
+
+  /* Resume at the first incomplete dhikr, based on live counters.
+     This is always in sync with the category card's "X/N done". */
+  sessIdx = 0;
+  for(let i = 0; i < sessItems.length; i++){
+    const d = sessItems[i];
+    const k = `c_${d.id}`;
+    if((counters[k] || 0) < d.repeat){ sessIdx = i; break; }
+    if(i === sessItems.length - 1) sessIdx = i;   // all done → stay on last
+  }
+  sessTapCount = counters[`c_${sessItems[sessIdx].id}`] || 0;
+  
+  const titleBase = getCat(currentCat).ar;
+  const titleTag  = activeTag ? ' · ' + ((typeof _tagLabel === 'function') ? _tagLabel(activeTag) : activeTag) : '';
+  $('sess-title').textContent = titleBase + titleTag;
+
   $('session-overlay').classList.add('open');
   $('session-overlay').classList.remove('is-done');
   $('sess-body').style.borderBottom = '';
   $('sess-body').style.borderRadius = '';
   lockBody();
   renderSessionStep();
-  $('sess-body').style.borderBottom = '';
-$('sess-body').style.borderRadius = '';
 }
 
 function closeSession(){
+  /* Do NOT clear saved progress — closing should allow resume.
+     Progress is cleared only when the session is completed,
+     or when startSession detects the saved idx is out of range. */
   $('session-overlay').classList.remove('open');
   $('session-overlay').classList.remove('is-done');
   var body = $('sess-body');
@@ -83,11 +101,27 @@ function renderSessionStep(){
     </div>`;
 
   $('sess-next-btn').textContent = sessIdx < sessItems.length - 1 ? 'Next' : 'Finish';
+  $('sess-next-btn').classList.toggle('done', isDone);
   $('sess-footer').style.display = 'flex';
-    /* Clear any done-state inline styling from a previous step */
+
   var body = $('sess-body');
   body.style.borderBottom = '';
   body.style.borderRadius = '';
+}
+
+async function _saveSessProgress(){
+  if(!currentCat || sessIdx >= sessItems.length) return;
+  try{
+    await store.setMeta('sessProgress', {
+      cat: currentCat,
+      idx: sessIdx,
+      tap: sessTapCount,
+    });
+  }catch(e){ console.warn('[sess] save progress failed', e); }
+}
+
+async function _clearSessProgress(){
+  try{ await store.setMeta('sessProgress', null); }catch(e){}
 }
 
 function sessionTap(id, target){
@@ -95,35 +129,46 @@ function sessionTap(id, target){
   counters[k] = (counters[k] || 0) + 1;
   persistCounters();
   sessTapCount = counters[k];
+  _saveSessProgress();
+
   const pct = Math.min(100, Math.round(sessTapCount / target * 100));
   const isDone = sessTapCount >= target;
+
   $('sess-tap-num').textContent = sessTapCount;
   $('sess-count-disp').textContent = isDone ? 'Done' : Math.max(0, target - sessTapCount) + ' left';
   $('sess-pfill').style.width = pct + '%';
-  const tapBtn = $('sess-tap');
-  if(isDone){
-    tapBtn.classList.add('done');
-    $('sess-pfill').classList.add('done-fill');
-    toast('✓ Completed');
-  }
+
+const tapBtn = $('sess-tap');
+const nextBtn = $('sess-next-btn');
+if(isDone){
+  tapBtn.classList.add('done');
+  nextBtn.classList.add('done');
+  $('sess-pfill').classList.add('done-fill');
+  toast('✓ Completed');
+} else {
+  tapBtn.classList.remove('done');
+  nextBtn.classList.remove('done');
+  $('sess-pfill').classList.remove('done-fill');
+}
 }
 
 function sessionNext(){
   sessIdx++; sessTapCount = 0;
-  if(sessIdx >= sessItems.length) renderSessionDone();
-  else renderSessionStep();
+  if(sessIdx >= sessItems.length){ _clearSessProgress(); renderSessionDone(); }
+  else { renderSessionStep(); _saveSessProgress(); }
 }
 
 function sessionSkip(){
   sessIdx++; sessTapCount = 0;
-  if(sessIdx >= sessItems.length) renderSessionDone();
-  else renderSessionStep();
+  if(sessIdx >= sessItems.length){ _clearSessProgress(); renderSessionDone(); }
+  else { renderSessionStep(); _saveSessProgress(); }
 }
 
 function sessionPrev(){
   if(sessIdx === 0) return;
   sessIdx--; sessTapCount = 0;
   renderSessionStep();
+  _saveSessProgress();
 }
 
 function renderSessionDone(){
@@ -138,13 +183,11 @@ function renderSessionDone(){
   $('sess-footer').style.display = 'none';
   $('session-overlay').classList.add('is-done');
 
-  /* Apply the bottom edge directly — inline styles win over any CSS rule */
   if(window.innerWidth >= 768){
     var body = $('sess-body');
     body.style.borderBottom = '1px solid var(--border)';
     body.style.borderRadius = '0 0 20px 20px';
   }
-
   $('sess-back-btn').style.opacity = '0.3';
   $('sess-back-btn').style.pointerEvents = 'none';
 }

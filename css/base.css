@@ -1,4 +1,4 @@
-/* FILE: css/base.css */
+/* FILE: css/base.css — clean rebuild, all comments verified */
 
 /* ═══════════════════════════════════════════════════════════
 Self-hosted fonts — Amiri (Arabic) + Tajawal (UI)
@@ -40,41 +40,78 @@ Self-hosted fonts — Amiri (Arabic) + Tajawal (UI)
 }
 
 :root {
-  /* ─── Surfaces (Catppuccin Mocha) ─── */
-  --bg:      #181825; /* Mantle (Main background) */
-  --surface: #1e1e2e; /* Base (Cards) */
-  --surface2:#313244; /* Surface0 (Inputs, secondary) */
-  --surface3:#45475a; /* Surface1 (Hover states) */
-  --border:  #585b70; /* Surface2 (Borders) */
+  /* ─── Catppuccin Mocha palette ─── */
+  --ctp-rose:     #f38ba8;
+  --ctp-flamingo: #f2cdcd;
+  --ctp-pink:     #f5c2e7;
+  --ctp-mauve:    #cba6f7;
+  --ctp-red:      #f38ba8;
+  --ctp-maroon:   #eba0ac;
+  --ctp-peach:    #fab387;
+  --ctp-yellow:   #f9e2af;
+  --ctp-green:    #a6e3a1;
+  --ctp-teal:     #94e2d5;
+  --ctp-sky:      #89dceb;
+  --ctp-sapphire: #74c7ec;
+  --ctp-blue:     #89b4fa;
+  --ctp-lavender: #b4befe;
+  --ctp-text:     #cdd6f4;
+  --ctp-subtext1: #bac2de;
+  --ctp-subtext0: #a6adc8;
+  --ctp-overlay2: #9399b2;
+  --ctp-overlay1: #7f849c;
+  --ctp-overlay0: #6c7086;
+  --ctp-surface2: #585b70;
+  --ctp-surface1: #45475a;
+  --ctp-surface0: #313244;
+  --ctp-base:     #1e1e2e;
+  --ctp-mantle:   #181825;
+  --ctp-crust:    #11111b;
 
-  /* ─── Accent (Custom Gold) ─── */
+  /* ─── Surfaces (Mocha) ─── */
+  --bg:      #181825;
+  --surface: #1e1e2e;
+  --surface2:#313244;
+  --surface3:#45475a;
+  --border:  #585b70;
+
+  /* ─── Accent (default gold — variants below override) ─── */
   --accent:  #c9a84c;
   --accent2: #e8c97a;
   --glow:    rgba(201, 168, 76, .15);
+  --on-accent: #1a1200;
 
-  /* ─── Text (Catppuccin Mocha) ─── */
-  --text:    #cdd6f4; /* Primary */
-  --text2:   #bac2de; /* Secondary */
-  --text3:   #a6adc8; /* Tertiary/Meta */
+  /* ─── Text ─── */
+  --text:  #cdd6f4;
+  --text2: #bac2de;
+  --text3: #a6adc8;
 
-  /* ─── Semantic (Catppuccin Mocha) ─── */
-  --green:   #a6e3a1;
-  --red:     #f38ba8;
-  --blue:    #89b4fa;
-  --orange:  #fab387;
+  /* ─── Semantic ── */
+  --green:  #a6e3a1;
+  --red:    #f38ba8;
+  --blue:   #89b4fa;
+  --orange: #fab387;
 
-  /* ─── Semantic Cycle Colors (Mocha) ─── */
-  --cycle-night: #89b4fa;
-  --cycle-day:   #fab387;
-  --cycle-teal:  #94e2d5;
-  --cycle-mauve: #cba6f7;
---cycle-yellow:#f9e2af;
---cycle-label: rgba(255, 255, 255, .85);
---cycle-label-dim: rgba(255, 255, 255, .55);
+  /* ─── Cycle bar ─── */
+  --cycle-night:  #89b4fa;
+  --cycle-day:    #fab387;
+  --cycle-teal:   #94e2d5;
+  --cycle-mauve:  #cba6f7;
+  --cycle-yellow: #f9e2af;
+  --cycle-label:     rgba(255, 255, 255, .85);
+  --cycle-label-dim: rgba(255, 255, 255, .55);
 
   /* ─── Shape & motion ─── */
   --sh: 0 8px 32px rgba(0, 0, 0, .4);
   --tr: .22s cubic-bezier(.4, 0, .2, 1);
+
+  /* ─── Radius ─── */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-pill: 9999px;
+  --r:  16px;
+  --rs: 10px;
 
   /* ─── Type scale ─── */
   --fs-xs:  11px;
@@ -85,17 +122,7 @@ Self-hosted fonts — Amiri (Arabic) + Tajawal (UI)
   --fs-2xl: 26px;
   --fs-3xl: 34px;
 
-  /* ─── Radius scale ─── */
-  --radius-sm:   8px;
-  --radius-md:   12px;
-  --radius-lg:   20px;
-  --radius-pill: 9999px;
-
-  /* Legacy radius aliases — older rules still use these */
-  --r:  16px;
-  --rs: 10px;
-
-  /* ─── Spacing scale ─── */
+  /* ─── Spacing ─── */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -105,43 +132,72 @@ Self-hosted fonts — Amiri (Arabic) + Tajawal (UI)
 }
 
 .light {
-  /* ─── Surfaces (Catppuccin Latte) ─── */
-  --bg:      #e6e9ef; /* Mantle */
-  --surface: #eff1f5; /* Base */
-  --surface2:#ccd0da; /* Surface0 */
-  --surface3:#bcc0cc; /* Surface1 */
-  --border:  #acb0be; /* Surface2 */
+  /* ─── Catppuccin Latte palette ─── */
+  --ctp-rose:     #d20f39;
+  --ctp-flamingo: #dd7878;
+  --ctp-pink:     #ea76cb;
+  --ctp-mauve:    #8839ef;
+  --ctp-red:      #d20f39;
+  --ctp-maroon:   #e64553;
+  --ctp-peach:    #fe640b;
+  --ctp-yellow:   #df8e1d;
+  --ctp-green:    #40a02b;
+  --ctp-teal:     #179299;
+  --ctp-sky:      #04a5e5;
+  --ctp-sapphire: #209fb5;
+  --ctp-blue:     #1e66f5;
+  --ctp-lavender: #7287fd;
+  --ctp-text:     #4c4f69;
+  --ctp-subtext1: #5c5f77;
+  --ctp-subtext0: #6c6f85;
+  --ctp-overlay2: #7c7f93;
+  --ctp-overlay1: #8c8fa1;
+  --ctp-overlay0: #9ca0b0;
+  --ctp-surface2: #acb0be;
+  --ctp-surface1: #bcc0cc;
+  --ctp-surface0: #ccd0da;
+  --ctp-base:     #eff1f5;
+  --ctp-mantle:   #e6e9ef;
+  --ctp-crust:    #dce0e8;
 
-  /* ─── Accent (Catppuccin Latte Yellow/Peach) ─── */
-  --accent:  #df8e1d; /* Golden Yellow */
-  --accent2: #fe640b; /* Peach */
+  /* ─── Surfaces (Latte) ─── */
+  --bg:      #e6e9ef;
+  --surface: #eff1f5;
+  --surface2:#ccd0da;
+  --surface3:#bcc0cc;
+  --border:  #acb0be;
+
+  /* ─── Accent (default — variants below override) ─── */
+  --accent:  #df8e1d;
+  --accent2: #fe640b;
   --glow:    rgba(223, 142, 29, .15);
+  --on-accent: #1a1200;
 
-  /* ─── Text (Catppuccin Latte) ─── */
-  --text:    #4c4f69;
-  --text2:   #5c5f77;
-  --text3:   #6c6f85;
+  /* ─── Text ─── */
+  --text:  #4c4f69;
+  --text2: #5c5f77;
+  --text3: #6c6f85;
 
-  /* ─── Semantic (Catppuccin Latte) ─── */
-  --green:   #40a02b;
-  --red:     #d20f39;
-  --blue:    #1e66f5;
-  --orange:  #fe640b;
+  /* ─── Semantic ─── */
+  --green:  #40a02b;
+  --red:    #d20f39;
+  --blue:   #1e66f5;
+  --orange: #fe640b;
 
-  /* ─── Semantic Cycle Colors (Latte) ─── */
-  --cycle-night: #1e66f5;
-  --cycle-day:   #fe640b;
-  --cycle-teal:  #179299;
-  --cycle-mauve: #8839ef;
---cycle-yellow:#df8e1d;
---cycle-label: rgba(44, 48, 66, .85);
---cycle-label-dim: rgba(44, 48, 66, .60);
+  /* ─── Cycle bar ─── */
+  --cycle-night:  #1e66f5;
+  --cycle-day:    #fe640b;
+  --cycle-teal:   #179299;
+  --cycle-mauve:  #8839ef;
+  --cycle-yellow: #df8e1d;
+  --cycle-label:     rgba(44, 48, 66, .85);
+  --cycle-label-dim: rgba(44, 48, 66, .60);
 
   /* ─── Shape & motion ─── */
   --sh: 0 8px 32px rgba(0, 0, 0, .08);
 }
 
-/* ─── Light mode cards shadow ─── */
+/* ─── Light mode card lift ─── */
 .light .adkar-card,
 .light .cat-card,
 .light .book-card,
@@ -160,7 +216,6 @@ html {
   text-size-adjust: 100%;
   scroll-behavior: smooth;
 }
-
 body {
   font-family: 'Tajawal', sans-serif;
   background: var(--bg);
@@ -171,19 +226,15 @@ body {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
-
 button, input, textarea, select {
   font-family: inherit;
-  font-size: 16px; /* iOS: prevent zoom-on-focus */
+  font-size: 16px;
 }
-
 button {
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
 }
-
-/* Safe-area insets (notch / home indicator) */
 header {
   padding-left: calc(20px + env(safe-area-inset-left));
   padding-right: calc(20px + env(safe-area-inset-right));
@@ -196,21 +247,33 @@ header {
 }
 
 /* ═══════════════════════════════════════════════════════════
-Global UX Polish (Scrollbars & Selection)
+Scrollbars & selection
 ═══════════════════════════════════════════════════════════ */
-::-webkit
-
-/* --- ADD THIS AT THE BOTTOM OF css/base.css --- */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border); }
+* { scrollbar-width: thin; scrollbar-color: var(--surface3) var(--bg); }
+::selection { background: var(--accent); color: var(--bg); }
 
 /* ═══════════════════════════════════════════════════════════
-Accent variants
-Applied with: <body data-accent="gold|peach|blue|green|mauve">
+Icons
 ═══════════════════════════════════════════════════════════ */
-body {
-  --on-accent: #1a1200;
+svg[aria-hidden="true"] {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
+.icon-filled use { fill: currentColor; }
+.icon-rotate-90  { transform: rotate(90deg); }
+.icon-rotate-180 { transform: rotate(180deg); }
+.icon-rotate-270 { transform: rotate(270deg); }
+.icon-spin { animation: icon-spin 1s linear infinite; }
+@keyframes icon-spin { to { transform: rotate(360deg); } }
 
-/* ── Gold ── */
+/* ═══════════════════════════════════════════════════════════
+Accent variants — body[data-accent="gold|peach|blue|green|mauve"]
+═══════════════════════════════════════════════════════════ */
 body[data-accent="gold"] {
   --accent: #c9a84c;
   --accent2: #e8c97a;
@@ -223,8 +286,6 @@ body.light[data-accent="gold"] {
   --glow: rgba(223, 142, 29, .16);
   --on-accent: #1a1200;
 }
-
-/* ── Peach ── */
 body[data-accent="peach"] {
   --accent: #fab387;
   --accent2: #f5bde6;
@@ -237,8 +298,6 @@ body.light[data-accent="peach"] {
   --glow: rgba(254, 100, 11, .16);
   --on-accent: #1a1200;
 }
-
-/* ── Blue ── */
 body[data-accent="blue"] {
   --accent: #89b4fa;
   --accent2: #89dceb;
@@ -251,8 +310,6 @@ body.light[data-accent="blue"] {
   --glow: rgba(30, 102, 245, .14);
   --on-accent: #ffffff;
 }
-
-/* ── Green ── */
 body[data-accent="green"] {
   --accent: #a6e3a1;
   --accent2: #94e2d5;
@@ -265,8 +322,6 @@ body.light[data-accent="green"] {
   --glow: rgba(64, 160, 43, .14);
   --on-accent: #ffffff;
 }
-
-/* ── Mauve ── */
 body[data-accent="mauve"] {
   --accent: #cba6f7;
   --accent2: #f5bde6;
@@ -280,7 +335,7 @@ body.light[data-accent="mauve"] {
   --on-accent: #ffffff;
 }
 
-/* Keep important gold-background buttons readable */
+/* Keep text readable on accent-filled buttons */
 body[data-accent] .btn-add,
 body[data-accent] .btn-session,
 body[data-accent] .btn-session-next,
@@ -297,41 +352,38 @@ body[data-accent] .tasbih-tap-btn,
 body[data-accent] .flash-btn.reveal {
   color: var(--on-accent);
 }
-
 body[data-accent] .hijri-cell.today .hijri-day-num,
 body[data-accent] .hijri-cell.today .hijri-day-greg {
   color: var(--on-accent);
 }
-/* ── Settings chips — color preview dots ── */
+
+/* ═══════════════════════════════════════════════════════════
+Settings modal extras
+═══════════════════════════════════════════════════════════ */
 #ov-settings .filter-chip {
-display: inline-flex;
-align-items: center;
-gap: 7px;
-padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
 }
 .accent-dot {
-width: 12px;
-height: 12px;
-border-radius: 50%;
-flex-shrink: 0;
-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25);
 }
 .dot-gold  { background: #c9a84c; }
 .dot-peach { background: #fab387; }
 .dot-blue  { background: #89b4fa; }
 .dot-green { background: #a6e3a1; }
 .dot-mauve { background: #cba6f7; }
-
 body.light .dot-gold  { background: #df8e1d; }
 body.light .dot-peach { background: #fe640b; }
 body.light .dot-blue  { background: #1e66f5; }
 body.light .dot-green { background: #40a02b; }
 body.light .dot-mauve { background: #8839ef; }
-
-/* ── Settings footer — centered pill Done button ── */
-#ov-settings .mf {
-  justify-content: center;
-}
+#ov-settings .mf { justify-content: center; }
 #ov-settings .btn-save {
   border-radius: var(--radius-pill);
   padding: 10px 36px;
