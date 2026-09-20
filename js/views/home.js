@@ -1,24 +1,21 @@
 'use strict';
 /* Home dashboard tab state */
 window._homeTab = window._homeTab || 0;   /* 0 = today card, 1 = daily cycle */
-/* ═══════════════════════════════════════════════════════════
-   Home dashboard
-   • Today card (Hijri + Gregorian date, next prayer, event)
-   • Quote of the day
-   • Feature cards (Adkar, Prayer, Hijri, Names, Library)
-   ═══════════════════════════════════════════════════════════ */
+
+/* Home dashboard:
+   Today card (Hijri + Gregorian date, next prayer, event)
+   Quote of the day
+   Feature cards (Adkar, Prayer, Hijri, Names, Library) */
 
 async function renderHome(){
   const host = $('home-body');
   if(!host) return;
 
-  /* Ensure quote lang preference is loaded */
   if(typeof _quoteLang !== 'undefined' && _quoteLang === null){
     const saved = await store.getMeta('quoteLang');
     _quoteLang = saved === 'en' ? 'en' : 'ar';
   }
 
-  /* Build all three sections */
   const todayHTML = await renderTodayCardHTML();
   const quoteHTML = renderHomeQuoteHTML();
   const featuresHTML = renderHomeFeaturesHTML();
@@ -28,13 +25,9 @@ async function renderHome(){
     ${quoteHTML}
     ${featuresHTML}
   `;
-    if(typeof _attachHomeTabsSwipe === 'function'){
-    setTimeout(_attachHomeTabsSwipe, 0);
-  }
 
-  /* Reuse existing quote expand toggle */
-  if(typeof _quoteExpanded !== 'undefined'){
-    /* nothing extra needed — quote card already has its own click handler */
+  if(typeof _attachHomeTabsSwipe === 'function'){
+    setTimeout(_attachHomeTabsSwipe, 0);
   }
 
   if(typeof injectHeaderIcons === 'function'){
@@ -42,9 +35,6 @@ async function renderHome(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TODAY CARD
-   ═══════════════════════════════════════════════════════════ */
 async function renderTodayCardHTML(){
   const date = new Date();
   const hijri = (typeof getHijriParts === 'function') ? getHijriParts(date) : null;
@@ -52,16 +42,13 @@ async function renderTodayCardHTML(){
   const weekdayEn = date.toLocaleDateString('en-US', { weekday: 'long' });
   const monthEn = date.toLocaleDateString('en-US', { month: 'short' });
 
-  /* Hijri line */
   let hijriLine = '';
   if(hijri){
     hijriLine = `${weekdayAr} ${hijri.day} ${hijri.monthNameAr} ${hijri.year}`;
   }
 
-  /* Gregorian line */
   const gregorianLine = `${weekdayEn} ${date.getDate()} ${monthEn} ${date.getFullYear()}`;
 
-  /* Next prayer — only if we have a cached location */
   let prayerLine = '';
   let todayData = null;
   let location = null;
@@ -88,7 +75,6 @@ async function renderTodayCardHTML(){
           `;
         }
 
-        /* Look up tomorrow's data — needed for the daily cycle bar */
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const key = monthKey(location.lat, location.lng, tomorrow.getFullYear(), tomorrow.getMonth() + 1);
@@ -99,7 +85,6 @@ async function renderTodayCardHTML(){
       }
     }
   }catch(err){
-    /* NO_LOCATION or fetch error — show a friendly prompt instead of hiding */
     prayerLine = `
       <div class="home-today-prayer" onclick="openLocationPicker()" style="cursor:pointer">
         <span class="home-prayer-icon">${icon('map-pin', 16)}</span>
@@ -109,7 +94,6 @@ async function renderTodayCardHTML(){
     `;
   }
 
-  /* Today's special event — from Hijri events */
   let eventLine = '';
   try{
     if(typeof getTodaysEvents === 'function' && typeof getTodayHijri === 'function'){
@@ -118,9 +102,9 @@ async function renderTodayCardHTML(){
         const ev = events[0];
         eventLine = `
           <div class="home-today-event" onclick="openHijriEvent('${ev.id}')">
-            <span class="home-event-icon">${ev.icon}</span>
+            <span class="home-event-icon">${icon(EVENT_ICONS[ev.type] || 'calendar', 14)}</span>
             <span class="home-event-name">${ev.nameAr}</span>
-            <span class="home-event-arrow">›</span>
+            <span class="home-event-arrow">${icon('chevron-left', 14)}</span>
           </div>
         `;
       }
@@ -129,7 +113,6 @@ async function renderTodayCardHTML(){
     eventLine = '';
   }
 
-  /* Build tab 1: today card */
   const todayTabHTML = `
     <div class="home-today-card">
       <div class="home-today-date-ar" id="home-today-date-ar">${hijriLine}</div>
@@ -139,7 +122,6 @@ async function renderTodayCardHTML(){
     </div>
   `;
 
-  /* Build tab 2: daily cycle bar — only if data available */
   let cycleTabHTML = '';
   if(
     todayData && nextDay &&
@@ -149,7 +131,6 @@ async function renderTodayCardHTML(){
     try{
       const cycle = _computeDailyCycle(todayData, nextDay);
       if(cycle){
-        /* Expose data so the on-bar taps work on the home page too */
         window._homeCycleData = { today: todayData, nextDay: nextDay };
         cycleTabHTML = _renderDailyCycleHTML(cycle, todayData, nextDay);
       }
@@ -158,12 +139,10 @@ async function renderTodayCardHTML(){
     }
   }
 
-  /* If we can't render the cycle, just return the today card (no tabs) */
   if(!cycleTabHTML){
     return todayTabHTML;
   }
 
-   /* Two-tab swiper */
   const tab = window._homeTab || 0;
   return `
     <div class="home-tabs" id="home-tabs" data-tab="${tab}">
@@ -173,8 +152,8 @@ async function renderTodayCardHTML(){
           <span class="home-tab-dot ${tab === 1 ? 'on' : ''}" onclick="setHomeTab(1)"></span>
         </div>
         <div class="home-tabs-arrows">
-          <button class="home-tab-arrow" onclick="setHomeTab(0)" ${tab === 0 ? 'disabled' : ''}>‹</button>
-          <button class="home-tab-arrow" onclick="setHomeTab(1)" ${tab === 1 ? 'disabled' : ''}>›</button>
+          <button class="home-tab-arrow" onclick="setHomeTab(0)" ${tab === 0 ? 'disabled' : ''}>${icon('chevron-right', 16)}</button>
+          <button class="home-tab-arrow" onclick="setHomeTab(1)" ${tab === 1 ? 'disabled' : ''}>${icon('chevron-left', 16)}</button>
         </div>
       </div>
       <div class="home-tabs-body">
@@ -219,9 +198,6 @@ function _attachHomeTabsSwipe(){
   body.dataset.swipeAttached = '1';
 }
 
-/* ═══════════════════════════════════════════════════════════
-   QUOTE CARD (moved from adkar page)
-   ═══════════════════════════════════════════════════════════ */
 function renderHomeQuoteHTML(){
   if(typeof getTodayQuote !== 'function') return '';
 
@@ -231,7 +207,7 @@ function renderHomeQuoteHTML(){
   const lang = (typeof _quoteLang !== 'undefined' && _quoteLang) ? _quoteLang : 'ar';
   const tafsirText = lang === 'ar' ? (q.tafsirAr || '') : (q.tafsirEn || '');
   const tafsirClass = lang === 'ar' ? 'ar' : 'en';
-  const badgeIcon = q.type === 'quran' ? '📖' : '🕌';
+  const badgeIconName = q.type === 'quran' ? 'book-open' : 'mosque';
   const badgeLabel = q.type === 'quran' ? 'Verse' : 'Hadith';
 
   const isExpanded = (typeof _quoteExpanded !== 'undefined') ? _quoteExpanded : false;
@@ -249,10 +225,10 @@ function renderHomeQuoteHTML(){
       })()}
       <div class="quote-header">
         <div class="quote-badge">
-          <span class="quote-badge-icon">${badgeIcon}</span>
-          <span>${badgeLabel} · ${q.time}</span>
+          <span class="quote-badge-icon">${icon(badgeIconName, 14)}</span>
+          <span>${badgeLabel} \u00B7 ${q.time}</span>
         </div>
-        <span class="quote-expand-hint">${isExpanded ? '▲' : '▼'}</span>
+        <span class="quote-expand-hint">${icon(isExpanded ? 'chevron-up' : 'chevron-down', 14)}</span>
       </div>
 
       <div class="quote-text">${q.ar}</div>
@@ -262,14 +238,14 @@ function renderHomeQuoteHTML(){
 
       <div class="quote-tafsir-wrap">
         <div class="quote-tafsir-header">
-          <span class="quote-tafsir-label">📚 Tafsir</span>
+          <span class="quote-tafsir-label">${icon('book-open', 14)} Tafsir</span>
           <div class="quote-lang-toggle">
             <button class="quote-lang-btn ${lang==='ar'?'on':''}" onclick="event.stopPropagation();setQuoteLang('ar')">عربي</button>
             <button class="quote-lang-btn ${lang==='en'?'on':''}" onclick="event.stopPropagation();setQuoteLang('en')">EN</button>
           </div>
         </div>
         <div class="quote-tafsir-body ${tafsirClass}">${tafsirText}</div>
-        ${q.link ? `<a class="quote-link" href="${q.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 Read full source →</a>` : ''}
+        ${q.link ? `<a class="quote-link" href="${q.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${icon('external-link', 12)} Read full source</a>` : ''}
       </div>
     </div>
   `;
@@ -286,71 +262,14 @@ function toggleHomeQuote(event){
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   FEATURE CARDS
-   ═══════════════════════════════════════════════════════════ */
 function renderHomeFeaturesHTML(){
   const features = [
-    {
-      id: 'adkar',
-      icon: 'book-open',
-      color: '#f5a623',
-      labelAr: 'الأذكار',
-      labelEn: 'Adkar',
-      subAr: 'حصن المسلم',
-      subEn: 'Fortress of the Muslim',
-      action: 'goToAdkarCategories',
-    },
-    {
-      id: 'prayer',
-      icon: 'mosque',
-      color: '#4caf89',
-      labelAr: 'الصلاة',
-      labelEn: 'Prayer times',
-      subAr: 'مواقيت الصلاة',
-      subEn: 'Daily times',
-      action: 'openPrayerView',
-    },
-    {
-      id: 'hijri',
-      icon: 'calendar',
-      color: '#8b4cc9',
-      labelAr: 'التقويم',
-      labelEn: 'Hijri calendar',
-      subAr: 'الأحداث الإسلامية',
-      subEn: 'Islamic events',
-      action: 'openHijriView',
-    },
-    {
-      id: 'asma',
-      icon: 'sparkles',
-      color: '#c9604c',
-      labelAr: 'أسماء الله',
-      labelEn: '99 Names of Allah',
-      subAr: 'الأسماء الحسنى',
-      subEn: 'Asma al-Husna',
-      action: 'openAsmaView',
-    },
-    {
-      id: 'books',
-      icon: 'library',
-      color: '#4c7fc9',
-      labelAr: 'المكتبة',
-      labelEn: 'Library',
-      subAr: 'الكتب الإسلامية',
-      subEn: 'Islamic books',
-      action: 'openBooksView',
-    },
-	    {
-      id: 'tasbih',
-      icon: 'beads',
-      color: '#fab387',
-      labelAr: 'التسبيح',
-      labelEn: 'Tasbih',
-      subAr: 'مسبحة إلكترونية',
-      subEn: 'Digital counter',
-      action: 'openTasbihView',
-    },
+    { id:'adkar',  icon:'book-open',  color:'#f5a623', labelAr:'الأذكار',     labelEn:'Adkar',           subAr:'حصن المسلم',        subEn:'Fortress of the Muslim', action:'goToAdkarCategories' },
+    { id:'prayer', icon:'mosque',     color:'#4caf89', labelAr:'الصلاة',      labelEn:'Prayer times',    subAr:'مواقيت الصلاة',      subEn:'Daily times',            action:'openPrayerView' },
+    { id:'hijri',  icon:'calendar',   color:'#8b4cc9', labelAr:'التقويم',     labelEn:'Hijri calendar',  subAr:'الأحداث الإسلامية', subEn:'Islamic events',         action:'openHijriView' },
+    { id:'asma',   icon:'sparkles',   color:'#c9604c', labelAr:'أسماء الله',   labelEn:'99 Names of Allah',subAr:'الأسماء الحسنى',    subEn:'Asma al-Husna',          action:'openAsmaView' },
+    { id:'books',  icon:'library',    color:'#4c7fc9', labelAr:'المكتبة',     labelEn:'Library',         subAr:'الكتب الإسلامية',   subEn:'Islamic books',          action:'openBooksView' },
+    { id:'tasbih', icon:'beads',      color:'#fab387', labelAr:'التسبيح',     labelEn:'Tasbih',          subAr:'مسبحة إلكترونية',   subEn:'Digital counter',        action:'openTasbihView' },
   ];
 
   return `
@@ -367,9 +286,6 @@ function renderHomeFeaturesHTML(){
   `;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   NAVIGATION HELPERS
-   ═══════════════════════════════════════════════════════════ */
 function goToAdkar(){
   goToAdkarCategories();
 }

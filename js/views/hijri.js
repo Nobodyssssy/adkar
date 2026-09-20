@@ -1,16 +1,10 @@
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
-   Hijri calendar view
-   • Month grid with navigation
-   • Day cells with event markers
-   • Tap a day → event detail sheet (if events exist)
-   • Return-to-today button
-   ═══════════════════════════════════════════════════════════ */
+/* Hijri calendar view - month grid, event markers, day tap, event modal */
 
 let _hijriYear  = null;
 let _hijriMonth = null;
-let _calendarLang = 'ar';   /* 'ar' or 'en' for labels */
+let _calendarLang = 'ar';
 
 async function openHijriView(){
   const today = getTodayHijri();
@@ -19,7 +13,7 @@ async function openHijriView(){
     _hijriMonth = today.month;
   } else {
     _hijriYear  = 1448;
-    _hijriMonth = 1;      /* 1-indexed: 1 = Muharram */
+    _hijriMonth = 1;
   }
   showView('view-hijri');
   renderHijriCalendar();
@@ -29,7 +23,6 @@ function closeHijriView(){
   goHome();
 }
 
-/* ── Navigation ── */
 function hijriPrevMonth(){
   _hijriMonth--;
   if(_hijriMonth < 1){ _hijriMonth = 12; _hijriYear--; }
@@ -50,18 +43,12 @@ function hijriGoToday(){
   }
   renderHijriCalendar();
 }
-/* ═══════════════════════════════════════════════════════════
-   SWIPE NAVIGATION
-   Attach once — handles touch on the calendar grid.
-   Swipe right → prev month (RTL natural); swipe left → next month.
-   ═══════════════════════════════════════════════════════════ */
+
 function _attachHijriSwipe(){
   const grid = document.querySelector('.hijri-grid');
   if(!grid || grid.dataset.swipeAttached === '1') return;
 
-  let startX = 0;
-  let startY = 0;
-  let startTime = 0;
+  let startX = 0, startY = 0, startTime = 0;
 
   grid.addEventListener('touchstart', (e) => {
     if(e.touches.length !== 1) return;
@@ -76,31 +63,22 @@ function _attachHijriSwipe(){
     const dy = e.changedTouches[0].clientY - startY;
     const dt = Date.now() - startTime;
 
-    /* Ignore long-press, slow drags, or vertical gestures */
     if(dt > 600) return;
     if(Math.abs(dx) < 50) return;
     if(Math.abs(dx) < Math.abs(dy) * 1.2) return;
 
-    /* RTL: swipe right reveals the previous month */
-    if(dx > 0){
-      hijriPrevMonth();
-    } else {
-      hijriNextMonth();
-    }
+    if(dx > 0) hijriPrevMonth();
+    else hijriNextMonth();
   }, { passive: true });
 
   grid.dataset.swipeAttached = '1';
 }
 
-/* ── Toggle labels AR/EN ── */
 function toggleCalendarLang(){
   _calendarLang = (_calendarLang === 'ar') ? 'en' : 'ar';
   renderHijriCalendar();
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MAIN RENDER
-   ═══════════════════════════════════════════════════════════ */
 function renderHijriCalendar(){
   const host = $('hijri-body');
   if(!host) return;
@@ -110,12 +88,10 @@ function renderHijriCalendar(){
   const weekdayHeaders = _calendarLang === 'ar' ? grid.weekdayHeadersAr : grid.weekdayHeadersEn;
   const yearDisplay = _calendarLang === 'ar' ? `${grid.year} هـ` : `${grid.year} AH`;
 
-  /* Build the weekday header row */
   const weekRow = weekdayHeaders.map(w =>
     `<div class="hijri-weekday">${w}</div>`
   ).join('');
 
-  /* Build day cells */
   const dayCells = grid.days.map((d, idx) => {
     if(d.isEmpty) return `<div class="hijri-cell empty"></div>`;
 
@@ -127,7 +103,6 @@ function renderHijriCalendar(){
       hasEvents ? 'has-event' : '',
     ].filter(Boolean).join(' ');
 
-    /* Primary event for the dot / color */
     let dotHTML = '';
     if(hasEvents){
       const primary = d.events[0];
@@ -142,12 +117,11 @@ function renderHijriCalendar(){
     </div>`;
   }).join('');
 
-  /* Upcoming events list (short) */
   const upcoming = _getUpcomingListForView(grid);
 
   host.innerHTML = `
     <div class="hijri-header">
-      <button class="hijri-nav-btn" onclick="hijriPrevMonth()" data-icon="chevron-right"><span class="btn-icon"></span></button>
+      <button class="hijri-nav-btn" onclick="hijriPrevMonth()" aria-label="Previous month">${icon('chevron-right', 18)}</button>
       <div class="hijri-title-wrap" onclick="toggleCalendarLang()">
         <div class="hijri-month-title">${monthName}</div>
         <div class="hijri-year-sub">
@@ -155,7 +129,7 @@ function renderHijriCalendar(){
           <span class="hijri-lang-badge">${_calendarLang === 'ar' ? 'EN' : 'عربي'}</span>
         </div>
       </div>
-      <button class="hijri-nav-btn" onclick="hijriNextMonth()" data-icon="chevron-left"><span class="btn-icon"></span></button>
+      <button class="hijri-nav-btn" onclick="hijriNextMonth()" aria-label="Next month">${icon('chevron-left', 18)}</button>
     </div>
 
     <div class="hijri-grid">
@@ -164,8 +138,8 @@ function renderHijriCalendar(){
     </div>
 
     <div class="hijri-today-btn-wrap">
-      <button class="btn-cancel" onclick="hijriGoToday()" data-icon="rotate-ccw">
-        <span class="btn-icon"></span>
+      <button class="btn-cancel" onclick="hijriGoToday()">
+        ${icon('rotate-ccw', 14)}
         <span>${_calendarLang === 'ar' ? 'اليوم' : 'Today'}</span>
       </button>
     </div>
@@ -173,29 +147,27 @@ function renderHijriCalendar(){
     ${upcoming.length ? `
       <div class="hijri-upcoming">
         <div class="hijri-upcoming-title">${_calendarLang === 'ar' ? 'أحداث الشهر' : 'Events this month'}</div>
-        ${upcoming.map(e => `
+        ${upcoming.map(e => {
+          return `
           <div class="hijri-upcoming-row" onclick="openHijriEvent('${e.event.id}')">
-            <span class="hijri-upcoming-icon">${e.event.icon}</span>
+            <span class="hijri-upcoming-icon">${icon(EVENT_ICONS[e.event.type] || 'calendar', 14)}</span>
             <span class="hijri-upcoming-name">${_calendarLang === 'ar' ? e.event.nameAr : e.event.nameEn}</span>
             <span class="hijri-upcoming-day">${e.dayLabel}</span>
           </div>
-        `).join('')}
+        `;}).join('')}
       </div>
     ` : ''}
   `;
 
-  /* Store grid on window for click handlers */
   window._hijriGrid = grid;
 
-  /* Inject any SVG icons in the freshly-rendered calendar */
   if(typeof injectHeaderIcons === 'function'){
     setTimeout(() => injectHeaderIcons(), 0);
   }
 
-  /* Attach swipe handler (idempotent — safe to call every render) */
   _attachHijriSwipe();
 }
-/* ── Get events that fall inside the currently displayed month ── */
+
 function _getUpcomingListForView(grid){
   const seen = new Set();
   const list = [];
@@ -205,13 +177,12 @@ function _getUpcomingListForView(grid){
       if(seen.has(ev.id)) return;
       seen.add(ev.id);
 
-      /* Weekly events: show weekday names instead of Hijri day */
       let dayLabel;
       if(Array.isArray(ev.hijriDate.weekdays)){
         const names = _calendarLang === 'ar'
           ? ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت']
           : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        dayLabel = ev.hijriDate.weekdays.map(w => names[w]).join(' · ');
+        dayLabel = ev.hijriDate.weekdays.map(w => names[w]).join(' \u00B7 ');
       } else {
         dayLabel = d.day;
       }
@@ -222,21 +193,17 @@ function _getUpcomingListForView(grid){
   return list;
 }
 
-/* ── Color for event type ── */
 function eventColor(type){
   switch(type){
     case 'major':       return 'var(--red)';
     case 'recommended': return 'var(--accent)';
-    case 'sacred':      return '#a06cd5';
+    case 'sacred':      return 'var(--accent2)';
     case 'weekly':      return 'var(--blue)';
     case 'reflection':  return 'var(--text3)';
     default:            return 'var(--accent)';
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Day tap → show events for that day
-   ═══════════════════════════════════════════════════════════ */
 function onHijriDayClick(idx){
   const grid = window._hijriGrid;
   if(!grid) return;
@@ -244,23 +211,17 @@ function onHijriDayClick(idx){
   if(!cell || cell.isEmpty) return;
 
   if(!cell.events || !cell.events.length){
-    /* No event → simple toast with date */
-    toast(`${cell.day} ${grid.monthNameEn} · ${cell.gregorianDay}/${cell.gregorian.getMonth()+1}`);
+    toast(`${cell.day} ${grid.monthNameEn} \u00B7 ${cell.gregorianDay}/${cell.gregorian.getMonth()+1}`);
     return;
   }
 
-  /* Multiple events? Show first (extend later if needed) */
   openHijriEvent(cell.events[0].id);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Event detail modal — reuse the .modal-box style
-   ═══════════════════════════════════════════════════════════ */
 function openHijriEvent(eventId){
   const ev = HIJRI_EVENTS.find(e => e.id === eventId);
   if(!ev){ toast('Event not found'); return; }
 
-  /* Build or reuse modal */
   let modal = $('ov-hijri-event');
   if(!modal){
     modal = document.createElement('div');
@@ -271,14 +232,14 @@ function openHijriEvent(eventId){
       <div class="modal-box" style="max-width:520px">
         <div class="mh">
           <h2 id="he-title"></h2>
-          <button class="btn-close" onclick="closeHijriEvent()">✕</button>
+          <button class="btn-close" onclick="closeHijriEvent()" aria-label="Close">${icon('x', 16)}</button>
         </div>
         <div class="mb" id="he-body"></div>
       </div>`;
     document.body.appendChild(modal);
   }
 
-  $('he-title').innerHTML = `${ev.icon} ${_calendarLang === 'ar' ? ev.nameAr : ev.nameEn}`;
+  $('he-title').innerHTML = `${icon(EVENT_ICONS[ev.type] || 'calendar', 16)} ${_calendarLang === 'ar' ? ev.nameAr : ev.nameEn}`;
   $('he-body').innerHTML = _renderEventDetail(ev);
 
   modal.classList.add('open');
@@ -291,21 +252,20 @@ function closeHijriEvent(){
   unlockBody();
 }
 
-/* ── Event detail HTML ── */
 function _renderEventDetail(ev){
   const lang = _calendarLang;
-  const desc  = lang === 'ar' ? ev.descAr : ev.descEn;
-  const virtue= lang === 'ar' ? ev.virtueAr : ev.virtueEn;
-  const acts  = lang === 'ar' ? ev.actsAr : ev.actsEn;
-  const prep  = lang === 'ar' ? ev.prepAr : ev.prepEn;
-  const dhikr = ev.specialDhikr;
+  const desc   = lang === 'ar' ? ev.descAr : ev.descEn;
+  const virtue = lang === 'ar' ? ev.virtueAr : ev.virtueEn;
+  const acts   = lang === 'ar' ? ev.actsAr : ev.actsEn;
+  const prep   = lang === 'ar' ? ev.prepAr : ev.prepEn;
+  const dhikr  = ev.specialDhikr;
 
   const sections = [];
 
   if(desc){
     sections.push(`
       <div class="hijri-sec">
-        <div class="hijri-sec-label">${lang === 'ar' ? '📖 ما هو' : '📖 What it is'}</div>
+        <div class="hijri-sec-label">${icon('book-open', 14)} ${lang === 'ar' ? 'ما هو' : 'What it is'}</div>
         <div class="hijri-sec-body ${lang === 'ar' ? 'ar' : 'en'}">${desc}</div>
       </div>`);
   }
@@ -313,7 +273,7 @@ function _renderEventDetail(ev){
   if(virtue){
     sections.push(`
       <div class="hijri-sec">
-        <div class="hijri-sec-label">${lang === 'ar' ? '✨ الفضل' : '✨ Virtue'}</div>
+        <div class="hijri-sec-label">${icon('sparkles', 14)} ${lang === 'ar' ? 'الفضل' : 'Virtue'}</div>
         <div class="hijri-sec-body ${lang === 'ar' ? 'ar' : 'en'}">${virtue}</div>
       </div>`);
   }
@@ -321,7 +281,7 @@ function _renderEventDetail(ev){
   if(acts && acts.length){
     sections.push(`
       <div class="hijri-sec">
-        <div class="hijri-sec-label">${lang === 'ar' ? '🕌 ما يُستحب فعله' : '🕌 Recommended acts'}</div>
+        <div class="hijri-sec-label">${icon('mosque', 14)} ${lang === 'ar' ? 'ما يُستحب فعله' : 'Recommended acts'}</div>
         <ul class="hijri-sec-list ${lang === 'ar' ? 'ar' : 'en'}">
           ${acts.map(a => `<li>${a}</li>`).join('')}
         </ul>
@@ -331,7 +291,7 @@ function _renderEventDetail(ev){
   if(prep){
     sections.push(`
       <div class="hijri-sec">
-        <div class="hijri-sec-label">${lang === 'ar' ? '📋 الاستعداد' : '📋 Preparation'}</div>
+        <div class="hijri-sec-label">${icon('list', 14)} ${lang === 'ar' ? 'الاستعداد' : 'Preparation'}</div>
         <div class="hijri-sec-body ${lang === 'ar' ? 'ar' : 'en'}">${prep}</div>
       </div>`);
   }
@@ -339,21 +299,21 @@ function _renderEventDetail(ev){
   if(dhikr && dhikr.ar){
     sections.push(`
       <div class="hijri-sec hijri-dhikr-sec">
-        <div class="hijri-sec-label">${lang === 'ar' ? '🤲 ذكر خاص بهذا اليوم' : '🤲 Special dhikr'}</div>
+        <div class="hijri-sec-label">${icon('hand-heart', 14)} ${lang === 'ar' ? 'ذكر خاص بهذا اليوم' : 'Special dhikr'}</div>
         <div class="hijri-dhikr-ar">${dhikr.ar}</div>
         <div class="hijri-dhikr-en">${dhikr.en}</div>
         <div class="hijri-dhikr-count">${dhikr.count}</div>
-        ${dhikr.source && dhikr.source.url ? `<a class="hijri-source-link" href="${dhikr.source.url}" target="_blank" rel="noopener">🔗 ${dhikr.source.ref}</a>` : (dhikr.source && dhikr.source.ref ? `<div class="hijri-dhikr-source">${dhikr.source.ref}</div>` : '')}
+        ${dhikr.source && dhikr.source.url ? `<a class="hijri-source-link" href="${dhikr.source.url}" target="_blank" rel="noopener">${icon('external-link', 12)} ${dhikr.source.ref}</a>` : (dhikr.source && dhikr.source.ref ? `<div class="hijri-dhikr-source">${dhikr.source.ref}</div>` : '')}
       </div>`);
   }
 
   if(ev.sources && ev.sources.length){
     sections.push(`
       <div class="hijri-sec">
-        <div class="hijri-sec-label">${lang === 'ar' ? '📚 المصادر' : '📚 Sources'}</div>
+        <div class="hijri-sec-label">${icon('library', 14)} ${lang === 'ar' ? 'المصادر' : 'Sources'}</div>
         <ul class="hijri-sources-list">
           ${ev.sources.map(s => s.url
-            ? `<li><a href="${s.url}" target="_blank" rel="noopener">${s.ref} →</a></li>`
+            ? `<li><a href="${s.url}" target="_blank" rel="noopener">${s.ref}</a></li>`
             : `<li>${s.ref}</li>`
           ).join('')}
         </ul>
