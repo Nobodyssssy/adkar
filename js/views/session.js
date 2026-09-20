@@ -20,17 +20,16 @@ async function startSession(){
   sessIdx = 0;
   sessTapCount = 0;
 
-  /* Resume at the first incomplete dhikr, based on live counters.
-     This is always in sync with the category card's "X/N done". */
+  /* Resume at the first incomplete dhikr, based on live counters. */
   sessIdx = 0;
   for(let i = 0; i < sessItems.length; i++){
     const d = sessItems[i];
     const k = `c_${d.id}`;
     if((counters[k] || 0) < d.repeat){ sessIdx = i; break; }
-    if(i === sessItems.length - 1) sessIdx = i;   // all done → stay on last
+    if(i === sessItems.length - 1) sessIdx = i;
   }
   sessTapCount = counters[`c_${sessItems[sessIdx].id}`] || 0;
-  
+
   const titleBase = getCat(currentCat).ar;
   const titleTag  = activeTag ? ' · ' + ((typeof _tagLabel === 'function') ? _tagLabel(activeTag) : activeTag) : '';
   $('sess-title').textContent = titleBase + titleTag;
@@ -44,9 +43,6 @@ async function startSession(){
 }
 
 function closeSession(){
-  /* Do NOT clear saved progress — closing should allow resume.
-     Progress is cleared only when the session is completed,
-     or when startSession detects the saved idx is out of range. */
   $('session-overlay').classList.remove('open');
   $('session-overlay').classList.remove('is-done');
   var body = $('sess-body');
@@ -72,7 +68,7 @@ function renderSessionStep(){
   $('sess-back-btn').style.pointerEvents = sessIdx === 0 ? 'none' : 'auto';
 
   const relBadge = d.reliability
-    ? `<span class="badge badge-${d.reliability}" style="font-size:12px;padding:3px 10px">${REL_LABEL[d.reliability]}</span>`
+    ? `<span class="badge badge-${d.reliability}" style="font-size:12px;padding:3px 10px">${icon(REL_ICON[d.reliability], 12)} ${REL_LABEL[d.reliability]}</span>`
     : '';
   const translit = d.transliteration
     ? `<div class="session-info" style="background:var(--surface2);border:1px solid var(--border);direction:ltr;text-align:center;font-style:italic;font-size:12px;color:var(--text3)">${esc(d.transliteration)}</div>`
@@ -138,18 +134,18 @@ function sessionTap(id, target){
   $('sess-count-disp').textContent = isDone ? 'Done' : Math.max(0, target - sessTapCount) + ' left';
   $('sess-pfill').style.width = pct + '%';
 
-const tapBtn = $('sess-tap');
-const nextBtn = $('sess-next-btn');
-if(isDone){
-  tapBtn.classList.add('done');
-  nextBtn.classList.add('done');
-  $('sess-pfill').classList.add('done-fill');
-  toast('✓ Completed');
-} else {
-  tapBtn.classList.remove('done');
-  nextBtn.classList.remove('done');
-  $('sess-pfill').classList.remove('done-fill');
-}
+  const tapBtn = $('sess-tap');
+  const nextBtn = $('sess-next-btn');
+  if(isDone){
+    tapBtn.classList.add('done');
+    nextBtn.classList.add('done');
+    $('sess-pfill').classList.add('done-fill');
+    toast('Completed', 'check');
+  } else {
+    tapBtn.classList.remove('done');
+    nextBtn.classList.remove('done');
+    $('sess-pfill').classList.remove('done-fill');
+  }
 }
 
 function sessionNext(){

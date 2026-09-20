@@ -3,7 +3,7 @@
 function askDelDhikr(id){
   delId = id;
   delCat = null;
-  $('conf-ico').textContent = '🗑️';
+  $('conf-ico').innerHTML = icon('trash', 32);
   $('conf-t').textContent = 'Delete this dhikr?';
   $('conf-x').textContent = 'This cannot be undone.';
   $('ov-confirm').classList.add('open');
@@ -17,7 +17,7 @@ function askDelCat(key){
   const n = data.filter(d =>
     Array.isArray(d.categories) && d.categories.includes(key)
   ).length;
-  $('conf-ico').textContent = '📂';
+  $('conf-ico').innerHTML = icon('layers', 32);
   $('conf-t').textContent = `Delete "${c.ar}"?`;
   $('conf-x').textContent = `This will remove it from ${n} adkar. Dhikr that were only in this category will be deleted entirely.`;
   $('ov-confirm').classList.add('open');
@@ -33,13 +33,9 @@ function closeConfirm(){
 
 function doDelete(){
   if(delCat){
-    /* Remove the category */
     cats = cats.filter(c => c.key !== delCat);
     store.deleteCat(delCat);
 
-    /* For each dhikr that had this category:
-       - remove it from the categories array
-       - if categories becomes empty, delete the dhikr entirely */
     const toDelete = [];
     data.forEach(d => {
       if(!Array.isArray(d.categories)) return;
@@ -61,7 +57,7 @@ function doDelete(){
     if(toDelete.length) store.saveCounters(counters);
     store.saveFavs(favs);
 
-    toast('🗑️ Category deleted');
+    toast('Category deleted', 'trash');
     renderCatListBody();
     renderCatsGrid();
 
@@ -72,7 +68,7 @@ function doDelete(){
     store.deleteAdkar(delId);
     store.removeFav(delId);
     store.setCounter(delId, 0);
-    toast('🗑️ Deleted');
+    toast('Deleted', 'trash');
     if(currentCat) renderAdkarGrid();
     renderCatsGrid();
   }

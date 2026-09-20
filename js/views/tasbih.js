@@ -180,7 +180,7 @@ function tasbihOpenSettings(){
       <div class="modal-box" style="max-width:420px">
         <div class="mh">
           <h2>Tasbih settings</h2>
-          <button class="btn-close" onclick="tasbihCloseSettings()">✕</button>
+             <button class="btn-close" onclick="tasbihCloseSettings()" aria-label="Close">${icon('x', 16)}</button>
         </div>
         <div class="mb" id="tasbih-settings-body"></div>
       </div>`;
@@ -296,7 +296,7 @@ function tasbihConfirmReset(){
   }
   const modal = $('ov-confirm');
   if(modal){
-    $('conf-ico').textContent = '🔄';
+    $('conf-ico').innerHTML = icon('rotate-ccw', 32);
     $('conf-t').textContent = 'Reset counter?';
     $('conf-x').textContent = `Current count: ${_tasbihState.count}. This cannot be undone.`;
     const delBtn = modal.querySelector('.btn-del');

@@ -1,23 +1,18 @@
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
-   Books library view — categories first, drill down to books
-   • Landing: category cards (+ continue-reading strip + search)
-   • Category: book list for that category
-   • Detail: book modal with start/continue
-   ═══════════════════════════════════════════════════════════ */
+/* Books library view - categories first, drill down to books
+   Landing: category cards (+ continue-reading strip + search)
+   Category: book list for that category
+   Detail: book modal with start/continue */
 
-let _booksLang = 'ar';          /* 'ar' | 'en' */
-let _booksCategory = null;      /* null = category landing, else category id */
+let _booksLang = 'ar';
+let _booksCategory = null;
 let _booksQuery = '';
 let _booksDetailId = null;
 
-/* ═══════════════════════════════════════════════════════════
-   Entry / exit
-   ═══════════════════════════════════════════════════════════ */
 async function openBooksView(){
   await loadReadingProgress();
-  await loadBookmarks();          // ← add this line
+  await loadBookmarks();
   _booksQuery = '';
   _booksCategory = null;
   showView('view-books');
@@ -25,42 +20,31 @@ async function openBooksView(){
 }
 
 function closeBooksView(){
-  /* Smart back: if inside a category, go back one step */
   if(_booksCategory){
     closeBooksCategory();
     return;
   }
-  /* Otherwise, exit to home */
   goHome();
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MAIN RENDER — dispatches to category view or book list
-   ═══════════════════════════════════════════════════════════ */
 function renderBooksGrid(){
   const host = $('books-body');
   if(!host) return;
 
-  /* Search active → book list (regardless of category) */
   if(_booksQuery.trim()){
     renderBookList(host, searchBooks(_booksQuery), true);
     return;
   }
 
-  /* Category drill-down */
   if(_booksCategory){
     const list = getBooksByCategory(_booksCategory);
     renderBookList(host, list, false);
     return;
   }
 
-  /* Default: category landing */
   renderCategoryLanding(host);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   LANDING — categories + continue reading + search
-   ═══════════════════════════════════════════════════════════ */
 function renderCategoryLanding(host){
   const counts = getCategoryBookCounts();
   const recentlyRead = getRecentlyReadBooks(3);
@@ -86,7 +70,7 @@ function renderCategoryLanding(host){
 
     ${recentlyRead.length ? `
       <div class="books-section">
-        <div class="books-section-title">${_booksLang === 'ar' ? '📖 متابعة القراءة' : '📖 Continue reading'}</div>
+        <div class="books-section-title">${icon('book-open', 16)} ${_booksLang === 'ar' ? 'متابعة القراءة' : 'Continue reading'}</div>
         <div class="continue-strip">
           ${recentlyRead.map(b => continueCardHTML(b)).join('')}
         </div>
@@ -94,23 +78,22 @@ function renderCategoryLanding(host){
     ` : ''}
 
     <div class="books-section">
-      <div class="books-section-title">${_booksLang === 'ar' ? '📚 الفئات' : '📚 Categories'}</div>
+      <div class="books-section-title">${icon('library', 16)} ${_booksLang === 'ar' ? 'الفئات' : 'Categories'}</div>
       <div class="cat-cards-grid">
         ${BOOK_CATEGORIES.map(cat => categoryCardHTML(cat, counts[cat.id] || 0)).join('')}
       </div>
     </div>
   `;
-    if(typeof injectHeaderIcons === 'function'){
+
+  if(typeof injectHeaderIcons === 'function'){
     setTimeout(() => injectHeaderIcons(), 0);
   }
 
-  /* Attach covers to continue-reading cards */
   if(typeof generateCoversForGrid === 'function'){
     setTimeout(() => generateCoversForGrid(), 50);
   }
 }
 
-/* ── Category card ── */
 function categoryCardHTML(cat, count){
   const items = BOOKS.filter(b => b.category === cat.id);
   const started = items.filter(b => {
@@ -123,8 +106,8 @@ function categoryCardHTML(cat, count){
   }).length;
 
   const progressLine = _booksLang === 'ar'
-    ? `${count} ${count === 1 ? 'كتاب' : 'كتب'}${started ? ` · ${started} قيد القراءة` : ''}`
-    : `${count} ${count === 1 ? 'book' : 'books'}${started ? ` · ${started} reading` : ''}`;
+    ? `${count} ${count === 1 ? 'كتاب' : 'كتب'}${started ? ` - ${started} قيد القراءة` : ''}`
+    : `${count} ${count === 1 ? 'book' : 'books'}${started ? ` - ${started} reading` : ''}`;
 
   return `
     <div class="cat-card-lg" style="--cc:${cat.color}" onclick="openBooksCategory('${cat.id}')">
@@ -138,7 +121,6 @@ function categoryCardHTML(cat, count){
   `;
 }
 
-/* ── Continue reading card ── */
 function continueCardHTML(b){
   const progress = getBookProgress(b.id);
   const pct = (progress && progress.totalPages)
@@ -146,12 +128,12 @@ function continueCardHTML(b){
     : 0;
   const title = _booksLang === 'ar' ? b.titleAr : (b.titleEn || b.titleAr);
 
-const pinnedIds = (_bookmarks && _bookmarks['_pinned']) || [];
-const isPinned = pinnedIds.includes(b.id);
+  const pinnedIds = (_bookmarks && _bookmarks['_pinned']) || [];
+  const isPinned = pinnedIds.includes(b.id);
 
-return `
+  return `
     <div class="continue-card" onclick="openBookDetail('${b.id}')">
-      ${isPinned ? `<div class="continue-pin-badge">★</div>` : ''}
+      ${isPinned ? `<div class="continue-pin-badge">${icon('bookmark-filled', 12)}</div>` : ''}
       <div class="continue-cover" id="cover-${b.id}">
         <div class="book-cover-placeholder">${icon('book-open', 30)}</div>
       </div>
@@ -164,12 +146,9 @@ return `
   `;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BOOK LIST — inside a category or search results
-   ═══════════════════════════════════════════════════════════ */
 function renderBookList(host, list, isSearch){
   const cat = isSearch ? null : getCategoryById(_booksCategory);
-  const backLabel = _booksLang === 'ar' ? '← الفئات' : '← Categories';
+  const backLabel = _booksLang === 'ar' ? 'الفئات' : 'Categories';
   const title = isSearch
     ? (_booksLang === 'ar' ? 'نتائج البحث' : 'Search results')
     : (_booksLang === 'ar' ? cat.ar : cat.en);
@@ -197,7 +176,7 @@ function renderBookList(host, list, isSearch){
 
     ${list.length === 0
       ? `<div class="adkar-empty">
-           <div class="adkar-empty-icon">📚</div>
+           <div class="adkar-empty-icon">${icon('library', 40)}</div>
            <div>${_booksLang === 'ar' ? 'لا توجد نتائج' : 'No results'}</div>
          </div>`
       : `<div class="books-grid">
@@ -210,7 +189,6 @@ function renderBookList(host, list, isSearch){
   }
 }
 
-/* ── Individual book card (used in book list) ── */
 function bookCardHTML(b){
   const cat = getCategoryById(b.category);
   const progress = getBookProgress(b.id);
@@ -229,7 +207,7 @@ function bookCardHTML(b){
       </div>
       <div class="book-progress-text">
         ${isFinished
-          ? (_booksLang === 'ar' ? '✓ منتهي' : '✓ Finished')
+          ? `${icon('check', 12)} ${_booksLang === 'ar' ? 'منتهي' : 'Finished'}`
           : (_booksLang === 'ar'
               ? `صفحة ${progress.page} / ${progress.totalPages}`
               : `Page ${progress.page} of ${progress.totalPages}`)}
@@ -249,21 +227,15 @@ function bookCardHTML(b){
   </div>`;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Helpers
-   ═══════════════════════════════════════════════════════════ */
 function getRecentlyReadBooks(limit){
   limit = limit || 3;
   if(!_readingProgress) _readingProgress = {};
 
-  /* Pinned book IDs — books the user starred to pin to Continue reading */
   const pinnedIds = (_bookmarks && _bookmarks['_pinned']) || [];
 
-  /* Combine: pinned (in pin order) + recently-read (unfinished, by lastRead desc) */
   const seen = new Set();
   const result = [];
 
-  /* 1. Pinned books first, in the order they were pinned */
   for(const id of pinnedIds){
     if(seen.has(id)) continue;
     const book = getBookById(id);
@@ -273,7 +245,6 @@ function getRecentlyReadBooks(limit){
     }
   }
 
-  /* 2. Recently-read unfinished books, in reverse-chronological order */
   const recent = Object.entries(_readingProgress)
     .filter(([_, p]) => p && p.lastRead && (!p.totalPages || p.page < p.totalPages))
     .sort((a, b) => b[1].lastRead - a[1].lastRead);
@@ -291,9 +262,6 @@ function getRecentlyReadBooks(limit){
   return result.slice(0, limit);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   UI handlers
-   ═══════════════════════════════════════════════════════════ */
 function setBooksLang(lang){
   _booksLang = lang;
   renderBooksGrid();
@@ -325,15 +293,11 @@ function onBooksSearch(value){
   }, 200);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   DETAIL MODAL
-   ═══════════════════════════════════════════════════════════ */
 function openBookDetail(id){
   const b = getBookById(id);
   if(!b) return;
   _booksDetailId = id;
 
-  /* Save scroll position BEFORE locking body */
   window._booksSavedScroll = window.scrollY || window.pageYOffset || 0;
 
   ensureBookDetailModal();
@@ -380,7 +344,7 @@ function renderBookDetail(b){
         </div>
         <div class="book-progress-text">
           ${isFinished
-            ? (ar ? '✓ انتهيت من هذا الكتاب' : '✓ Finished reading')
+            ? `${icon('check', 12)} ${ar ? 'انتهيت من هذا الكتاب' : 'Finished reading'}`
             : (ar ? `توقفت عند صفحة ${progress.page}` : `Stopped at page ${progress.page}`)}
         </div>
       </div>` : ''}
@@ -388,18 +352,17 @@ function renderBookDetail(b){
     <div class="book-detail-actions">
       <button class="btn-save" style="flex:1;padding:14px;font-size:15px" onclick="readBook('${b.id}')">
         ${isRead
-          ? (ar ? '📖 متابعة القراءة' : '📖 Continue reading')
-          : (ar ? '📖 ابدأ القراءة' : '📖 Start reading')}
+          ? `${icon('book-open', 16)} ${ar ? 'متابعة القراءة' : 'Continue reading'}`
+          : `${icon('book-open', 16)} ${ar ? 'ابدأ القراءة' : 'Start reading'}`}
       </button>
     </div>
 
     ${isRead ? `
       <button class="book-reset-btn" onclick="resetBookProgress('${b.id}')">
-        ${ar ? '↺ إعادة تعيين التقدم' : '↺ Reset progress'}
+        ${icon('rotate-ccw', 14)} ${ar ? 'إعادة تعيين التقدم' : 'Reset progress'}
       </button>` : ''}
   `;
 
-  /* Attach cover to the detail view */
   const coverEl = $(`detail-cover-${b.id}`);
   if(coverEl && typeof attachBookCover === 'function'){
     setTimeout(() => attachBookCover(b.id, coverEl), 30);
@@ -431,7 +394,7 @@ function ensureBookDetailModal(){
     <div class="modal-box" style="max-width:520px">
       <div class="mh">
         <h2 id="book-detail-title"></h2>
-        <button class="btn-close" onclick="closeBookDetail()">✕</button>
+        <button class="btn-close" onclick="closeBookDetail()" aria-label="Close">${icon('x', 16)}</button>
       </div>
       <div class="mb" id="book-detail-body"></div>
     </div>`;
@@ -444,19 +407,13 @@ async function resetBookProgress(id){
   await clearBookProgress(id);
   const b = getBookById(id);
   if(b) renderBookDetail(b);
-  toast(ar ? 'تمت إعادة التعيين' : 'Progress reset');
+  toast(ar ? 'تمت إعادة التعيين' : 'Progress reset', 'rotate-ccw');
 }
 
-/* ═══════════════════════════════════════════════════════════
-   READER LAUNCHER
-   ═══════════════════════════════════════════════════════════ */
 function readBook(id){
   const b = getBookById(id);
   if(!b) return;
 
-  /* Close the detail modal */
   closeBookDetail();
-
-  /* Open the in-app reader */
   openReader(id);
 }
