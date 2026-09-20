@@ -142,16 +142,16 @@
   display: block;
 }
 .adkar-btn.fav.on {
-  color: #e8c97a;
-  border-color: #e8c97a;
-  background: rgba(232, 201, 122, .1);
+color: var(--accent2);
+border-color: var(--accent2);
+background: color-mix(in srgb, var(--accent2) 10%, transparent);
 }
 .adkar-btn.fav.on svg {
-  fill: #e8c97a;
+fill: var(--accent2);
 }
 .adkar-btn.fav:hover {
-  color: #e8c97a;
-  border-color: #e8c97a;
+color: var(--accent2);
+border-color: var(--accent2);
 }
 .adkar-btn.edit:hover {
   color: var(--blue);

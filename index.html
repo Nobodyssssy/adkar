@@ -49,6 +49,7 @@
 <div class="menu-overlay" id="menu-overlay" onclick="if(event.target===this)closeMainMenu()">
 
   <div class="menu-dropdown" id="menu-dropdown">
+  
   <button class="menu-item" onclick="closeMainMenu();goHome()" data-icon="home">
     <span class="menu-icon"></span>
     <span class="menu-label">Home</span>
@@ -82,6 +83,11 @@
     <button class="menu-item" onclick="closeMainMenu();openTasbihView()" data-icon="beads">
     <span class="menu-icon"></span>
     <span class="menu-label">Tasbih</span>
+  </button>
+  
+    <button type="button" class="menu-item" data-icon="settings" onclick="openSettings()">
+    <span class="menu-icon"></span>
+    <span class="menu-label">Settings</span>
   </button>
   
 </div>
@@ -401,6 +407,39 @@
 <script src="js/views/reader.js"></script>
 <script src="js/io.js"></script>
 <script src="js/app.js"></script>
+<div class="ov center" id="ov-settings" onclick="if(event.target === this) closeSettings()">
+  <div class="modal-box">
+    <div class="mh">
+      <h2>Settings</h2>
+      <button class="btn-close" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="mb">
+      <div class="fg">
+        <div class="fl">Theme</div>
+        <div class="filter-row">
+          <button type="button" class="filter-chip" data-theme-btn="dark">Dark</button>
+          <button type="button" class="filter-chip" data-theme-btn="light">Light</button>
+        </div>
+      </div>
+
+      <div class="fg">
+        <div class="fl">Color variant</div>
+        <div class="filter-row">
+          <button type="button" class="filter-chip" data-accent-btn="gold"><span class="accent-dot dot-gold"></span>Gold</button>
+          <button type="button" class="filter-chip" data-accent-btn="peach"><span class="accent-dot dot-peach"></span>Peach</button>
+          <button type="button" class="filter-chip" data-accent-btn="blue"><span class="accent-dot dot-blue"></span>Blue</button>
+          <button type="button" class="filter-chip" data-accent-btn="green"><span class="accent-dot dot-green"></span>Green</button>
+          <button type="button" class="filter-chip" data-accent-btn="mauve"><span class="accent-dot dot-mauve"></span>Mauve</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mf">
+      <button class="btn-save" onclick="closeSettings()">Done</button>
+    </div>
+  </div>
+</div>
 </body>
 <script>
   // ── Service worker registration ──

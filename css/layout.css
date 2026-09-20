@@ -402,15 +402,15 @@ header{
 #btn-favs,
 #btn-favs svg,
 header #btn-favs {
-  color: #e8c97a !important;
+color: var(--accent2) !important;
 }
 #btn-favs:hover {
-  color: #f0d580 !important;
-  border-color: #e8c97a !important;
-  background: rgba(232,201,122,.12) !important;
+color: var(--accent2) !important;
+border-color: var(--accent2) !important;
+background: color-mix(in srgb, var(--accent2) 12%, transparent) !important;
 }
 #btn-favs.active {
-  color: #e8c97a !important;
-  border-color: #e8c97a !important;
-  background: rgba(232,201,122,.15) !important;
+color: var(--accent2) !important;
+border-color: var(--accent2) !important;
+background: color-mix(in srgb, var(--accent2) 15%, transparent) !important;
 }

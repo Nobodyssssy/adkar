@@ -6,7 +6,6 @@
    • Migrate from localStorage on first run
    • Then render the UI
    ═══════════════════════════════════════════════════════════ */
-
 (async function boot(){
   try{
     /* 1. Load everything from IndexedDB into memory */
@@ -14,46 +13,51 @@
 
     /* 1b. Load icon sprite into the DOM (so <use> references work) */
     await loadIconSprite();
-	
+
     /* 2. Daily reset check (now async) */
     await store.checkDailyReset();
 
     /* 3. Build the fuzzy search index (once data is loaded) */
     rebuildSearchIndex();
 
-    /* 4. Restore theme preference */
+    /* 4. Restore theme + accent preference */
     const savedTheme = await store.getMeta('theme');
+    const savedAccent = await store.getMeta('accent') || 'gold';
     if(savedTheme === 'light'){
       isLight = true;
       document.body.classList.add('light');
     }
+    applyAccent(savedAccent);
     updateThemeColorMeta();
 
     /* 5. Inject header icons */
     injectHeaderIcons();
 
-    /* 5. Render home dashboard */
+    /* 5.1 Render home dashboard */
     renderHome();
 
-    /* 4. Global keyboard shortcuts */
+    /* 6. Global keyboard shortcuts */
     document.addEventListener('keydown', e => {
       if(e.key === 'Escape'){
         const sess = $('session-overlay');
         if(sess && sess.classList.contains('open')) closeSession();
+        
+        const settings = document.getElementById('ov-settings');
+        if(settings && settings.classList.contains('open')) closeSettings();
       }
     });
 
-    /* 5. Standalone-mode class */
+    /* 7. Standalone-mode class */
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true;
     if(isStandalone) document.documentElement.classList.add('pwa-standalone');
 
-    /* 6. Log */
-  console.log(
-    '%cصاحب · Sahib' + (isStandalone ? ' (installed)' : ''),
-    'color:#c9a84c;font-weight:bold'
-  );
+    /* 8. Log */
+    console.log(
+      '%cصاحب · Sahib' + (isStandalone ? ' (installed)' : ''),
+      'color:#c9a84c;font-weight:bold'
+    );
   }catch(err){
     console.error('[app] boot failed:', err);
     /* Fallback: still try to render, might work with partial state */
@@ -131,6 +135,92 @@ function updateThemeToggleIcon(){
 function updateThemeColorMeta(){
   const meta = document.querySelector('meta[name="theme-color"]');
   if(!meta) return;
-  const isLight = document.body.classList.contains('light');
-  meta.setAttribute('content', isLight ? '#faf8f3' : '#0d0f14');
+  const bg = getComputedStyle(document.body).getPropertyValue('--bg').trim();
+  meta.setAttribute('content', bg || (document.body.classList.contains('light') ? '#e6e9ef' : '#181825'));
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Theme + Accent settings
+   ═══════════════════════════════════════════════════════════ */
+const ACCENTS = ['gold', 'peach', 'blue', 'green', 'mauve'];
+
+function applyAccent(accent){
+  if(!ACCENTS.includes(accent)) accent = 'gold';
+  document.body.dataset.accent = accent;
+}
+
+function applyTheme(mode){
+  if(mode === 'light'){
+    isLight = true;
+    document.body.classList.add('light');
+  } else {
+    isLight = false;
+    document.body.classList.remove('light');
+  }
+  if(typeof updateThemeToggleIcon === 'function') updateThemeToggleIcon();
+  updateThemeColorMeta();
+}
+
+function setThemeMode(mode){
+  applyTheme(mode);
+  store.setMeta('theme', mode === 'light' ? 'light' : 'dark');
+  updateSettingsUI();
+}
+
+function setAccent(accent){
+  if(!ACCENTS.includes(accent)) accent = 'gold';
+  applyAccent(accent);
+  store.setMeta('accent', accent);
+  updateThemeColorMeta();
+  updateSettingsUI();
+}
+
+function openSettings(){
+  const menuOverlay = document.querySelector('.menu-overlay.open');
+  if(menuOverlay) menuOverlay.classList.remove('open');
+
+  updateSettingsUI();
+  const ov = document.getElementById('ov-settings');
+  if(ov){
+    ov.classList.add('open');
+    document.body.classList.add('modal-open');
+  }
+}
+
+function closeSettings(){
+  const ov = document.getElementById('ov-settings');
+  if(ov){
+    ov.classList.remove('open');
+    document.body.classList.remove('modal-open');
+  }
+}
+
+function updateSettingsUI(){
+  const theme = document.body.classList.contains('light') ? 'light' : 'dark';
+  const accent = document.body.dataset.accent || 'gold';
+
+  document.querySelectorAll('#ov-settings [data-theme-btn]').forEach(btn => {
+    btn.classList.toggle('on', btn.getAttribute('data-theme-btn') === theme);
+  });
+
+  document.querySelectorAll('#ov-settings [data-accent-btn]').forEach(btn => {
+    btn.classList.toggle('on', btn.getAttribute('data-accent-btn') === accent);
+  });
+}
+
+window.setThemeMode = setThemeMode;
+window.setAccent = setAccent;
+window.openSettings = openSettings;
+window.closeSettings = closeSettings;
+
+/* Settings chips — one click handler, selection always follows real state */
+document.addEventListener('click', (e) => {
+  const chip = e.target.closest('[data-accent-btn], [data-theme-btn]');
+  if(!chip) return;
+  if(chip.hasAttribute('data-accent-btn')){
+    setAccent(chip.getAttribute('data-accent-btn'));
+  } else {
+    setThemeMode(chip.getAttribute('data-theme-btn'));
+  }
+  updateSettingsUI();
+});

@@ -1436,17 +1436,17 @@ body.modal-open {
   font-family: inherit;
   position: relative;
 }
-/* Pinned state — gold bookmark in reader topbar */
+/*  Pinned state — gold bookmark in reader topbar  */
 .reader-icon-btn.pinned,
 .reader-icon-btn.pinned:hover{
-  color: #e8c97a !important;
-  border-color: #e8c97a !important;
-  background: rgba(232,201,122,.15) !important;
+color: var(--accent2) !important;
+border-color: var(--accent2) !important;
+background: color-mix(in srgb, var(--accent2) 15%, transparent) !important;
 }
 .reader-icon-btn.pinned svg{
-  color: #e8c97a !important;
-  fill: none !important;      /* bookmark icon is outline, not filled */
-  stroke: #e8c97a !important;
+color: var(--accent2) !important;
+fill: none !important;      /*  bookmark icon is outline, not filled */
+stroke: var(--accent2) !important;
 }
 .reader-icon-btn::before {
   content: '';
@@ -1463,7 +1463,7 @@ body.modal-open {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: #0a0b0f;
+background: var(--bg);
   position: relative;
   -webkit-overflow-scrolling: touch;
   direction: ltr;
@@ -1471,7 +1471,7 @@ body.modal-open {
 .reader-body > * {
   direction: rtl;
 }
-.light .reader-body { background: #e8e2d4; }
+.light .reader-body { background: var(--bg); }
 .reader-loading,
 .reader-error {
   display: flex;
