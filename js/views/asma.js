@@ -1,35 +1,26 @@
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
-   Asma al-Husna view
-   • Grid of 99 names
-   • Search + filter (all / memorized / not)
-   • Detail modal with AR/EN toggle
-   • Flashcard recitation mode with direction picker
-   ═══════════════════════════════════════════════════════════ */
+/* Asma al-Husna view: grid, search, filter, detail modal, flashcards */
 
-let _asmaLang = 'ar';        /* 'ar' | 'en' */
-let _asmaFilter = 'all';     /* 'all' | 'memorized' | 'not-memorized' */
+let _asmaLang = 'ar';
+let _asmaFilter = 'all';
 let _asmaQuery = '';
 
-/* Flashcard state */
 let _flashDeck = null;
 let _flashIdx = 0;
 let _flashRevealed = false;
-let _flashMode = 'memorized';        /* 'memorized' | 'not-memorized' | 'all' */
-let _flashDirection = 'meaning-to-name';   /* 'meaning-to-name' | 'name-to-meaning' | 'mixed' */
-let _flashCardDirection = 'meaning-to-name';  /* computed per card in mixed mode */
+let _flashMode = 'memorized';
+let _flashDirection = 'meaning-to-name';
+let _flashCardDirection = 'meaning-to-name';
 let _flashStats = { correct: 0, missed: 0 };
 
-/* ═══════════════════════════════════════════════════════════
-   Entry / exit
-   ═══════════════════════════════════════════════════════════ */
 async function openAsmaView(){
   await loadMemorized();
   _asmaQuery = '';
   _asmaFilter = 'all';
   showView('view-asma');
   renderAsmaGrid();
+  window.scrollTo(0, 0);
 }
 
 function closeAsmaView(){
@@ -37,9 +28,6 @@ function closeAsmaView(){
   goHome();
 }
 
-/* ═══════════════════════════════════════════════════════════
-   GRID
-   ═══════════════════════════════════════════════════════════ */
 function renderAsmaGrid(){
   const host = $('asma-body');
   if(!host) return;
@@ -73,7 +61,7 @@ function renderAsmaGrid(){
         <div class="asma-progress-fill" style="width:${pct}%"></div>
       </div>
       <button class="btn-save asma-flash-btn" onclick="startFlashcards()">
-        ${_asmaLang === 'ar' ? '🎴 بدء المراجعة' : '🎴 Start flashcards'}
+        ${icon('flashcard', 16)} ${_asmaLang === 'ar' ? 'بدء المراجعة' : 'Start flashcards'}
       </button>
     </div>
 
@@ -84,24 +72,25 @@ function renderAsmaGrid(){
     </div>
 
     <div class="asma-filters">
-<button class="filter-chip ${_asmaFilter==='memorized'?'on':''}" onclick="setAsmaFilter('memorized')">
-  ${_asmaLang === 'ar' ? 'محفوظة' : 'Memorized'} (${memo})
-</button>
-<button class="filter-chip ${_asmaFilter==='not-memorized'?'on':''}" onclick="setAsmaFilter('not-memorized')">
-  ${_asmaLang === 'ar' ? 'غير محفوظة' : 'Not yet'} (${total - memo})
-</button>
+      <button class="filter-chip ${_asmaFilter==='memorized'?'on':''}" onclick="setAsmaFilter('memorized')">
+        ${icon('memory', 14)} ${_asmaLang === 'ar' ? 'محفوظة' : 'Memorized'} (${memo})
+      </button>
+      <button class="filter-chip ${_asmaFilter==='not-memorized'?'on':''}" onclick="setAsmaFilter('not-memorized')">
+        ${icon('hourglass', 14)} ${_asmaLang === 'ar' ? 'غير محفوظة' : 'Not yet'} (${total - memo})
+      </button>
     </div>
 
     ${list.length === 0
       ? `<div class="adkar-empty">
-           <div class="adkar-empty-icon">🔍</div>
+           <div class="adkar-empty-icon">${icon('search', 40)}</div>
            <div>${_asmaLang === 'ar' ? 'لا توجد نتائج' : 'No results'}</div>
          </div>`
       : `<div class="asma-grid">
            ${list.map(n => asmaCardHTML(n)).join('')}
          </div>`}
   `;
-    if(typeof injectHeaderIcons === 'function'){
+
+  if(typeof injectHeaderIcons === 'function'){
     setTimeout(() => injectHeaderIcons(), 0);
   }
 }
@@ -119,19 +108,6 @@ function asmaCardHTML(n){
   </div>`;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   UI handlers
-   ═══════════════════════════════════════════════════════════ */
-async function openAsmaView(){
-  await loadMemorized();
-  _asmaQuery = '';
-  _asmaFilter = 'all';
-  showView('view-asma');
-  renderAsmaGrid();
-  /* Always start at top when opening the view */
-  window.scrollTo(0, 0);
-}
-
 let _asmaSearchTimer;
 function onAsmaSearch(value){
   clearTimeout(_asmaSearchTimer);
@@ -146,14 +122,10 @@ function onAsmaSearch(value){
   }, 200);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   DETAIL MODAL
-   ═══════════════════════════════════════════════════════════ */
 function openAsmaDetail(id){
   const n = getAsmaById(id);
   if(!n) return;
 
-  /* Save scroll position BEFORE locking body */
   window._asmaSavedScroll = window.scrollY || window.pageYOffset || 0;
 
   ensureAsmaDetailModal();
@@ -174,14 +146,6 @@ function renderAsmaDetail(n, lang){
       <div class="asma-detail-meaning">${esc(n.meaningEn)}</div>
     </div>
 
-  <div class="asma-detail-actions">
-    <button class="btn-save ${isMemo?'memo':''}" onclick="toggleAsmaMemo(${n.id})">
-      ${isMemo
-        ? (lang === 'ar' ? 'محفوظ ✓' : 'Memorized ✓')
-        : (lang === 'ar' ? 'ضع علامة محفوظ' : 'Mark as memorized')}
-    </button>
-  </div>
-
     <div class="asma-detail-tafsir ${lang==='ar'?'ar':'en'}">
       ${lang === 'ar' ? n.tafsirAr : n.tafsirEn}
     </div>
@@ -189,13 +153,13 @@ function renderAsmaDetail(n, lang){
     <div class="asma-detail-actions">
       <button class="btn-save ${isMemo?'memo':''}" onclick="toggleAsmaMemo(${n.id})">
         ${isMemo
-          ? (lang === 'ar' ? '✅ محفوظ' : '✅ Memorized')
-          : (lang === 'ar' ? '⏳ ضع علامة محفوظ' : '⏳ Mark as memorized')}
+          ? `${icon('memory', 14)} ${lang === 'ar' ? 'محفوظ' : 'Memorized'}`
+          : `${icon('hourglass', 14)} ${lang === 'ar' ? 'ضع علامة محفوظ' : 'Mark as memorized'}`}
       </button>
     </div>
 
     ${n.videoUrl
-      ? `<div class="asma-detail-video"><a href="${n.videoUrl}" target="_blank" rel="noopener">📺 ${lang === 'ar' ? 'شاهد الشرح' : 'Watch explanation'}</a></div>`
+      ? `<div class="asma-detail-video"><a href="${n.videoUrl}" target="_blank" rel="noopener">${icon('external-link', 12)} ${lang === 'ar' ? 'شاهد الشرح' : 'Watch explanation'}</a></div>`
       : ''}
   `;
 }
@@ -205,10 +169,8 @@ function closeAsmaDetail(){
   if(modal) modal.classList.remove('open');
   unlockBody();
 
-  /* Refresh grid first, then restore scroll position */
   renderAsmaGrid();
 
-  /* Restore saved position after layout settles */
   requestAnimationFrame(() => {
     const y = window._asmaSavedScroll || 0;
     window.scrollTo(0, y);
@@ -226,8 +188,6 @@ async function toggleAsmaMemo(id){
   await toggleMemorized(id);
   const n = getAsmaById(id);
   if(n) renderAsmaDetail(n, _asmaLang);
-  /* Don't re-render the grid while modal is open — it's visible behind
-     and would reset scroll. We refresh it on close instead. */
 }
 
 function ensureAsmaDetailModal(){
@@ -241,23 +201,17 @@ function ensureAsmaDetailModal(){
     <div class="modal-box" style="max-width:520px">
       <div class="mh">
         <h2 id="asma-detail-title"></h2>
-        <button class="btn-close" onclick="closeAsmaDetail()">✕</button>
+        <button class="btn-close" onclick="closeAsmaDetail()" aria-label="Close">${icon('x', 16)}</button>
       </div>
       <div class="mb" id="asma-detail-body"></div>
     </div>`;
   document.body.appendChild(modal);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   FLASHCARDS
-   ═══════════════════════════════════════════════════════════ */
-
-/* ── Entry point ── */
 async function startFlashcards(){
   ensureFlashOverlay();
   await loadMemorized();
 
-  /* If nothing memorized yet → skip picker, start with all */
   if(getMemorizedCount() === 0){
     _flashMode = 'all';
     _flashDirection = 'meaning-to-name';
@@ -268,9 +222,8 @@ async function startFlashcards(){
   showFlashPicker();
 }
 
-/* ── Mode + direction picker ── */
 function showFlashPicker(){
-	ensureFlashOverlay();
+  ensureFlashOverlay();
   const memoCount = getMemorizedCount();
   const total = ASMA_NAMES.length;
   const notMemoCount = total - memoCount;
@@ -278,23 +231,23 @@ function showFlashPicker(){
 
   $('flash-body').innerHTML = `
     <div class="flash-picker">
-      <div class="flash-picker-title">${ar ? '🎴 اختر نوع المراجعة' : '🎴 Choose review mode'}</div>
+      <div class="flash-picker-title">${icon('flashcard', 18)} ${ar ? 'اختر نوع المراجعة' : 'Choose review mode'}</div>
 
       <div class="flash-picker-section">
-        <div class="flash-picker-section-label">${ar ? '📿 الأسماء' : '📿 Which names'}</div>
+        <div class="flash-picker-section-label">${icon('beads', 14)} ${ar ? 'الأسماء' : 'Which names'}</div>
         <div class="flash-picker-options">
           <button class="flash-picker-btn ${_flashMode==='memorized'?'selected':''}" onclick="setFlashMode('memorized')">
-            <div class="flash-picker-icon">✅</div>
+            <div class="flash-picker-icon">${icon('memory', 22)}</div>
             <div class="flash-picker-name">${ar ? 'المحفوظة' : 'Memorized'}</div>
             <div class="flash-picker-count">${memoCount}</div>
           </button>
           <button class="flash-picker-btn ${_flashMode==='not-memorized'?'selected':''}" onclick="setFlashMode('not-memorized')">
-            <div class="flash-picker-icon">⏳</div>
+            <div class="flash-picker-icon">${icon('hourglass', 22)}</div>
             <div class="flash-picker-name">${ar ? 'غير المحفوظة' : 'Not yet'}</div>
             <div class="flash-picker-count">${notMemoCount}</div>
           </button>
           <button class="flash-picker-btn ${_flashMode==='all'?'selected':''}" onclick="setFlashMode('all')">
-            <div class="flash-picker-icon">📿</div>
+            <div class="flash-picker-icon">${icon('beads', 22)}</div>
             <div class="flash-picker-name">${ar ? 'الكل' : 'All'}</div>
             <div class="flash-picker-count">${total}</div>
           </button>
@@ -302,20 +255,20 @@ function showFlashPicker(){
       </div>
 
       <div class="flash-picker-section">
-        <div class="flash-picker-section-label">${ar ? '🧭 الاتجاه' : '🧭 Direction'}</div>
+        <div class="flash-picker-section-label">${icon('compass', 14)} ${ar ? 'الاتجاه' : 'Direction'}</div>
         <div class="flash-picker-options">
           <button class="flash-picker-btn ${_flashDirection==='meaning-to-name'?'selected':''}" onclick="setFlashDirection('meaning-to-name')">
-            <div class="flash-picker-icon">📖</div>
+            <div class="flash-picker-icon">${icon('book-open', 22)}</div>
             <div class="flash-picker-name">${ar ? 'المعنى ← الاسم' : 'Meaning → Name'}</div>
             <div class="flash-picker-desc">${ar ? 'الأفضل للحفظ' : 'Best for memorization'}</div>
           </button>
           <button class="flash-picker-btn ${_flashDirection==='name-to-meaning'?'selected':''}" onclick="setFlashDirection('name-to-meaning')">
-            <div class="flash-picker-icon">🌙</div>
+            <div class="flash-picker-icon">${icon('moon', 22)}</div>
             <div class="flash-picker-name">${ar ? 'الاسم ← المعنى' : 'Name → Meaning'}</div>
             <div class="flash-picker-desc">${ar ? 'للتعرف على المعنى' : 'Recognition'}</div>
           </button>
           <button class="flash-picker-btn ${_flashDirection==='mixed'?'selected':''}" onclick="setFlashDirection('mixed')">
-            <div class="flash-picker-icon">🎯</div>
+            <div class="flash-picker-icon">${icon('circle-dot', 22)}</div>
             <div class="flash-picker-name">${ar ? 'مختلط' : 'Mixed'}</div>
             <div class="flash-picker-desc">${ar ? 'كلاهما بالتناوب' : 'Alternates'}</div>
           </button>
@@ -324,7 +277,7 @@ function showFlashPicker(){
 
       <button class="btn-save" style="width:100%;padding:14px;font-size:15px;margin-top:6px"
               onclick="launchFlashDeck()">
-        ${ar ? '▶ ابدأ' : '▶ Start'}
+        ${icon('play', 14)} ${ar ? 'ابدأ' : 'Start'}
       </button>
 
       <button class="flash-exit" onclick="stopFlashcards()">
@@ -347,7 +300,6 @@ function setFlashDirection(dir){
   showFlashPicker();
 }
 
-/* ── Launch the deck ── */
 function launchFlashDeck(){
   ensureFlashOverlay();
   _flashDeck = buildFlashcardDeck(_flashMode);
@@ -355,8 +307,9 @@ function launchFlashDeck(){
   if(!_flashDeck.length){
     const ar = _asmaLang === 'ar';
     toast(ar
-      ? (_flashMode === 'memorized' ? 'لا توجد أسماء محفوظة بعد' : 'كل الأسماء محفوظة 🎉')
-      : (_flashMode === 'memorized' ? 'No memorized names yet' : 'All names memorized 🎉'));
+      ? (_flashMode === 'memorized' ? 'لا توجد أسماء محفوظة بعد' : 'كل الأسماء محفوظة')
+      : (_flashMode === 'memorized' ? 'No memorized names yet' : 'All names memorized'),
+      'alert');
     showFlashPicker();
     return;
   }
@@ -366,7 +319,6 @@ function launchFlashDeck(){
   _flashStats = { correct: 0, missed: 0 };
   computeCardDirection();
 
-  /* Always ensure the overlay is open */
   $('flash-overlay').classList.add('open');
   lockBody();
 
@@ -381,7 +333,6 @@ function computeCardDirection(){
   }
 }
 
-/* ── Render a single card ── */
 function renderFlashcard(){
   if(!_flashDeck || !_flashDeck.length){ stopFlashcards(); return; }
 
@@ -391,34 +342,28 @@ function renderFlashcard(){
   const ar = _asmaLang === 'ar';
   const isM2N = _flashCardDirection === 'meaning-to-name';
 
-  /* FRONT of the card */
   let front;
   if(isM2N){
-    /* Meaning → Name: front = English meaning */
     front = `
       <div class="flash-front-label">${ar ? 'المعنى' : 'Meaning'}</div>
       <div class="flash-front-meaning">${esc(n.meaningEn)}</div>
     `;
   } else {
-    /* Name → Meaning: front = Arabic name + transliteration */
     front = `
       <div class="flash-front-ar">${n.ar}</div>
       <div class="flash-front-translit">${esc(n.transliteration)}</div>
     `;
   }
 
-  /* BACK of the card (revealed) */
   let back = '';
   if(_flashRevealed){
     if(isM2N){
-      /* Reveal: Arabic + transliteration (not repeating meaning) */
       back = `
         <div class="flash-back-divider"></div>
         <div class="flash-back-ar">${n.ar}</div>
         <div class="flash-back-translit">${esc(n.transliteration)}</div>
       `;
     } else {
-      /* Reveal: English meaning + tafsir */
       back = `
         <div class="flash-back-divider"></div>
         <div class="flash-back-meaning">${esc(n.meaningEn)}</div>
@@ -429,10 +374,9 @@ function renderFlashcard(){
     }
   }
 
-  /* Direction badge (visible at top of card) */
   const dirLabel = isM2N
-    ? (ar ? '📖 معنى ← اسم' : '📖 Meaning → Name')
-    : (ar ? '🌙 اسم ← معنى' : '🌙 Name → Meaning');
+    ? `${icon('book-open', 12)} ${ar ? 'معنى ← اسم' : 'Meaning → Name'}`
+    : `${icon('moon', 12)} ${ar ? 'اسم ← معنى' : 'Name → Meaning'}`;
 
   $('flash-body').innerHTML = `
     <div class="flash-progress">
@@ -443,35 +387,34 @@ function renderFlashcard(){
     <div class="flash-card ${_flashRevealed?'revealed':''}" onclick="revealFlashcard()">
       ${front}
       ${back}
-      ${!_flashRevealed ? `<div class="flash-hint">${ar ? '🤔 تذكّر ثم اضغط للكشف' : '🤔 Recall, then tap to reveal'}</div>` : ''}
+      ${!_flashRevealed ? `<div class="flash-hint">${icon('show', 14)} ${ar ? 'تذكّر ثم اضغط للكشف' : 'Recall, then tap to reveal'}</div>` : ''}
     </div>
 
     <div class="flash-controls">
       ${_flashRevealed ? `
         <button class="flash-btn miss" onclick="flashNext(false)">
-          ${ar ? '✗ نسيت' : '✗ Missed'}
+          ${icon('x', 14)} ${ar ? 'نسيت' : 'Missed'}
         </button>
         <button class="flash-btn known" onclick="flashNext(true)">
-          ${ar ? '✓ أعرفها' : '✓ I knew it'}
+          ${icon('check', 14)} ${ar ? 'أعرفها' : 'I knew it'}
         </button>
       ` : `
         <button class="flash-btn reveal" onclick="revealFlashcard()">
-          ${ar ? '👁 اكشف الإجابة' : '👁 Reveal answer'}
+          ${icon('show', 14)} ${ar ? 'اكشف الإجابة' : 'Reveal answer'}
         </button>
       `}
     </div>
 
     <div class="flash-footer-actions">
       <button class="flash-exit" onclick="showFlashPicker()">
-        ${ar ? '⚙ تغيير الوضع' : '⚙ Change mode'}
+        ${icon('settings', 14)} ${ar ? 'تغيير الوضع' : 'Change mode'}
       </button>
       <button class="flash-exit" onclick="stopFlashcards()">
-        ${ar ? '✕ إنهاء الجلسة' : '✕ End session'}
+        ${icon('x', 14)} ${ar ? 'إنهاء الجلسة' : 'End session'}
       </button>
     </div>
   `;
 
-  /* Safety: ensure overlay is open */
   const overlay = $('flash-overlay');
   if(overlay && !overlay.classList.contains('open')){
     overlay.classList.add('open');
@@ -488,7 +431,6 @@ function revealFlashcard(){
 async function flashNext(knewIt){
   const n = _flashDeck[_flashIdx];
 
-  /* Update memorized state based on answer */
   if(knewIt){
     _flashStats.correct++;
     if(!isMemorized(n.id)) await toggleMemorized(n.id);
@@ -500,7 +442,6 @@ async function flashNext(knewIt){
   _flashRevealed = false;
   _flashIdx++;
 
-  /* End of deck? */
   if(_flashIdx >= _flashDeck.length){
     renderFlashDone();
     renderAsmaGrid();
@@ -518,16 +459,16 @@ function renderFlashDone(){
 
   $('flash-body').innerHTML = `
     <div class="flash-done">
-      <div class="flash-done-icon">🎉</div>
+      <div class="flash-done-icon">${icon('sparkles', 48)}</div>
       <div class="flash-done-title">${ar ? 'أحسنت!' : 'Session complete!'}</div>
       <div class="flash-done-stats">
         <div class="flash-stat stat-correct">
           <div class="flash-stat-num">${correct}</div>
-          <div class="flash-stat-lbl">${ar ? '✓ صحيح' : '✓ Correct'}</div>
+          <div class="flash-stat-lbl">${icon('check', 12)} ${ar ? 'صحيح' : 'Correct'}</div>
         </div>
         <div class="flash-stat stat-missed">
           <div class="flash-stat-num">${missed}</div>
-          <div class="flash-stat-lbl">${ar ? '✗ نسيت' : '✗ Missed'}</div>
+          <div class="flash-stat-lbl">${icon('x', 12)} ${ar ? 'نسيت' : 'Missed'}</div>
         </div>
       </div>
       <div class="flash-done-sub">
@@ -537,10 +478,10 @@ function renderFlashDone(){
       </div>
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center">
         <button class="btn-save" onclick="showFlashPicker()">
-          ${ar ? '🔁 مراجعة أخرى' : '🔁 Another round'}
+          ${icon('rotate-ccw', 14)} ${ar ? 'مراجعة أخرى' : 'Another round'}
         </button>
         <button class="btn-cancel" onclick="stopFlashcards();renderAsmaGrid()">
-          ${ar ? 'رجوع' : 'Back' }
+          ${ar ? 'رجوع' : 'Back'}
         </button>
       </div>
     </div>
@@ -551,7 +492,6 @@ function stopFlashcards(){
   const el = $('flash-overlay');
   if(el) el.classList.remove('open');
   unlockBody();
-  /* Reset flash state so next entry is fresh */
   _flashDeck = null;
   _flashIdx = 0;
   _flashRevealed = false;
@@ -566,8 +506,8 @@ function ensureFlashOverlay(){
   el.id = 'flash-overlay';
   el.innerHTML = `
     <div class="flash-header">
-      <div class="flash-title">${_asmaLang === 'ar' ? '🎴 المراجعة' : '🎴 Flashcards'}</div>
-      <button class="session-close-btn" onclick="stopFlashcards()">✕</button>
+      <div class="flash-title">${icon('flashcard', 16)} ${_asmaLang === 'ar' ? 'المراجعة' : 'Flashcards'}</div>
+      <button class="session-close-btn" onclick="stopFlashcards()" aria-label="Close">${icon('x', 16)}</button>
     </div>
     <div class="flash-body" id="flash-body"></div>
   `;
