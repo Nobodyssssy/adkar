@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.5.4';
+const VERSION = 'v2.5.6';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [

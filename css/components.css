@@ -1431,7 +1431,7 @@ body.modal-open {
   border-radius: 10px;
   background: var(--surface2);
   border: 1px solid var(--border);
-  color: var(--text2);
+  color: var(--text);
   cursor: pointer;
   font-size: 16px;
   display: flex;
@@ -1451,8 +1451,6 @@ background: color-mix(in srgb, var(--accent2) 15%, transparent) !important;
 }
 .reader-icon-btn.pinned svg{
 color: var(--accent2) !important;
-fill: none !important;      /*  bookmark icon is outline, not filled */
-stroke: var(--accent2) !important;
 }
 .reader-icon-btn::before {
   content: '';

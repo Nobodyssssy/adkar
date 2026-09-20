@@ -1,6 +1,6 @@
 'use strict';
 
-/* ── Body scroll lock helpers ── */
+/* Body scroll lock helpers */
 function lockBody(){
   document.body.classList.add('modal-open');
 }
@@ -36,8 +36,8 @@ function renderCatListBody(){
       <span class="clr-en">${c.en}</span>
       <span class="clr-n">(${n})</span>
       <div class="clr-acts">
-        <button class="crb edit" onclick="event.stopPropagation();openEditCat('${c.key}')">✏️</button>
-        <button class="crb del" onclick="event.stopPropagation();askDelCat('${c.key}')">🗑️</button>
+        <button class="crb edit" onclick="event.stopPropagation();openEditCat('${c.key}')" aria-label="Edit category">${icon('pencil', 16)}</button>
+        <button class="crb del" onclick="event.stopPropagation();askDelCat('${c.key}')" aria-label="Delete category">${icon('trash', 16)}</button>
       </div>
     </div>`;
   }).join('');
@@ -59,7 +59,7 @@ function toggleNewCatForm(){
 function addCat(){
   const ar = $('nc-ar').value.trim();
   const en = $('nc-en').value.trim();
-  if(!ar || !en){ toast('⚠️ Both names required'); return; }
+  if(!ar || !en){ toast('Both names required', 'alert'); return; }
   cats.push({key:'cat_'+(nextCk++), ar, en, color:newColor});
   saveCats();
   $('nc-ar').value = '';
@@ -67,7 +67,7 @@ function addCat(){
   $('newcat-form').style.display = 'none';
   renderCatListBody();
   renderCatsGrid();
-  toast('✅ Category added');
+  toast('Category added', 'check-circle');
 }
 
 function openEditCat(key){
@@ -93,7 +93,7 @@ function closeEditCat(){
 function saveEditCat(){
   const ar = $('ec-ar').value.trim();
   const en = $('ec-en').value.trim();
-  if(!ar || !en){ toast('⚠️ Both names required'); return; }
+  if(!ar || !en){ toast('Both names required', 'alert'); return; }
   const i = cats.findIndex(c => c.key === editCatKey);
   if(i < 0){ closeEditCat(); return; }
   cats[i] = {...cats[i], ar, en, color:editColor};
@@ -101,10 +101,10 @@ function saveEditCat(){
   closeEditCat();
   renderCatListBody();
   renderCatsGrid();
-  toast('✏️ Category updated');
+  toast('Category updated', 'pencil');
 }
 
-/* Swatch rendering — uses data-color, robust to browser differences */
+/* Swatch rendering - uses data-color, robust to browser differences */
 function renderSwatches(cid, selected, cb){
   const host = $(cid);
   if(!host) return;

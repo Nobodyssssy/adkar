@@ -6,7 +6,7 @@
      icon('menu')                    → 24px default icon
      icon('menu', 16)                → 16px
      icon('menu', 16, 'my-class')    → with custom class
-     icon('star', 20, 'icon-filled') → filled star (color via CSS)
+     icon('favorite-filled', 20)     → filled star
    ═══════════════════════════════════════════════════════════ */
 
 function icon(name, size, className, extraAttrs){

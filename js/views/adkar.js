@@ -81,7 +81,7 @@ function adkarCardHTML(d, catObj){
   const isFav = favs.includes(d.id);
 
   const relBadge = d.reliability
-    ? `<span class="badge badge-${d.reliability}">${REL_LABEL[d.reliability]}</span>`
+    ? `<span class="badge badge-${d.reliability}">${icon(REL_ICON[d.reliability], 12)} ${REL_LABEL[d.reliability]}</span>`
     : '';
 
   const translit = d.transliteration
@@ -106,7 +106,7 @@ function adkarCardHTML(d, catObj){
     <div class="adkar-meta">${progressRing(pct, cat.color, isDone)}</div>
 
     <div class="adkar-actions" onclick="event.stopPropagation()">
-      <button class="adkar-btn fav ${isFav?'on':''}" onclick="toggleFav(${d.id})" title="Favorite">${icon('star', 14)}</button>
+      <button class="adkar-btn fav ${isFav?'on':''}" onclick="toggleFav(${d.id})" title="Favorite" aria-label="${isFav?'Remove from favorites':'Add to favorites'}">${icon(isFav ? 'favorite-filled' : 'favorite-empty', 14)}</button>
       <button class="adkar-btn edit" onclick="openForm(${d.id})" title="Edit">${icon('pencil', 14)}</button>
       <button class="adkar-btn del" onclick="askDelDhikr(${d.id})" title="Delete">${icon('trash', 14)}</button>
     </div>

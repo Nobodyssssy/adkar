@@ -1,10 +1,7 @@
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
-   Main menu — dropdown from the ☰ button
-   • Opens overlay + dropdown
-   • Closes on outside click or Escape
-   ═══════════════════════════════════════════════════════════ */
+/* Main menu - dropdown from the hamburger button
+   Opens overlay + dropdown; closes on outside click or Escape. */
 
 function toggleMainMenu(event){
   if(event) event.stopPropagation();
@@ -34,15 +31,14 @@ function closeMainMenu(){
 
 /* Update the theme icon/label to reflect current state */
 function updateMenuState(){
-  const icon  = $('menu-theme-icon');
-  const label = $('menu-theme-label');
-  if(!icon || !label) return;
+  const iconEl = $('menu-theme-icon');
+  const label  = $('menu-theme-label');
+  if(!iconEl || !label) return;
   const isLight = document.body.classList.contains('light');
-  icon.textContent  = isLight ? '☀️' : '🌙';
+  iconEl.innerHTML = icon(isLight ? 'sun' : 'moon', 20);
   label.textContent = isLight ? 'Light mode' : 'Dark mode';
 }
 
-/* Close on Escape */
 document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape'){
     const overlay = $('menu-overlay');

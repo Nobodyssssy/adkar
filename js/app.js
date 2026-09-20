@@ -98,8 +98,7 @@ function injectHeaderIcons(){
   const btnMenu = $('btn-menu');
   if(btnMenu) btnMenu.innerHTML = icon('menu', 18);
 
-  const btnFavs = $('btn-favs');
-  if(btnFavs) btnFavs.innerHTML = icon('star', 18);
+  if(typeof updateFavsButton === 'function') updateFavsButton();
 
   const btnAdd = document.querySelector('.btn-add-icon');
   if(btnAdd) btnAdd.innerHTML = icon('plus', 18);

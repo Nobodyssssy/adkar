@@ -16,8 +16,8 @@ function renderFavsGrid(){
   const g = $('favs-grid');
   if(!items.length){
     g.innerHTML = `<div class="adkar-empty">
-      <div class="adkar-empty-icon">⭐</div>
-      <div>No favorites yet.<br>Tap ★ on any dhikr.</div>
+      <div class="adkar-empty-icon">${icon('favorite-empty', 40)}</div>
+      <div>No favorites yet.<br>Tap the star on any dhikr.</div>
     </div>`;
     return;
   }
@@ -30,12 +30,25 @@ function toggleFav(id){
   saveFavs();
   if(currentCat) renderAdkarGrid(); else renderFavsGrid();
   renderCatsGrid();
+  updateFavsButton();
 }
 
 function toggleFavFromDetail(){
   if(!detailId) return;
   toggleFav(detailId);
   const isFav = favs.includes(detailId);
-  $('d-fav-btn').textContent = isFav ? '★' : '☆';
-  $('d-fav-btn').style.color = isFav ? '#e8c97a' : 'var(--text3)';
+  const btn = $('d-fav-btn');
+  btn.innerHTML = icon(isFav ? 'favorite-filled' : 'favorite-empty', 16);
+  btn.style.color = isFav ? 'var(--accent2)' : 'var(--text3)';
+  btn.setAttribute('aria-label', isFav ? 'Remove from favorites' : 'Add to favorites');
+  updateFavsButton();
+}
+
+function updateFavsButton(){
+  const btn = $('btn-favs');
+  if(!btn) return;
+  const has = Array.isArray(favs) && favs.length > 0;
+  btn.innerHTML = icon(has ? 'favorite-filled' : 'favorite-empty', 18);
+  btn.setAttribute('aria-label', has ? 'Favorites' : 'No favorites yet');
+  btn.classList.toggle('has-favs', has);
 }

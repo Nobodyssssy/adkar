@@ -4,8 +4,8 @@ function openDetail(id){
   const d = data.find(x => x.id === id);
   if(!d) return;
   detailId = id;
-  
-    /* Save scroll position BEFORE locking body */
+
+  /* Save scroll position BEFORE locking body */
   window._adkarSavedScroll = window.scrollY || window.pageYOffset || 0;
 
   const catKey = Array.isArray(d.categories) ? d.categories[0] : null;
@@ -15,17 +15,14 @@ function openDetail(id){
 
   const isFav = favs.includes(id);
   $('d-cat-lbl').textContent = cat.ar;
-  $('d-fav-btn').innerHTML = icon('star', 20);
-$('d-fav-btn').innerHTML = icon('star', 20);
-$('d-fav-btn').style.color = isFav ? '#e8c97a' : 'var(--text3)';
-const favSvg = $('d-fav-btn').querySelector('svg');
-if(favSvg){
-  favSvg.style.fill = isFav ? 'currentColor' : 'none';
-}
+  const favBtn = $('d-fav-btn');
+  favBtn.innerHTML = icon(isFav ? 'favorite-filled' : 'favorite-empty', 20);
+  favBtn.style.color = isFav ? 'var(--accent2)' : 'var(--text3)';
+  favBtn.setAttribute('aria-label', isFav ? 'Remove from favorites' : 'Add to favorites');
 
   const relBadge = d.reliability
     ? `<div style="display:flex;justify-content:center">
-         <span class="badge badge-${d.reliability}" style="font-size:12px;padding:3px 10px">${REL_LABEL[d.reliability]}</span>
+         <span class="badge badge-${d.reliability}" style="font-size:12px;padding:3px 10px">${icon(REL_ICON[d.reliability], 12)} ${REL_LABEL[d.reliability]}</span>
        </div>`
     : '';
   const translit = d.transliteration
@@ -45,8 +42,8 @@ if(favSvg){
     ${translit}
     ${relBadge}
     ${chipsRow}
-    ${d.hadith ? `<div class="info-box hadith-box"><div class="info-label">📖 Source</div>${d.hadith}</div>` : ''}
-    ${d.virtue ? `<div class="info-box virtue-box"><div class="info-label">✨ Virtue</div>${d.virtue}</div>` : ''}
+    ${d.hadith ? `<div class="info-box hadith-box"><div class="info-label">${icon('book-open', 14)} Source</div>${d.hadith}</div>` : ''}
+    ${d.virtue ? `<div class="info-box virtue-box"><div class="info-label">${icon('sparkles', 14)} Virtue</div>${d.virtue}</div>` : ''}
     <div class="counter-wrap">
       <div class="info-label" style="text-align:center;margin-bottom:12px;direction:ltr">Counter</div>
       <div class="counter-row">
@@ -65,8 +62,8 @@ if(favSvg){
     </div>`;
   $('ov-detail').classList.add('open');
   lockBody();
-  
-    if(typeof injectHeaderIcons === 'function'){
+
+  if(typeof injectHeaderIcons === 'function'){
     setTimeout(() => injectHeaderIcons(), 0);
   }
 }
@@ -92,7 +89,7 @@ function inc(id){
   persistCounters();
   $(`cv-${id}`).textContent = counters[k];
   $(`cp-${id}`).style.width = Math.min(100, Math.round(counters[k]/d.repeat*100)) + '%';
-  if(counters[k] === d.repeat) toast('✅ Completed');
+  if(counters[k] === d.repeat) toast('Completed', 'check-circle');
 }
 
 function dec(id){

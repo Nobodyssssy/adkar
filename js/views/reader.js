@@ -85,7 +85,7 @@ function ensureReaderOverlay(){
     <div class="reader-topbar" id="reader-topbar">
       <div class="reader-topbar-actions">
         <button class="reader-icon-btn" id="reader-sidebar-btn" onclick="toggleReaderSidebar()" title="Contents" data-icon="panel-left"><span class="btn-icon"></span></button>
-        <button class="reader-icon-btn" id="reader-bookmark-btn" onclick="toggleReaderPin()" title="Pin to Continue reading" data-icon="bookmark"><span class="btn-icon"></span></button>
+        <button class="reader-icon-btn" id="reader-bookmark-btn" onclick="toggleReaderPin()" title="Pin to Continue reading" aria-label="Pin to Continue reading"><span class="btn-icon"></span></button>
         <button class="reader-icon-btn" onclick="toggleReaderSettings()" title="Settings" data-icon="sliders"><span class="btn-icon"></span></button>
         <button class="reader-icon-btn" id="reader-fullscreen-btn" onclick="toggleReaderFullscreen()" title="Full screen" data-icon="maximize"><span class="btn-icon"></span></button>
       </div>
@@ -191,6 +191,9 @@ function updateReaderBookmarkBtn(){
   const starred = _bookmarks?.['_pinned'] || [];
   const isPinned = starred.includes(_readerBookId);
   btn.classList.toggle('pinned', isPinned);
+  btn.innerHTML = icon(isPinned ? 'bookmark-filled' : 'bookmark-outline', 18);
+  btn.setAttribute('title', isPinned ? 'Unpin from Continue reading' : 'Pin to Continue reading');
+  btn.setAttribute('aria-label', isPinned ? 'Unpin from Continue reading' : 'Pin to Continue reading');
 }
 
 /* ═══════════════════════════════════════════════════════════

@@ -24,9 +24,15 @@ const CAT_ICONS = {
 const CAT_ICON_DEFAULT = 'layers';
 
 const REL_LABEL = {
-  sahih: '✅ Sahih',
-  hasan: '🔵 Hasan',
-  daif:  "🔴 Da'if"
+  sahih: 'Sahih',
+  hasan: 'Hasan',
+  daif:  "Da'if"
+};
+
+const REL_ICON = {
+  sahih: 'check-circle',
+  hasan: 'circle-dot',
+  daif:  'alert'
 };
 
 const STORAGE_KEYS = {

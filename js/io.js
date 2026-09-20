@@ -7,7 +7,7 @@ function exportData(){
   a.href = URL.createObjectURL(blob);
   a.download = `adkari-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
-  toast('⬇️ Exported');
+  toast('Exported', 'download');
 }
 
 async function importData(e, mode){
@@ -17,9 +17,8 @@ async function importData(e, mode){
   reader.onload = async ev => {
     try{
       const json = JSON.parse(ev.target.result);
-      if(!json.data || !Array.isArray(json.data)){ toast('⚠️ Invalid file'); return; }
+      if(!json.data || !Array.isArray(json.data)){ toast('Invalid file', 'alert'); return; }
 
-      /* Normalize imported adkar: accept both v2 (`cat`) and v3 (`categories`) */
       const normalized = json.data.map(d => {
         const obj = {...d};
         if(typeof obj.cat === 'string' && !Array.isArray(obj.categories)){
@@ -37,9 +36,8 @@ async function importData(e, mode){
         await store.saveAdkar(data);
         if(Array.isArray(json.favs)){ favs = json.favs; await store.saveFavs(favs); }
         nextId = Math.max(0, ...data.map(d => d.id)) + 1;
-        toast('⬆️ Imported (replaced)');
+        toast('Imported (replaced)', 'upload');
       } else {
-        /* MERGE — dedupe by normalized Arabic */
         const key = d => normalizeAr(d.arabic).slice(0, 200);
         const existing = new Set(data.map(key));
 
@@ -69,13 +67,13 @@ async function importData(e, mode){
           favs = [...new Set([...favs, ...json.favs])];
           await store.saveFavs(favs);
         }
-        toast(`🔀 Merged: +${added} new adkar`);
+        toast(`Merged: +${added} new adkar`, 'shuffle');
       }
       renderCatsGrid();
       renderCatListBody();
     } catch(err) {
       console.error(err);
-      toast('⚠️ Invalid JSON file');
+      toast('Invalid JSON file', 'alert');
     }
   };
   reader.readAsText(file);
