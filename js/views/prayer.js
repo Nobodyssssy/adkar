@@ -156,7 +156,8 @@ function _computeForbiddenOnBar(cycle, day, nextDay){
       rangeEn: `${_formatHM(fajr)} → ${_formatHM(sunrise + 15)}`,
       noteEn: 'Voluntary prayers are forbidden in this window. Fard and the 2 sunnah of Fajr are exempt.',
       noteAr: 'تُنهى الصلوات التطوعية في هذا الوقت. أما الفرائض وسنة الفجر فمستثناة.',
-      ref: 'Sahih Muslim 1373 · صحيح مسلم ١٣٧٣',
+      ref: 'Sahih Bukhari 5819 · صحيح البخاري ٥٨١٩ ',
+	  refUrl: 'https://sunnah.com/bukhari:5819',
     },
     {
       key: 'zenith',
@@ -168,7 +169,8 @@ function _computeForbiddenOnBar(cycle, day, nextDay){
       rangeEn: `${_formatHM(dhuhr - 5)} → ${_formatHM(dhuhr)}`,
       noteEn: 'Voluntary prayer is forbidden while the sun is at its peak (~5 minutes).',
       noteAr: 'تُنهى الصلاة التطوعية عند استواء الشمس، وهي فترة قصيرة (~٥ دقائق).',
-      ref: 'Sahih Muslim 1373 · صحيح مسلم ١٣٧٣',
+      ref: 'Sahih Bukhari 5819 · صحيح البخاري ٥٨١٩ ',
+	  refUrl: 'https://sunnah.com/bukhari:5819',
     },
     {
       key: 'asr',
@@ -179,7 +181,8 @@ function _computeForbiddenOnBar(cycle, day, nextDay){
       rangeEn: `${_formatHM(asr)} → ${_formatHM(maghrib)}`,
       noteEn: 'Voluntary prayers are forbidden from Asr until sunset. The Asr prayer itself is valid.',
       noteAr: 'تُنهى الصلوات التطوعية من العصر حتى غروب الشمس. أما صلاة العصر فصحيحة.',
-      ref: 'Sahih Muslim 1373 · صحيح مسلم ١٣٧٣',
+      ref: 'Sahih Bukhari 5819 · صحيح البخاري ٥٨١٩ ',
+	  refUrl: 'https://sunnah.com/bukhari:5819',
     },
   ];
 }
@@ -258,8 +261,8 @@ function _computeDailyCycle(day, nextDay){
       label: 'Fajr → Sunrise', labelAr: 'الفجر → الشروق',
       noteEn: 'Voluntary prayers are forbidden after Fajr until sunrise. Fard and the 2 sunnah rak\'ahs of Fajr are exempt.',
       noteAr: 'تُنهى الصلوات التطوعية بعد الفجر حتى طلوع الشمس. أما الفرائض وسنة الفجر فمستثناة.',
-      sourceLabel: 'Sahih Muslim 1373',
-      sourceUrl: 'https://sunnah.com/muslim:1373',
+      sourceLabel: 'Sahih Muslim 5819',
+      sourceUrl: 'https://sunnah.com/bukhari:5819',
     },
     {
       start: sr, end: dh, kind: 'day',
@@ -272,8 +275,6 @@ function _computeDailyCycle(day, nextDay){
       label: 'Afternoon', labelAr: 'الظهيرة والعصر',
       noteEn: 'Voluntary prayer is forbidden for a few minutes just before Dhuhr, while the sun is at its zenith.',
       noteAr: 'تُنهى الصلاة التطوعية لبضع دقائق قبل الظهر عند استواء الشمس.',
-      sourceLabel: 'Sahih Muslim 1373',
-      sourceUrl: 'https://sunnah.com/muslim:1373',
     },
     {
       start: asr, end: mgN, kind: 'day',
@@ -281,8 +282,8 @@ function _computeDailyCycle(day, nextDay){
       label: 'Asr → Maghrib', labelAr: 'العصر → المغرب',
       noteEn: 'Voluntary prayers are forbidden after Asr until Maghrib. The Asr prayer itself is valid.',
       noteAr: 'تُنهى الصلوات التطوعية بعد العصر حتى المغرب. أما صلاة العصر فصحيحة.',
-      sourceLabel: 'Sahih Muslim 1373',
-      sourceUrl: 'https://sunnah.com/muslim:1373',
+      sourceLabel: 'Sahih Muslim 5819',
+      sourceUrl: 'https://sunnah.com/bukhari:5819',
     },
   ];
 
@@ -307,10 +308,25 @@ async function _loadCycleLang(){
 }
 
 function setCycleLang(lang){
-  _cycleLang = (lang === 'ar') ? 'ar' : 'en';
-  store.setMeta('cycleLang', _cycleLang);
-  /* Re-render the whole view to update everything in one shot */
-  renderPrayerView();
+_cycleLang = (lang === 'ar') ? 'ar' : 'en';
+store.setMeta('cycleLang', _cycleLang);
+/* Re-render only the view that is actually visible */
+const active = document.querySelector('.view.active');
+if(active && active.id === 'view-home'){
+const cycleHost = active.querySelector('.home-tab-cycle');
+if(cycleHost && window._homeCycleData &&
+typeof _computeDailyCycle === 'function' &&
+typeof _renderDailyCycleHTML === 'function'){
+const cycle = _computeDailyCycle(window._homeCycleData.today, window._homeCycleData.nextDay);
+if(cycle){
+cycleHost.innerHTML = _renderDailyCycleHTML(cycle, window._homeCycleData.today, window._homeCycleData.nextDay);
+return;
+}
+}
+renderHome();
+} else {
+renderPrayerView();
+}
 }
 /* ═══════════════════════════════════════════════════════════
    COMPUTE — night thirds
@@ -597,11 +613,13 @@ function onCycleMarkerTap(key){
 
   const isAr = _cycleLang === 'ar';
   const infos = {
-    awwabin: {
-      name: isAr ? 'الأوّابين' : 'Awwabin',
-      time: _formatHM(_parseHM(day.timings.Maghrib) + 20),
-      note: isAr ? 'صلاة تطوّعية تُصلى بعد المغرب.' : 'Voluntary prayer performed after Maghrib.',
-    },
+awwabin: {
+name: isAr ? 'الأوّابين' : 'Awwabin',
+time: _formatHM(_parseHM(day.timings.Maghrib) + 20),
+note: isAr ? 'صلاة تطوّعية تُصلى بعد المغرب، يُستحب أداؤها بين المغرب والعشاء.' : 'A voluntary prayer performed after Maghrib, recommended between Maghrib and Isha.',
+sourceLabel: 'IslamQA 2626',
+sourceUrl: 'https://islamqa.info/en/answers/2626/what-is-salat-al-awwabin',
+},
     midnight: {
       name: isAr ? 'منتصف الليل' : 'Islamic midnight',
       time: null,
@@ -614,15 +632,7 @@ function onCycleMarkerTap(key){
   const info = infos[key];
   if(!info) return;
 
-  panel.innerHTML = `
-    <div class="cycle-panel-inner">
-      <div class="cycle-panel-row-1">
-        <span class="cycle-panel-swatch cycle-legend-marker"></span>
-        <span class="cycle-panel-en">${info.name}</span>
-      </div>
-      ${info.time ? `<div class="cycle-panel-row-2">${info.time}</div>` : ''}
-      <div class="cycle-panel-row-3"><div class="cycle-panel-note">${info.note}</div></div>
-    </div>`;
+panel.innerHTML = `<div class="cycle-panel-inner"> <div class="cycle-panel-row-1"> <span class="cycle-panel-swatch cycle-legend-marker"></span> <span class="cycle-panel-en">${info.name}</span> </div> ${info.time ? `<div class="cycle-panel-row-2">${info.time}</div>`: ''} <div class="cycle-panel-row-3"><div class="cycle-panel-note">${info.note}</div></div> ${info.sourceUrl ? `<a class="cycle-panel-source" href="${info.sourceUrl}" target="_blank" rel="noopener">${info.sourceLabel} →</a>` : ''} </div>`;
 }
 
 function onCycleForbiddenTap(idx){
@@ -666,18 +676,7 @@ function onCycleForbiddenTap(idx){
   const name = isAr ? f.nameAr : f.nameEn;
   const note = isAr ? f.noteAr : f.noteEn;
 
-  panel.innerHTML = `
-    <div class="cycle-panel-inner">
-      <div class="cycle-panel-row-1">
-        <span class="cycle-panel-swatch cycle-legend-forbidden"></span>
-        <span class="cycle-panel-en">${name}</span>
-      </div>
-      <div class="cycle-panel-row-2">${f.rangeEn}</div>
-      <div class="cycle-panel-row-3">
-        <div class="cycle-panel-note">${note}</div>
-        <div class="cycle-panel-ref">${f.ref}</div>
-      </div>
-    </div>`;
+panel.innerHTML = `<div class="cycle-panel-inner"> <div class="cycle-panel-row-1"> <span class="cycle-panel-swatch cycle-legend-forbidden"></span> <span class="cycle-panel-en">${name}</span> </div> <div class="cycle-panel-row-2">${f.rangeEn}</div> <div class="cycle-panel-row-3"> <div class="cycle-panel-note">${note}</div> ${f.refUrl ? `<a class="cycle-panel-source" href="${f.refUrl}" target="_blank" rel="noopener">${f.ref} →</a>` : `<div class="cycle-panel-ref">${f.ref}</div>`} </div> </div>`;
 }
 /* ═══════════════════════════════════════════════════════════
    FORBIDDEN TIMES — language state & modal
@@ -724,7 +723,7 @@ function _forbiddenModalBodyHTML(){
     <div class="forbidden-hadith-body ${isAr?'ar':'en'}">${isAr ? FORBIDDEN_TIMES_HADITH.ar : FORBIDDEN_TIMES_HADITH.en}</div>
     <div class="forbidden-sources-label">📚 Sources · المصادر</div>
     <div class="forbidden-sources-list">
-      <a href="https://sunnah.com/muslim:1373" target="_blank" rel="noopener">Sahih Muslim 1373</a>
+      <a href="https://sunnah.com/bukhari:5819" target="_blank" rel="noopener">Sahih al-Bukhari 5819</a>
       <a href="https://sunnah.com/bukhari:547" target="_blank" rel="noopener">Sahih al-Bukhari 547</a>
       <a href="https://sunnah.com/bukhari:548" target="_blank" rel="noopener">Sahih al-Bukhari 548</a>
       <a href="https://sunnah.com/bukhari:551" target="_blank" rel="noopener">Sahih al-Bukhari 551</a>

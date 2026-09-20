@@ -68,7 +68,9 @@ Self-hosted fonts — Amiri (Arabic) + Tajawal (UI)
   --cycle-day:   #fab387;
   --cycle-teal:  #94e2d5;
   --cycle-mauve: #cba6f7;
-  --cycle-yellow:#f9e2af;
+--cycle-yellow:#f9e2af;
+--cycle-label: rgba(255, 255, 255, .85);
+--cycle-label-dim: rgba(255, 255, 255, .55);
 
   /* ─── Shape & motion ─── */
   --sh: 0 8px 32px rgba(0, 0, 0, .4);
@@ -131,7 +133,9 @@ Self-hosted fonts — Amiri (Arabic) + Tajawal (UI)
   --cycle-day:   #fe640b;
   --cycle-teal:  #179299;
   --cycle-mauve: #8839ef;
-  --cycle-yellow:#df8e1d;
+--cycle-yellow:#df8e1d;
+--cycle-label: rgba(44, 48, 66, .85);
+--cycle-label-dim: rgba(44, 48, 66, .60);
 
   /* ─── Shape & motion ─── */
   --sh: 0 8px 32px rgba(0, 0, 0, .08);
