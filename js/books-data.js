@@ -28,6 +28,7 @@ const BOOKS = [
   {
     id: 'tadabbur-quran',
     file: '1. القرآن وعلومه - Quran & Its Sciences/31-faedah-fi-tdabbor-alquran-ara.pdf',
+    rasterPages: 34,
     titleAr: 'إحدى وثلاثون فائدة في تدبر القرآن',
     titleEn: '31 Benefits in Contemplating the Quran',
     author: 'عبد المحسن بن حمد العباد البدر',
@@ -132,6 +133,7 @@ const BOOKS = [
   {
     id: 'urjuzah-miyah',
     file: '3. السيرة النبوية والتاريخ - Prophet\'s Biography & History/متن الأرجوزة الميئية في ذكر حال أشرف البرية الشيخ علي بن أبي العز الحنفي.pdf',
+    rasterPages: 25,
     titleAr: 'الأرجوزة الميئية في ذكر حال أشرف البرية',
     titleEn: 'The Hundred-Line Poem on the Prophet\'s Life',
     author: 'علي بن أبي العز الحنفي',
@@ -148,6 +150,7 @@ const BOOKS = [
   {
     id: 'ashariyyah',
     file: '4. العقيدة والتوحيد - Islamic Creed & Theology/ashareeah-fi-alislam_arb.pdf',
+    rasterPages: 93,
     titleAr: 'الأشعرية في الإسلام',
     titleEn: 'Ash\'arism in Islam',
     author: 'المؤلف (نص عربي)',
@@ -196,6 +199,7 @@ const BOOKS = [
   {
     id: 'sharh-asma-husna',
     file: '4. العقيدة والتوحيد - Islamic Creed & Theology/شرح أسماء الله الحسنى (لـ سعيد بن علي بن وهف القحطاني أو عبد الرزاق البدر).pdf',
+    rasterPages: 204,
     titleAr: 'شرح أسماء الله الحسنى',
     titleEn: 'Explanation of the Beautiful Names of Allah',
     author: 'سعيد بن علي بن وهف القحطاني',
@@ -460,6 +464,7 @@ const BOOKS = [
   {
     id: 'din-sahih',
     file: '7. دراسات وقضايا معاصرة - Modern Studies & Issues/الدين الصحيح يحل جميع المشاكل.pdf',
+    rasterPages: 24,
     titleAr: 'الدين الصحيح يحل جميع المشاكل',
     titleEn: 'The True Religion Solves All Problems',
     author: 'محمد بن جميل زينو',
@@ -488,6 +493,7 @@ const BOOKS = [
   {
     id: 'art-of-war',
     file: '8. كتب عامة وأدب - General Books & Literature/The Art of War (Sun Tzu ).pdf',
+    rasterPages: 258,
     titleAr: 'فن الحرب',
     titleEn: 'The Art of War',
     author: 'صن تزو',
