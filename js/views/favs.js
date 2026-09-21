@@ -1,19 +1,22 @@
 'use strict';
 
 function toggleFavsView(){
-  $('btn-favs').classList.add('active');
   renderFavsGrid();
   showView('view-favs');
 }
 
 function closeFavsView(){
-  $('btn-favs').classList.remove('active');
-  showView('view-cats');
+  const btn = $('btn-favs');
+  if(btn) btn.classList.remove('active');
+  if(typeof goHomeView === 'function') goHomeView();
+  else showView('view-cats');
 }
 
 function renderFavsGrid(){
   const items = data.filter(d => favs.includes(d.id));
   const g = $('favs-grid');
+  if(typeof updateFavsButton === 'function') updateFavsButton();
+  if(typeof refreshFavsMenuCounts === 'function') refreshFavsMenuCounts();
   if(!items.length){
     g.innerHTML = `<div class="adkar-empty">
       <div class="adkar-empty-icon">${icon('favorite-empty', 40)}</div>
@@ -47,8 +50,26 @@ function toggleFavFromDetail(){
 function updateFavsButton(){
   const btn = $('btn-favs');
   if(!btn) return;
-  const has = Array.isArray(favs) && favs.length > 0;
+
+  const adkarCount = Array.isArray(favs) ? favs.length : 0;
+
+  let booksCount = 0;
+  if(typeof getFavoriteBooks === 'function'){
+    try{ booksCount = getFavoriteBooks().length; }catch(e){ booksCount = 0; }
+  }
+
+  const has = adkarCount > 0 || booksCount > 0;
+
   btn.innerHTML = icon(has ? 'favorite-filled' : 'favorite-empty', 18);
-  btn.setAttribute('aria-label', has ? 'Favorites' : 'No favorites yet');
+
+  let label = 'No favorites yet';
+  if(has){
+    const parts = [];
+    if(booksCount) parts.push(`${booksCount} ${booksCount === 1 ? 'book' : 'books'}`);
+    if(adkarCount) parts.push(`${adkarCount} adkar`);
+    label = `Favorites (${parts.join(', ')})`;
+  }
+  btn.setAttribute('aria-label', label);
+  btn.setAttribute('title', label);
   btn.classList.toggle('has-favs', has);
 }

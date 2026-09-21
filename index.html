@@ -34,7 +34,21 @@
 <header>
   <div class="header-left">
     <button class="icon-btn" onclick="toggleMainMenu(event)" id="btn-menu" title="Menu" aria-label="Menu"></button>
-    <button class="icon-btn" onclick="toggleFavsView()" id="btn-favs" title="Favorites"></button>
+    <div class="favs-anchor">
+      <button class="icon-btn" onclick="toggleFavsMenu(event)" id="btn-favs" title="Favorites"></button>
+      <div class="favs-menu" id="favs-menu" role="menu" aria-hidden="true">
+        <button class="favs-menu-item" role="menuitem" onclick="openFavsAdkar()">
+          <span class="favs-menu-icon" data-icon="favorite-empty"></span>
+          <span class="favs-menu-label">Favorite adkar</span>
+          <span class="favs-menu-count" id="favs-count-adkar" hidden></span>
+        </button>
+        <button class="favs-menu-item" role="menuitem" onclick="openFavsBooks()">
+          <span class="favs-menu-icon" data-icon="bookmark-filled"></span>
+          <span class="favs-menu-label">Favorite books</span>
+          <span class="favs-menu-count" id="favs-count-books" hidden></span>
+        </button>
+      </div>
+    </div>
     <button class="icon-btn btn-add-icon" onclick="openForm()" title="Add dhikr"></button>
   </div>
   <div class="header-right">
@@ -149,6 +163,15 @@
     <div class="favs-title">Favorites · المفضلة</div>
   </div>
   <div class="adkar-grid" id="favs-grid"></div>
+</div>
+
+<!-- VIEW: FAVORITE BOOKS -->
+<div class="view" id="view-fav-books">
+  <div class="favs-header">
+    <button class="btn-back" onclick="closeFavsBooks()">← Back</button>
+    <div class="favs-title">Favorite books · الكتب المفضلة</div>
+  </div>
+  <div class="books-grid" id="fav-books-grid"></div>
 </div>
 
 <!-- VIEW: PRAYER TIMES -->
@@ -410,6 +433,7 @@
 <script src="js/views/adkar.js"></script>
 <script src="js/views/search.js"></script>
 <script src="js/views/favs.js"></script>
+<script src="js/views/favs-menu.js"></script>
 <script src="js/views/detail.js"></script>
 <script src="js/views/session.js"></script>
 <script src="js/views/form.js"></script>

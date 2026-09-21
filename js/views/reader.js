@@ -551,6 +551,8 @@ async function togglePageBookmark(){
   await loadBookmarks();
   await toggleBookBookmark(_readerBookId, _readerCurrentPage);
   updateReaderBookmarkBtn();
+  if(typeof updateFavsButton === 'function') updateFavsButton();
+  if(typeof refreshFavsMenuCounts === 'function') refreshFavsMenuCounts();
   const has = getBookBookmarks(_readerBookId).includes(_readerCurrentPage);
   toast(has ? `Bookmarked page ${_readerCurrentPage}` : `Removed bookmark on page ${_readerCurrentPage}`);
 }

@@ -422,3 +422,44 @@ body:has(#view-search.active) .search-bar { display: block; }
 
 /* Count line: force LTR so `53 result(s) — "a"` reads correctly */
 #search-count { direction: ltr; }
+
+.favs-menu-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  background:transparent;
+  border:none;
+  color:var(--text, #cdd6f4);
+  font-size:14px;
+  border-radius:8px;
+  cursor:pointer;
+  text-align:start;
+  white-space:nowrap;
+}
+.favs-menu-label{
+  flex:1;
+  white-space:nowrap;
+}
+.favs-menu-count{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:20px;
+  height:20px;
+  padding:0 6px;
+  border-radius:10px;
+  background:var(--accent, #f5c76a);
+  color:var(--on-accent, #101018);
+  font-size:11px;
+  font-weight:700;
+  line-height:1;
+}
+.favs-menu-count[hidden]{ display:none !important; }
+
+.favs-menu-item[data-empty="1"]{
+  color:var(--text3, #7f849c);
+}
+.favs-menu-item[data-empty="1"] .favs-menu-icon{
+  opacity:.45;
+}

@@ -1879,4 +1879,41 @@ background: var(--bg);
   outline: none;
 }
 
+.favs-anchor{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+}
 
+.favs-menu{
+  position:absolute;
+  top:calc(100% + 6px);
+  inset-inline-start:0;
+  background:var(--ctp-mantle, #181825);
+  border:1px solid var(--border, #313244);
+  border-radius:10px;
+  padding:6px;
+  display:none;
+  flex-direction:column;
+  gap:2px;
+  min-width:210px;
+  z-index:200;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+.favs-menu.open{ display:flex; }
+
+.favs-menu-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  background:transparent;
+  border:none;
+  color:var(--text, #cdd6f4);
+  font-size:14px;
+  border-radius:8px;
+  cursor:pointer;
+  text-align:start;
+}
+.favs-menu-item:hover{ background:var(--ctp-surface0, #313244); }
+.favs-menu-icon{ display:inline-flex; width:18px; height:18px; }
