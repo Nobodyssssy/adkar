@@ -58,3 +58,7 @@ Desktop.ini
 .vscode/
 .idea/
 *.swp
+# EmbedPDF build artifacts (regenerable from package.json)
+tools/embedpdf-build/node_modules/
+tools/embedpdf-build/dist-*/
+tools/embedpdf-build/*.tgz

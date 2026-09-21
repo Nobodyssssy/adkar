@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.8.0';
+const VERSION = 'v2.8.9';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -59,8 +59,17 @@ const APP_SHELL = [
   './js/books-data.js',
   './js/books.js',
   './js/reader.js',
-  './js/vendor/pdf.min.js',
-  './js/vendor/pdf.worker.min.js',
+  './js/vendor/embedpdf/engines/dist/index.js'
+  './js/vendor/embedpdf/engines/dist/lib/pdfium/index.js'
+  './js/vendor/embedpdf/engines/dist/lib/converters/index.js'
+  './js/vendor/embedpdf/engines/dist/direct-engine-C8xTbxym.js'
+  './js/vendor/embedpdf/engines/dist/browser-BKLM0ThC.js'
+  './js/vendor/embedpdf/engines/dist/pdf-engine-D9v0RfKe.js'
+  './js/vendor/embedpdf/pdfium/dist/index.browser.js'
+  './js/vendor/embedpdf/pdfium/dist/pdfium.wasm'
+  './js/vendor/embedpdf/models/dist/index.js'
+  './js/vendor/embedpdf/fonts-arabic/dist/index.js'
+  './js/vendor/embedpdf/fonts-latin/dist/index.js'
 
   './js/views/cats.js',
   './js/views/home.js',

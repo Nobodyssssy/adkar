@@ -406,6 +406,11 @@ function closeReader(){
   if(_readerObserver){ _readerObserver.disconnect(); _readerObserver = null; }
   if(_readerAutoSaveTimer){ clearTimeout(_readerAutoSaveTimer); _readerAutoSaveTimer = null; }
 
+  /* Close the WASM doc handle to free memory */
+  if(_readerPdf && typeof clearPdfCache === 'function'){
+    clearPdfCache(_readerBookId);
+  }
+
   const el = $('reader-overlay');
   if(el) el.classList.remove('open');
   unlockBody();

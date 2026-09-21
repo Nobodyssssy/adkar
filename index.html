@@ -362,6 +362,22 @@
 
 <div class="toast" id="toast"></div>
 
+<script type="importmap">
+{
+  "imports": {
+    "@embedpdf/models": "./js/vendor/embedpdf/models/dist/index.js",
+    "@embedpdf/pdfium": "./js/vendor/embedpdf/pdfium/dist/index.browser.js",
+    "@embedpdf/fonts-arabic": "./js/vendor/embedpdf/fonts-arabic/dist/index.js",
+    "@embedpdf/fonts-latin": "./js/vendor/embedpdf/fonts-latin/dist/index.js",
+    "@embedpdf/fonts-jp": "./js/vendor/embedpdf/fonts-arabic/dist/index.js",
+    "@embedpdf/fonts-kr": "./js/vendor/embedpdf/fonts-arabic/dist/index.js",
+    "@embedpdf/fonts-sc": "./js/vendor/embedpdf/fonts-arabic/dist/index.js",
+    "@embedpdf/fonts-tc": "./js/vendor/embedpdf/fonts-arabic/dist/index.js",
+    "@embedpdf/fonts-hebrew": "./js/vendor/embedpdf/fonts-arabic/dist/index.js"
+  }
+}
+</script>
+
 <!-- Load order matters -->
 <script src="js/config.js"></script>
 <script src="js/utils.js"></script>
@@ -369,7 +385,7 @@
 <script src="js/scroll-preserve.js"></script>
 <script src="js/dict.js"></script>
 <script src="js/vendor/fuse.min.js"></script>
-<script src="js/vendor/pdf.min.js"></script>
+<!-- PDF.js removed — using EmbedPDF (PDFium WASM) via dynamic import in js/reader.js -->
 <script src="js/db.js"></script>
 <script src="js/store.js"></script>
 <script src="js/data-defaults.js"></script>

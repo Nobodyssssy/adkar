@@ -1,49 +1,57 @@
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
-   Reader — PDF.js wrapper
-   • Initialises PDF.js worker
-   • Loads and caches PDF documents
-   • Generates + caches cover thumbnails
-   • Renders pages into canvas (used by the reader view)
-   ═══════════════════════════════════════════════════════════ */
+let _pdfEngine = null;
+let _pdfDocs = {};
 
-let _pdfJsReady = false;
-let _pdfDocs = {};              /* { bookId: PDFDocumentProxy } */
+async function initPdfEngine(){
+  if(_pdfEngine) return _pdfEngine;
 
-/* ── Init PDF.js worker ── */
-function initPdfJs(){
-  if(_pdfJsReady) return;
-  if(typeof pdfjsLib === 'undefined'){
-    console.warn('[reader] PDF.js not loaded');
-    return;
+  try{
+    const enginesMod = await import('./vendor/embedpdf/engines/dist/lib/pdfium/index.js');
+    const convertersMod = await import('./vendor/embedpdf/engines/dist/lib/converters/index.js');
+    const pdfiumMod = await import('./vendor/embedpdf/pdfium/dist/index.browser.js');
+
+    const wasmUrl = 'js/vendor/embedpdf/pdfium/dist/pdfium.wasm';
+    const response = await fetch(wasmUrl);
+    if(!response.ok) throw new Error('pdfium.wasm not found at ' + wasmUrl);
+    const wasmBinary = await response.arrayBuffer();
+
+    const pdfiumModule = await pdfiumMod.init({ wasmBinary });
+    const native = new enginesMod.PdfiumNative(pdfiumModule);
+    _pdfEngine = new enginesMod.PdfEngine(native, {
+      imageConverter: convertersMod.browserImageDataToBlobConverter,
+    });
+
+    console.log('[reader] PDFium engine ready');
+    return _pdfEngine;
+  }catch(err){
+    console.error('[reader] engine init failed', err);
+    throw err;
   }
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/vendor/pdf.worker.min.js';
-  _pdfJsReady = true;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Load + cache PDF documents
-   ═══════════════════════════════════════════════════════════ */
 async function loadPdfDocument(bookId){
   if(_pdfDocs[bookId]) return _pdfDocs[bookId];
 
   const book = getBookById(bookId);
   if(!book) throw new Error('Book not found');
 
-  initPdfJs();
+  const engine = await initPdfEngine();
   const url = resolveBookPath(book);
 
-  const loadingTask = pdfjsLib.getDocument({
-    url: url,
-    cMapUrl: 'js/vendor/cmaps/',
-    cMapPacked: true,
-    standardFontDataUrl: 'js/vendor/standard_fonts/',
-  });
+  const doc = await engine.openDocumentUrl({ id: bookId, url }).toPromise();
 
-  const pdf = await loadingTask.promise;
-  _pdfDocs[bookId] = pdf;
-  return pdf;
+  const wrapped = {
+    numPages: doc.pages.length,
+    _doc: doc,
+    _pages: doc.pages,
+    getPage: async (pageNum) => doc.pages[pageNum - 1],
+    getOutline: async () => [],
+    getMetadata: async () => ({ info: { Title: null, Author: null } }),
+  };
+
+  _pdfDocs[bookId] = wrapped;
+  return wrapped;
 }
 
 function getCachedPdf(bookId){
@@ -58,12 +66,7 @@ function clearPdfCache(bookId){
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Cover thumbnails — generate from page 1
-   Cache in IndexedDB under 'book-covers'
-   ═══════════════════════════════════════════════════════════ */
-
-const COVER_WIDTH = 140;      /* px, ~thumb */
+const COVER_WIDTH = 140;
 const COVER_CACHE_KEY = 'book-covers';
 
 let _coverCache = null;
@@ -84,35 +87,43 @@ function getCachedCover(bookId){
   return _coverCache[bookId] || null;
 }
 
-/* Generate + cache cover for one book */
 async function generateBookCover(bookId){
   await loadCoverCache();
 
-  /* Already cached? */
   const cached = getCachedCover(bookId);
   if(cached) return cached;
 
   try{
-    const pdf = await loadPdfDocument(bookId);
-    const page = await pdf.getPage(1);
+    const book = getBookById(bookId);
+    if(!book) return null;
 
-    /* Compute scale so width = COVER_WIDTH */
-    const baseViewport = page.getViewport({ scale: 1 });
-    const scale = COVER_WIDTH / baseViewport.width;
-    const viewport = page.getViewport({ scale });
+    const engine = await initPdfEngine();
+    const url = resolveBookPath(book);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    const ctx = canvas.getContext('2d');
+    /* Open a fresh document just for the cover render */
+    const doc = await engine.openDocumentUrl({ id: 'cover-' + bookId, url }).toPromise();
+    const page = doc.pages[0];
 
-    await page.render({
-      canvasContext: ctx,
-      viewport: viewport,
-    }).promise;
+    const baseWidth = page.size.width;
+    const scale = COVER_WIDTH / baseWidth;
 
-    /* Convert to data URL — JPEG at moderate quality to keep size small */
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+    const blob = await engine.renderPage(doc, page, {
+      scaleFactor: scale,
+      dpr: 1,
+      imageType: 'image/jpeg',
+    }).toPromise();
+
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    /* Close the doc after use if the API exposes it */
+    if(typeof engine.closeDocument === 'function'){
+      try{ await engine.closeDocument(doc).toPromise(); }catch(e){ /* ignore */ }
+    }
 
     _coverCache[bookId] = dataUrl;
     await saveCoverCache();
@@ -124,30 +135,25 @@ async function generateBookCover(bookId){
   }
 }
 
-/* Attach cover to a DOM element (called after grid renders) */
 async function attachBookCover(bookId, element){
   if(!element) return;
   await loadCoverCache();
 
   const cached = getCachedCover(bookId);
   if(cached){
-    element.innerHTML = `<img src="${cached}" alt="">`;
+    element.innerHTML = '<img src="' + cached + '" alt="">';
     return;
   }
 
-  /* Placeholder stays visible until generated */
-  /* Generate in background, then swap */
   generateBookCover(bookId).then(dataUrl => {
     if(dataUrl){
-      /* Only swap if element still exists in DOM */
       if(document.body.contains(element)){
-        element.innerHTML = `<img src="${dataUrl}" alt="">`;
+        element.innerHTML = '<img src="' + dataUrl + '" alt="">';
       }
     }
   });
 }
 
-/* Attach covers to all visible book cards */
 async function generateCoversForGrid(){
   await loadCoverCache();
 
@@ -158,20 +164,17 @@ async function generateCoversForGrid(){
   }
 }
 
-/* Generate covers for all books — call once on first Books visit */
 async function ensureAllCovers(){
   await loadCoverCache();
 
   const missing = BOOKS.filter(b => !getCachedCover(b.id));
   if(!missing.length) return;
 
-  /* Generate sequentially to avoid hammering PDF.js */
   for(const book of missing){
     await generateBookCover(book.id);
   }
 }
 
-/* ── Stats ── */
 function getCoverCacheStats(){
   if(!_coverCache) return { count: 0, size: 0 };
   const keys = Object.keys(_coverCache);
@@ -185,69 +188,49 @@ async function clearCoverCache(){
   await saveCoverCache();
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   Page rendering — used by the reader view
-   ═══════════════════════════════════════════════════════════ */
-
-/* Render one page into a canvas at a given CSS width */
 async function renderPageToCanvas(pdf, pageNum, canvas, containerWidth, zoomFactor){
   zoomFactor = zoomFactor || 1;
 
   const page = await pdf.getPage(pageNum);
-  const baseViewport = page.getViewport({ scale: 1 });
+  const engine = await initPdfEngine();
 
-  /* Fit-to-width scale */
-  const fitScale = containerWidth / baseViewport.width;
+  const baseWidth = page.size.width;
+  const fitScale = containerWidth / baseWidth;
   const scale = fitScale * zoomFactor;
-  const viewport = page.getViewport({ scale });
 
-  /* Account for high-DPI screens */
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(viewport.width * dpr);
-  canvas.height = Math.floor(viewport.height * dpr);
-  canvas.style.width = viewport.width + 'px';
-  canvas.style.height = viewport.height + 'px';
+  const blob = await engine.renderPage(pdf._doc, page, {
+    scaleFactor: scale,
+    dpr: window.devicePixelRatio || 1,
+    imageType: 'image/png',
+  }).toPromise();
 
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  const renderTask = page.render({
-    canvasContext: ctx,
-    viewport: viewport,
+  const img = await new Promise((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = reject;
+    i.src = URL.createObjectURL(blob);
   });
 
-  await renderTask.promise;
-  return { width: viewport.width, height: viewport.height };
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  canvas.style.width = (baseWidth * scale) + 'px';
+  canvas.style.height = (page.size.height * scale) + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  URL.revokeObjectURL(img.src);
+
+  return { width: baseWidth * scale, height: page.size.height * scale };
 }
 
-/* Extract table of contents if available */
 async function getPdfOutline(pdf){
-  try{
-    const outline = await pdf.getOutline();
-    return outline || [];
-  }catch{
-    return [];
-  }
+  return [];
 }
 
-/* Get PDF metadata (title, author, page count) */
 async function getPdfMetadata(pdf){
-  try{
-    const meta = await pdf.getMetadata();
-    return {
-      title:  meta?.info?.Title  || null,
-      author: meta?.info?.Author || null,
-      pages:  pdf.numPages,
-    };
-  }catch{
-    return { title: null, author: null, pages: pdf.numPages };
-  }
+  return { title: null, author: null, pages: pdf.numPages };
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Fullscreen helper for reader mode
-   ═══════════════════════════════════════════════════════════ */
 function enterFullscreen(el){
   if(el.requestFullscreen) el.requestFullscreen().catch(() => {});
 }
