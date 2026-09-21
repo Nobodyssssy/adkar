@@ -48,16 +48,6 @@ function resolveBookPath(book){
   return BOOKS_BASE_PATH + book.file.split('/').map(encodeURIComponent).join('/');
 }
 
-/* Path to a rasterized page JPG for books with book.rasterPages set.
-   Example: assets/books/<cat>/<file-stem>-pages/page-001.jpg */
-function resolveRasterPagePath(book, pageNum){
-  if(!book || !book.file || !book.rasterPages) return '';
-  const pdfPath = book.file.replace(/\.pdf$/i, '');
-  const pageName = 'page-' + String(pageNum).padStart(3, '0') + '.jpg';
-  return BOOKS_BASE_PATH
-    + (pdfPath + '-pages/' + pageName).split('/').map(encodeURIComponent).join('/');
-}
-
 /* ── Category counts ── */
 function getCategoryBookCounts(){
   const counts = {};

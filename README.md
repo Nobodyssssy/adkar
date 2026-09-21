@@ -53,27 +53,31 @@ There is no framework and no build step.
 ### Library and Reader
 
 - Local PDF library stored under `assets/books`.
-- Eight category folders:
-  1. Quran and Its Sciences
-  2. Hadith and Its Sciences
-  3. Prophet's Biography and History
-  4. Islamic Creed and Theology
-  5. Islamic Jurisprudence and Usul
-  6. Purification of the Soul and Adhkar
-  7. Modern Studies and Issues
-  8. General Books and Literature
+- Nine category folders, 70 books total:
+  1. Quran & Its Sciences (5)
+  2. Hadith & Its Sciences (9)
+  3. Prophet's Biography & History (6)
+  4. Islamic Creed & Theology (12)
+  5. Islamic Jurisprudence & Usul (7)
+  6. Purification of the Soul & Adhkar (14)
+  7. Modern Studies & Issues (7)
+  8. General Books & Literature (5)
+  9. Companions & Caliphs (5)
+- Catalog lives in `js/books-data.js`; helpers in `js/books.js`; view in `js/views/books.js`.
 - Built-in reader with three page rendering modes:
   - Light
   - Dark
   - Sepia
-- Single cycle button in the reader topbar.
-- Page placeholder sized for common A4 documents.
-- Settings panel with page thumbnails and reader controls.
-- Bookmark toggle support.
-- Planned:
-  - pinch-zoom
-  - full bookmark list UI
-  - expanded book metadata for the agreed library additions
+- Local PDF font support:
+  - pdf.js 3.11.174 cmap files in `js/vendor/cmaps`
+  - standard fonts in `js/vendor/standard_fonts`
+  - fixes Arabic, Hebrew, and CJK PDFs with non-embedded fonts
+- Raster fallback mode for 7 vectorized or broken PDFs:
+  - pages pre-rendered to JPG by `tools/rasterize.py` (PyMuPDF)
+  - page images live in `*-pages` folders beside each PDF
+  - scroll mode, flip mode, thumbnails, bookmarks, progress, and themes all work with raster pages
+- Reading progress and per-book bookmarks persisted in IndexedDB.
+- Continue-reading strip and pinned books on the library landing page.
 
 ### Digital Tasbih
 
@@ -116,6 +120,8 @@ There is no framework and no build step.
 - Offline: service worker with cache-first assets and network-first navigation.
 - Fonts: self-hosted Amiri for Arabic and Tajawal for UI.
 - Icons: Lucide-style SVG sprite in `assets/icons/sprite.svg`.
+- PDF rendering: pdf.js with local cmap and standard font data.
+- Raster fallback: PyMuPDF-generated page images for broken PDFs.
 
 ## Data Merge Model
 

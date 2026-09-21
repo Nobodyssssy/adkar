@@ -24,7 +24,6 @@ const BOOKS = [
 {
 id: 'tadabbur-quran',
 file: '1. القرآن وعلومه - Quran & Its Sciences/31-faedah-fi-tdabbor-alquran-ara.pdf',
-rasterPages: 34,
 titleAr: 'إحدى وثلاثون فائدة في تدبر القرآن',
 titleEn: '31 Benefits in Contemplating the Quran',
 author: 'عبد المحسن بن حمد العباد البدر',
@@ -192,7 +191,6 @@ descriptionEn: "One of the finest contemporary works on the Prophet's biography,
 {
 id: 'urjuzah-miyah',
 file: "3. السيرة النبوية والتاريخ - Prophet's Biography & History/متن الأرجوزة الميئية في ذكر حال أشرف البرية الشيخ علي بن أبي العز الحنفي.pdf",
-rasterPages: 25,
 titleAr: 'الأرجوزة الميئية في ذكر حال أشرف البرية',
 titleEn: "The Hundred-Line Poem on the Prophet's Life",
 author: 'علي بن أبي العز الحنفي',
@@ -249,7 +247,6 @@ descriptionEn: 'A study on the status and rights of women in the Prophetic era.'
 {
 id: 'ashariyyah',
 file: '4. العقيدة والتوحيد - Islamic Creed & Theology/ashareeah-fi-alislam_arb.pdf',
-rasterPages: 93,
 titleAr: 'الأشعرية في الإسلام',
 titleEn: "Ash'arism in Islam",
 author: 'المؤلف (نص عربي)',
@@ -294,7 +291,6 @@ descriptionEn: "A contemporary book exploring Allah's nearness to His servants a
 {
 id: 'sharh-asma-husna',
 file: '4. العقيدة والتوحيد - Islamic Creed & Theology/شرح أسماء الله الحسنى (لـ سعيد بن علي بن وهف القحطاني أو عبد الرزاق البدر).pdf',
-rasterPages: 204,
 titleAr: 'شرح أسماء الله الحسنى',
 titleEn: 'Explanation of the Beautiful Names of Allah',
 author: 'سعيد بن علي بن وهف القحطاني',
@@ -462,7 +458,6 @@ descriptionEn: 'A work on grounding the higher objectives of Shariah and applyin
 {
 id: 'wasaaya-waba',
 file: '6. الرقائق، الأذكار والتزكية - Purification of the Soul & Adhkar/10 وصايا للوقاية من الوباء.pdf',
-rasterPages: 16,
 titleAr: 'عشر وصايا للوقاية من الوباء',
 titleEn: 'Ten Precepts for Protection from Epidemics',
 author: 'مؤلف معاصر',
@@ -640,7 +635,6 @@ descriptionEn: 'A classical work discussing religious innovations, their harms, 
 {
 id: 'din-sahih',
 file: '7. دراسات وقضايا معاصرة - Modern Studies & Issues/الدين الصحيح يحل جميع المشاكل.pdf',
-rasterPages: 24,
 titleAr: 'الدين الصحيح يحل جميع المشاكل',
 titleEn: 'The True Religion Solves All Problems',
 author: 'محمد بن جميل زينو',
@@ -651,23 +645,23 @@ descriptionEn: 'A treatise demonstrating that Islam, with its principles and law
 },
 {
 id: 'thinking-fast-and-slow',
-file: '7. دراسات وقضايا معاصرة - Modern Studies & Issues/Daniel Kahneman-Thinking, Fast and Slow.pdf',
+file: '8. كتب عامة وأدب - General Books & Literature/Daniel Kahneman-Thinking, Fast and Slow.pdf',
 titleAr: 'التفكير السريع والبطيء',
 titleEn: 'Thinking, Fast and Slow',
 author: 'دانيال كانمان',
 authorEn: 'Daniel Kahneman',
-category: 'modern',
+category: 'general',
 descriptionAr: 'كتاب في علم النفس المعرفي يوضح نظامي التفكير والتحيزات العقلية.',
 descriptionEn: 'A book on cognitive psychology explaining fast and slow thinking and mental biases.'
 },
 {
 id: 'deep-work',
-file: '7. دراسات وقضايا معاصرة - Modern Studies & Issues/Deep Work Cal Newport.pdf',
+file: '8. كتب عامة وأدب - General Books & Literature/Deep Work Cal Newport.pdf',
 titleAr: 'العمل العميق',
 titleEn: 'Deep Work',
 author: 'كال نيوبورت',
 authorEn: 'Cal Newport',
-category: 'modern',
+category: 'general',
 descriptionAr: 'كتاب في التركيز والإنتاجية وبناء عادات عمل عميق في عالم مليء بالمشتتات.',
 descriptionEn: 'A book on focus, productivity, and building habits of deep work in a distracted world.'
 },
@@ -708,7 +702,6 @@ descriptionEn: "A collection of letters by the German poet Rilke to a young poet
 {
 id: 'art-of-war',
 file: '8. كتب عامة وأدب - General Books & Literature/The Art of War (Sun Tzu ).pdf',
-rasterPages: 258,
 titleAr: 'فن الحرب',
 titleEn: 'The Art of War',
 author: 'صن تزو',

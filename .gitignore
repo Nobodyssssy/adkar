@@ -41,6 +41,8 @@ gs/
 *.tar.gz
 nultype
 ocrmypdf-windows*
+node_modules/
+dist/
 
 # --- Python ---
 __pycache__/
