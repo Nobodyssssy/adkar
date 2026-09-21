@@ -42,7 +42,7 @@ gs/
 nultype
 ocrmypdf-windows*
 node_modules/
-dist/
+/dist/
 
 # --- Python ---
 __pycache__/
