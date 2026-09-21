@@ -41,13 +41,6 @@ async function openReader(bookId){
   $('reader-overlay').classList.add('open');
   lockBody();
 
-  /* Reset the pin button state — ensures a fresh pin state for the new book */
-  const pinBtn = $('reader-bookmark-btn');
-  if(pinBtn){
-    pinBtn.classList.remove('pinned');
-    pinBtn.style.color = '';
-  }
-
   renderReaderLoading();
   try{
     _readerPdf = await loadPdfDocument(bookId);
@@ -95,7 +88,8 @@ function ensureReaderOverlay(){
     <div class="reader-topbar" id="reader-topbar">
       <div class="reader-topbar-actions">
         <button class="reader-icon-btn" id="reader-sidebar-btn" onclick="toggleReaderSidebar()" title="Contents" data-icon="panel-left"><span class="btn-icon"></span></button>
-        <button class="reader-icon-btn" id="reader-bookmark-btn" onclick="toggleReaderPin()" title="Pin to Continue reading" aria-label="Pin to Continue reading"><span class="btn-icon"></span></button>
+        <button class="reader-icon-btn" id="reader-page-bookmark-btn" onclick="togglePageBookmark()" title="Bookmark this page" aria-label="Bookmark this page"><span class="btn-icon"></span></button>
+        <button class="reader-icon-btn" id="reader-bookmarks-list-btn" onclick="openReaderBookmarksPanel()" title="Bookmarks list" aria-label="Bookmarks list" data-icon="list"><span class="btn-icon"></span></button>
         <button class="reader-icon-btn" onclick="toggleReaderSettings()" title="Settings" data-icon="sliders"><span class="btn-icon"></span></button>
         <button class="reader-icon-btn" id="reader-darkmode-btn" onclick="toggleReaderDarkMode()" title="Reader theme" aria-label="Reader theme"><span class="btn-icon"></span></button>
         <button class="reader-icon-btn" id="reader-fullscreen-btn" onclick="toggleReaderFullscreen()" title="Full screen" data-icon="maximize"><span class="btn-icon"></span></button>
@@ -216,14 +210,14 @@ function renderReaderUI(){
 }
 
 function updateReaderBookmarkBtn(){
-  const btn = $('reader-bookmark-btn');
-  if(!btn) return;
-  const starred = _bookmarks?.['_pinned'] || [];
-  const isPinned = starred.includes(_readerBookId);
-  btn.classList.toggle('pinned', isPinned);
-  btn.innerHTML = icon(isPinned ? 'bookmark-filled' : 'bookmark-outline', 18);
-  btn.setAttribute('title', isPinned ? 'Unpin from Continue reading' : 'Pin to Continue reading');
-  btn.setAttribute('aria-label', isPinned ? 'Unpin from Continue reading' : 'Pin to Continue reading');
+  const pageBtn = $('reader-page-bookmark-btn');
+  if(!pageBtn) return;
+  const saved = getBookBookmarks(_readerBookId).includes(_readerCurrentPage);
+  pageBtn.classList.toggle('pinned', saved);
+  pageBtn.innerHTML = `<span class="btn-icon">${icon(saved ? 'bookmark-filled' : 'bookmark-outline', 18)}</span>`;
+  const label = saved ? `Remove bookmark from page ${_readerCurrentPage}` : `Bookmark page ${_readerCurrentPage}`;
+  pageBtn.setAttribute('title', label);
+  pageBtn.setAttribute('aria-label', label);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -468,6 +462,8 @@ function updateReaderProgressUI(){
 
   const jump = $('reader-jump-input');
   if(jump) jump.value = _readerCurrentPage;
+
+  updateReaderBookmarkBtn();
 }
 
 function scheduleAutoSave(){
@@ -548,36 +544,82 @@ function toggleReaderSettings(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   BOOKMARK (Pin)
+   BOOKMARK 
    ═══════════════════════════════════════════════════════════ */
-async function toggleReaderPin(){
+async function togglePageBookmark(){
   if(!_readerBookId) return;
   await loadBookmarks();
-
-  if(!_bookmarks) _bookmarks = {};
-  if(!Array.isArray(_bookmarks['_pinned'])) _bookmarks['_pinned'] = [];
-
-  const starred = _bookmarks['_pinned'];
-  const idx = starred.indexOf(_readerBookId);
-  const isPinned = idx >= 0;
-
-  if(isPinned){
-    starred.splice(idx, 1);
-  } else {
-    starred.push(_readerBookId);
-  }
-
-  await store.setMeta('books-bookmarks', _bookmarks);
-
+  await toggleBookBookmark(_readerBookId, _readerCurrentPage);
   updateReaderBookmarkBtn();
-
-  const book = getBookById(_readerBookId);
-  toast(isPinned
-    ? `Unpinned "${book?.titleAr || 'book'}"`
-    : `Pinned "${book?.titleAr || 'book'}" to Continue reading`);
+  const has = getBookBookmarks(_readerBookId).includes(_readerCurrentPage);
+  toast(has ? `Bookmarked page ${_readerCurrentPage}` : `Removed bookmark on page ${_readerCurrentPage}`);
 }
 
-function toggleReaderBookmark(){ return toggleReaderPin(); }
+function openReaderBookmarksPanel(){
+  if(!_readerBookId) return;
+  const sb = $('reader-sidebar');
+  if(!sb) return;
+
+  _sidebarOpen = true;
+  _sidebarMode = 'bookmarks';
+  sb.classList.add('open');
+  renderReaderBookmarks();
+}
+
+function renderReaderBookmarks(){
+  const sb = $('reader-sidebar');
+  const list = getBookBookmarks(_readerBookId);
+
+  sb.innerHTML = `
+    <div class="reader-sidebar-title">
+      <span>Bookmarks</span>
+      <button class="reader-sidebar-close" onclick="toggleReaderSidebar()" title="Close" data-icon="x"><span class="btn-icon"></span></button>
+    </div>
+    <div class="reader-toc" id="reader-bookmarks-list"></div>`;
+
+  const host = $('reader-bookmarks-list');
+
+  if(!list.length){
+    host.innerHTML = `<div style="padding:16px;color:var(--text3);font-size:13px">No bookmarks yet. Use the bookmark button above the page to save one.</div>`;
+  } else {
+    list.forEach(page => {
+      const row = document.createElement('div');
+      row.className = 'reader-toc-item';
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.justifyContent = 'space-between';
+
+      const label = document.createElement('span');
+      label.textContent = `Page ${page}`;
+      label.style.cursor = 'pointer';
+      label.style.flex = '1';
+      label.onclick = () => {
+        gotoReaderPage(page);
+        if(window.innerWidth < 700) toggleReaderSidebar();
+      };
+
+      const del = document.createElement('button');
+      del.className = 'reader-icon-btn';
+      del.style.padding = '4px 6px';
+      del.innerHTML = `<span class="btn-icon">${icon('trash-2', 14)}</span>`;
+      del.setAttribute('title', `Remove bookmark on page ${page}`);
+      del.setAttribute('aria-label', `Remove bookmark on page ${page}`);
+      del.onclick = async (e) => {
+        e.stopPropagation();
+        await loadBookmarks();
+        await toggleBookBookmark(_readerBookId, page);
+        renderReaderBookmarks();
+        updateReaderBookmarkBtn();
+      };
+
+      row.appendChild(label);
+      row.appendChild(del);
+      host.appendChild(row);
+    });
+  }
+
+  if(typeof injectHeaderIcons === 'function') injectHeaderIcons();
+}
 
 /* ═══════════════════════════════════════════════════════════
    SIDEBAR — thumbnails or TOC
@@ -610,6 +652,8 @@ async function toggleReaderSidebar(mode){
 
   if(mode === 'toc' && _readerToc.length){
     renderReaderToc();
+  } else if(mode === 'bookmarks'){
+    renderReaderBookmarks();
   } else {
     renderReaderThumbs();
   }

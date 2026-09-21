@@ -128,12 +128,8 @@ function continueCardHTML(b){
     : 0;
   const title = _booksLang === 'ar' ? b.titleAr : (b.titleEn || b.titleAr);
 
-  const pinnedIds = (_bookmarks && _bookmarks['_pinned']) || [];
-  const isPinned = pinnedIds.includes(b.id);
-
   return `
     <div class="continue-card" onclick="openBookDetail('${b.id}')">
-      ${isPinned ? `<div class="continue-pin-badge">${icon('bookmark-filled', 12)}</div>` : ''}
       <div class="continue-cover" id="cover-${b.id}">
         <div class="book-cover-placeholder">${icon('book-open', 30)}</div>
       </div>
@@ -231,19 +227,8 @@ function getRecentlyReadBooks(limit){
   limit = limit || 3;
   if(!_readingProgress) _readingProgress = {};
 
-  const pinnedIds = (_bookmarks && _bookmarks['_pinned']) || [];
-
   const seen = new Set();
   const result = [];
-
-  for(const id of pinnedIds){
-    if(seen.has(id)) continue;
-    const book = getBookById(id);
-    if(book){
-      result.push(book);
-      seen.add(id);
-    }
-  }
 
   const recent = Object.entries(_readingProgress)
     .filter(([_, p]) => p && p.lastRead && (!p.totalPages || p.page < p.totalPages))

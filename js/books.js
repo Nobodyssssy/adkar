@@ -102,6 +102,11 @@ async function loadBookmarks(){
   if(_bookmarks) return _bookmarks;
   const stored = await store.getMeta('books-bookmarks');
   _bookmarks = (stored && typeof stored === 'object') ? stored : {};
+  /* One-shot cleanup: the pin feature was removed. Delete any residual `_pinned`. */
+  if('_pinned' in _bookmarks){
+    delete _bookmarks['_pinned'];
+    await store.setMeta('books-bookmarks', _bookmarks);
+  }
   return _bookmarks;
 }
 
