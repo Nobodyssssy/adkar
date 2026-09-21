@@ -36,8 +36,9 @@ async function loadPdfDocument(bookId){
 
   const loadingTask = pdfjsLib.getDocument({
     url: url,
-    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+    cMapUrl: 'js/vendor/cmaps/',
     cMapPacked: true,
+    standardFontDataUrl: 'js/vendor/standard_fonts/',
   });
 
   const pdf = await loadingTask.promise;

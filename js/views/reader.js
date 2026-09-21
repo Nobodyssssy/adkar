@@ -50,8 +50,16 @@ async function openReader(bookId){
 
   renderReaderLoading();
   try{
-    _readerPdf = await loadPdfDocument(bookId);
-    _readerTotalPages = _readerPdf.numPages;
+    if(book.rasterPages){
+      /* Raster book: skip PDF.js entirely */
+      _readerPdf = null;
+      _readerTotalPages = book.rasterPages;
+      _readerToc = [];
+    } else {
+      _readerPdf = await loadPdfDocument(bookId);
+      _readerTotalPages = _readerPdf.numPages;
+      _readerToc = await getPdfOutline(_readerPdf);
+    }
 
     await loadReadingProgress();
     await loadBookmarks();
@@ -63,12 +71,10 @@ async function openReader(bookId){
       _readerCurrentPage = 1;
     }
 
-    _readerToc = await getPdfOutline(_readerPdf);
-
-  renderReaderUI();
-  updateReaderDarkModeBtn();
-  applyReaderTheme();
-  await renderReaderContent();
+    renderReaderUI();
+    updateReaderDarkModeBtn();
+    applyReaderTheme();
+    await renderReaderContent();
 
   }catch(err){
     console.error('[reader]', err);
@@ -288,6 +294,9 @@ async function renderReaderContent(){
    SCROLL MODE — all pages stacked in a scroll container
    ═══════════════════════════════════════════════════════════ */
 async function renderScrollMode(){
+  const book = getBookById(_readerBookId);
+  const isRaster = !!(book && book.rasterPages);
+
   const body = $('reader-body');
   body.innerHTML = `<div class="reader-scroll" id="reader-scroll"></div>`;
   const container = $('reader-scroll');
@@ -299,12 +308,24 @@ async function renderScrollMode(){
     wrap.className = 'reader-page-wrap';
     wrap.id = `reader-page-${i}`;
     wrap.dataset.page = i;
-    /* placeholder ratio keeps scroll stable until canvas renders */
-    wrap.style.aspectRatio = '1 / 1.414';
 
-    const canvas = document.createElement('canvas');
-    canvas.className = 'reader-canvas';
-    wrap.appendChild(canvas);
+    if(isRaster){
+      /* Raster book: lazy-load the JPG */
+      const img = document.createElement('img');
+      img.className = 'reader-canvas';
+      img.alt = '';
+      img.decoding = 'async';
+      img.loading = (i === _readerCurrentPage) ? 'eager' : 'lazy';
+      img.src = resolveRasterPagePath(book, i);
+      wrap.appendChild(img);
+      _readerRenderedPages.add(i); /* already "rendered" — browser handles it */
+    } else {
+      /* PDF book: reserve space until canvas renders */
+      wrap.style.aspectRatio = '1 / 1.414';
+      const canvas = document.createElement('canvas');
+      canvas.className = 'reader-canvas';
+      wrap.appendChild(canvas);
+    }
 
     const pageNum = document.createElement('div');
     pageNum.className = 'reader-page-num';
@@ -315,11 +336,13 @@ async function renderScrollMode(){
   }
 
   if(_readerCurrentPage > 1){
-    for(let i = 1; i <= _readerCurrentPage; i++){
-      const wrap = $(`reader-page-${i}`);
-      if(wrap){
-        await renderScrollPage(i, wrap, width);
-        _readerRenderedPages.add(i);
+    if(!isRaster){
+      for(let i = 1; i <= _readerCurrentPage; i++){
+        const wrap = $(`reader-page-${i}`);
+        if(wrap){
+          await renderScrollPage(i, wrap, width);
+          _readerRenderedPages.add(i);
+        }
       }
     }
     const target = $(`reader-page-${_readerCurrentPage}`);
@@ -337,8 +360,11 @@ async function renderScrollMode(){
 }
 
 async function renderScrollPage(pageNum, wrapEl, width){
+  /* Raster books don't use canvas — browser lazy-loads the <img> */
+  const canvas = wrapEl.querySelector('canvas');
+  if(!canvas) return;
+
   try{
-    const canvas = wrapEl.querySelector('canvas');
     const size = await renderPageToCanvas(_readerPdf, pageNum, canvas, width, _readerZoom);
     wrapEl.style.minHeight = size.height + 'px';
   }catch(err){
@@ -378,8 +404,16 @@ function setupScrollObserver(pageWidth){
    FLIP MODE — one page at a time
    ═══════════════════════════════════════════════════════════ */
 async function renderFlipMode(){
+  const book = getBookById(_readerBookId);
+  const isRaster = !!(book && book.rasterPages);
+
   const body = $('reader-body');
-  body.innerHTML = `<div class="reader-flip"><canvas class="reader-canvas" id="reader-flip-canvas"></canvas></div>`;
+
+  if(isRaster){
+    body.innerHTML = `<div class="reader-flip"><img class="reader-canvas" id="reader-flip-img" alt="" decoding="async"></div>`;
+  } else {
+    body.innerHTML = `<div class="reader-flip"><canvas class="reader-canvas" id="reader-flip-canvas"></canvas></div>`;
+  }
 
   const container = body.querySelector('.reader-flip');
   const width = Math.min(container.clientWidth || 700, 900);
@@ -390,13 +424,23 @@ async function renderFlipMode(){
 
 async function renderFlipCurrentPage(width){
   width = width || Math.min($('reader-body').clientWidth || 700, 900);
-  const canvas = $('reader-flip-canvas');
-  if(!canvas) return;
-  try{
-    await renderPageToCanvas(_readerPdf, _readerCurrentPage, canvas, width, _readerZoom);
-  }catch(err){
-    console.warn('[reader] flip page failed', err);
+
+  const book = getBookById(_readerBookId);
+
+  if(book && book.rasterPages){
+    const img = $('reader-flip-img');
+    if(!img) return;
+    img.src = resolveRasterPagePath(book, _readerCurrentPage);
+  } else {
+    const canvas = $('reader-flip-canvas');
+    if(!canvas) return;
+    try{
+      await renderPageToCanvas(_readerPdf, _readerCurrentPage, canvas, width, _readerZoom);
+    }catch(err){
+      console.warn('[reader] flip page failed', err);
+    }
   }
+
   updateReaderProgressUI();
   scheduleAutoSave();
 }
@@ -634,20 +678,31 @@ async function renderReaderThumbs(){
       if(el.dataset.rendered === '1') return;
       el.dataset.rendered = '1';
       const pageNum = parseInt(el.dataset.page, 10);
+      const book = getBookById(_readerBookId);
+
       try{
-        const page = await _readerPdf.getPage(pageNum);
-        const baseVp = page.getViewport({ scale: 1 });
-        const scale = THUMB_WIDTH / baseVp.width;
-        const vp = page.getViewport({ scale });
-        const canvas = document.createElement('canvas');
-        canvas.width = vp.width;
-        canvas.height = vp.height;
-        const ctx = canvas.getContext('2d');
-        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        let thumbSrc;
+
+        if(book && book.rasterPages){
+          thumbSrc = resolveRasterPagePath(book, pageNum);
+        } else {
+          const page = await _readerPdf.getPage(pageNum);
+          const baseVp = page.getViewport({ scale: 1 });
+          const scale = THUMB_WIDTH / baseVp.width;
+          const vp = page.getViewport({ scale });
+          const canvas = document.createElement('canvas');
+          canvas.width = vp.width;
+          canvas.height = vp.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({ canvasContext: ctx, viewport: vp }).promise;
+          thumbSrc = canvas.toDataURL('image/jpeg', 0.7);
+        }
+
         const img = document.createElement('img');
-        img.src = canvas.toDataURL('image/jpeg', 0.7);
+        img.src = thumbSrc;
         el.innerHTML = '';
         el.appendChild(img);
+
         const num = document.createElement('div');
         num.className = 'reader-thumb-num';
         num.textContent = pageNum;

@@ -33,3 +33,26 @@ recompress-books.py
 pdf-quality-report.json
 auto-icons.ps1
 build-icons.ps1
+# --- Downloaded tools / temp artifacts ---
+qpdf-*/
+magick/
+gs/
+*.zip
+*.tar.gz
+nultype
+ocrmypdf-windows*
+
+# --- Python ---
+__pycache__/
+*.pyc
+tools/__pycache__/
+
+# --- OS ---
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- Editor ---
+.vscode/
+.idea/
+*.swp
