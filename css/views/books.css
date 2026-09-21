@@ -533,3 +533,37 @@
 @media (min-width: 900px) {
   .books-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   READER THEMES (applied on #reader-overlay)
+   ═══════════════════════════════════════════════════════════ */
+
+/* DARK: page inverted to white-on-black */
+.reader-overlay.reader-dark .reader-body { background: #0d0d0d; }
+.reader-overlay.reader-dark .reader-canvas {
+  filter: invert(1) hue-rotate(180deg) brightness(1.05) contrast(1.05);
+}
+
+/* SEPIA: warm aged-paper look (matches Stirling-PDF) */
+.reader-overlay.reader-sepia .reader-body { background: #0d0d0d; }
+.reader-overlay.reader-sepia .reader-canvas {
+  filter: sepia(0.7) brightness(0.85);
+}
+
+/* LIGHT (default) — page renders naturally, no override */
+
+/* (Reader theme overrides live above; base layout is in components.css) */
+
+/* Reader: wrapper should hug the canvas, not stretch */
+.reader-overlay .reader-page-wrap {
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  display: block;
+}
+.reader-overlay .reader-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}

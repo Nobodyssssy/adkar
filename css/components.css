@@ -1571,6 +1571,9 @@ background: var(--bg);
   border-radius: var(--rs);
   padding: 12px;
   min-width: 240px;
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  overflow: hidden;
   box-shadow: 0 12px 40px rgba(0, 0, 0, .6);
   transform: translateY(-8px) scale(.97);
   opacity: 0;
@@ -1590,6 +1593,10 @@ background: var(--bg);
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 .reader-setting-label {
   font-size: 10px;
@@ -1601,9 +1608,17 @@ background: var(--bg);
 .reader-setting-buttons {
   display: flex;
   gap: 4px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.reader-setting-buttons > * {
+  min-width: 0;
+  box-sizing: border-box;
 }
 .reader-setting-btn {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   padding: 8px 10px;
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -1615,6 +1630,10 @@ background: var(--bg);
   cursor: pointer;
   transition: all var(--tr);
   text-align: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .reader-setting-btn:hover {
   border-color: var(--accent);
@@ -1628,8 +1647,14 @@ background: var(--bg);
 }
 .reader-setting-btn.wide {
   width: 100%;
+  flex: 1 1 auto;
   padding: 10px 12px;
   text-align: left;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
 }
 .reader-page-input {
   width: 100%;
@@ -1642,6 +1667,8 @@ background: var(--bg);
   font-size: 13px;
   outline: none;
   text-align: center;
+  box-sizing: border-box;
+  min-width: 0;
 }
 .reader-page-input:focus { border-color: var(--accent); }
 .reader-sidebar {

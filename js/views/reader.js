@@ -20,6 +20,7 @@ let _readerRenderedPages = new Set();
 let _readerObserver = null;
 let _readerAutoSaveTimer = null;
 let _readerScrolledToRestore = false;
+let _readerTheme = 'light';
 
 /* ═══════════════════════════════════════════════════════════
    Open / close
@@ -34,6 +35,7 @@ async function openReader(bookId){
   _readerCurrentPage = 1;
   _readerRenderedPages.clear();
   _readerScrolledToRestore = false;
+  _readerTheme = 'light';
 
   ensureReaderOverlay();
   $('reader-overlay').classList.add('open');
@@ -63,8 +65,10 @@ async function openReader(bookId){
 
     _readerToc = await getPdfOutline(_readerPdf);
 
-    renderReaderUI();
-    await renderReaderContent();
+  renderReaderUI();
+  updateReaderDarkModeBtn();
+  applyReaderTheme();
+  await renderReaderContent();
 
   }catch(err){
     console.error('[reader]', err);
@@ -76,7 +80,14 @@ async function openReader(bookId){
    Overlay structure
    ═══════════════════════════════════════════════════════════ */
 function ensureReaderOverlay(){
-  if($('reader-overlay')) return;
+  const existing = $('reader-overlay');
+  if(existing){
+    /* Rebuild if the cached overlay predates the dark-mode button */
+    if(existing.querySelector('#reader-darkmode-btn')){
+      return;
+    }
+    existing.remove();
+  }
 
   const el = document.createElement('div');
   el.className = 'reader-overlay';
@@ -87,6 +98,7 @@ function ensureReaderOverlay(){
         <button class="reader-icon-btn" id="reader-sidebar-btn" onclick="toggleReaderSidebar()" title="Contents" data-icon="panel-left"><span class="btn-icon"></span></button>
         <button class="reader-icon-btn" id="reader-bookmark-btn" onclick="toggleReaderPin()" title="Pin to Continue reading" aria-label="Pin to Continue reading"><span class="btn-icon"></span></button>
         <button class="reader-icon-btn" onclick="toggleReaderSettings()" title="Settings" data-icon="sliders"><span class="btn-icon"></span></button>
+        <button class="reader-icon-btn" id="reader-darkmode-btn" onclick="toggleReaderDarkMode()" title="Reader theme" aria-label="Reader theme"><span class="btn-icon"></span></button>
         <button class="reader-icon-btn" id="reader-fullscreen-btn" onclick="toggleReaderFullscreen()" title="Full screen" data-icon="maximize"><span class="btn-icon"></span></button>
       </div>
       <div class="reader-title" id="reader-title"></div>
@@ -143,25 +155,35 @@ function ensureReaderOverlay(){
    Loading / error states
    ═══════════════════════════════════════════════════════════ */
 function renderReaderLoading(){
-  $('reader-body').innerHTML = `
-    <div class="reader-loading">
-      <div class="prayer-spinner"></div>
-      <div>Loading book…</div>
-    </div>`;
-  $('reader-bottombar').style.display = 'none';
-  $('reader-topbar').style.display = 'flex';
-  $('reader-title').textContent = getBookById(_readerBookId)?.titleAr || 'Loading';
+  const body = $('reader-body');
+  if(body){
+    body.innerHTML = `
+      <div class="reader-loading">
+        <div class="prayer-spinner"></div>
+        <div>Loading book...</div>
+      </div>`;
+  }
+  const bot = $('reader-bottombar');
+  if(bot) bot.style.display = 'none';
+  const top = $('reader-topbar');
+  if(top) top.style.display = 'flex';
+  const title = $('reader-title');
+  if(title) title.textContent = getBookById(_readerBookId)?.titleAr || 'Loading';
 }
 
 function renderReaderError(msg){
-  $('reader-body').innerHTML = `
-    <div class="reader-error">
-      <div style="font-size:40px;margin-bottom:12px">${icon('book-open', 40)}</div>
-      <div style="font-weight:700;margin-bottom:6px">Could not open book</div>
-      <div style="font-size:12px;color:var(--text3)">${esc(msg)}</div>
-      <button class="btn-cancel" style="margin-top:16px" onclick="closeReader()">Close</button>
-    </div>`;
-  $('reader-bottombar').style.display = 'none';
+  const body = $('reader-body');
+  if(body){
+    body.innerHTML = `
+      <div class="reader-error">
+        <div style="font-size:40px;margin-bottom:12px">${icon('book-open', 40)}</div>
+        <div style="font-weight:700;margin-bottom:6px">Could not open book</div>
+        <div style="font-size:12px;color:var(--text3)">${esc(msg)}</div>
+        <button class="btn-cancel" style="margin-top:16px" onclick="closeReader()">Close</button>
+      </div>`;
+  }
+  const bot = $('reader-bottombar');
+  if(bot) bot.style.display = 'none';
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -170,10 +192,17 @@ function renderReaderError(msg){
 function renderReaderUI(){
   const book = getBookById(_readerBookId);
 
-  $('reader-title').textContent = book?.titleAr || '';
-  $('reader-page-info').textContent = `${_readerCurrentPage} / ${_readerTotalPages}`;
-  $('reader-jump-input').max = _readerTotalPages;
-  $('reader-jump-input').value = _readerCurrentPage;
+  const title = $('reader-title');
+  if(title) title.textContent = book?.titleAr || '';
+
+  const info = $('reader-page-info');
+  if(info) info.textContent = `${_readerCurrentPage} / ${_readerTotalPages}`;
+
+  const jump = $('reader-jump-input');
+  if(jump){
+    jump.max = _readerTotalPages;
+    jump.value = _readerCurrentPage;
+  }
 
   updateReaderBookmarkBtn();
 
@@ -181,8 +210,10 @@ function renderReaderUI(){
     btn.classList.toggle('active', btn.dataset.mode === _readerMode);
   });
 
-  $('reader-bottombar').style.display = 'flex';
-  $('reader-topbar').style.display = 'flex';
+  const bot = $('reader-bottombar');
+  if(bot) bot.style.display = 'flex';
+  const top = $('reader-topbar');
+  if(top) top.style.display = 'flex';
 }
 
 function updateReaderBookmarkBtn(){
@@ -194,6 +225,52 @@ function updateReaderBookmarkBtn(){
   btn.innerHTML = icon(isPinned ? 'bookmark-filled' : 'bookmark-outline', 18);
   btn.setAttribute('title', isPinned ? 'Unpin from Continue reading' : 'Pin to Continue reading');
   btn.setAttribute('aria-label', isPinned ? 'Unpin from Continue reading' : 'Pin to Continue reading');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   READER THEME (3 modes, cycled by one button)
+   - 'light'    : page shown as-is, dark chrome
+   - 'dark'     : page inverted (invert + hue-rotate)
+   - 'original' : page un-inverted on white paper, dark chrome
+   ═══════════════════════════════════════════════════════════ */
+const _READER_THEMES = ['light', 'dark', 'sepia'];
+
+function updateReaderDarkModeBtn(){
+  const btn = $('reader-darkmode-btn');
+  if(!btn) return;
+
+  /* Button always shows the NEXT mode (click target) */
+  const nextIndex = (_READER_THEMES.indexOf(_readerTheme) + 1) % _READER_THEMES.length;
+  const nextTheme = _READER_THEMES[nextIndex];
+
+  const iconId =
+    nextTheme === 'light' ? 'light-mode' :
+    nextTheme === 'dark'  ? 'dark-mode'  :
+                            'sepia-mode';
+
+  const label =
+    nextTheme === 'light' ? 'Switch to light page' :
+    nextTheme === 'dark'  ? 'Switch to dark page'  :
+                            'Switch to sepia page';
+
+  btn.innerHTML = `<span class="btn-icon">${icon(iconId, 18)}</span>`;
+  btn.setAttribute('title', label);
+  btn.setAttribute('aria-label', label);
+
+  applyReaderTheme();
+}
+
+function toggleReaderDarkMode(){
+  const idx = _READER_THEMES.indexOf(_readerTheme);
+  _readerTheme = _READER_THEMES[(idx + 1) % _READER_THEMES.length];
+  updateReaderDarkModeBtn();
+}
+
+function applyReaderTheme(){
+  const root = $('reader-overlay');
+  if(!root) return;
+  root.classList.toggle('reader-dark',  _readerTheme === 'dark');
+  root.classList.toggle('reader-sepia', _readerTheme === 'sepia');
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -222,7 +299,8 @@ async function renderScrollMode(){
     wrap.className = 'reader-page-wrap';
     wrap.id = `reader-page-${i}`;
     wrap.dataset.page = i;
-    wrap.style.minHeight = '200px';
+    /* placeholder ratio keeps scroll stable until canvas renders */
+    wrap.style.aspectRatio = '1 / 1.414';
 
     const canvas = document.createElement('canvas');
     canvas.className = 'reader-canvas';
