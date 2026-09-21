@@ -64,18 +64,11 @@ There is no framework and no build step.
   8. General Books & Literature (5)
   9. Companions & Caliphs (5)
 - Catalog lives in `js/books-data.js`; helpers in `js/books.js`; view in `js/views/books.js`.
-- Built-in reader with three page rendering modes:
-  - Light
-  - Dark
-  - Sepia
-- Local PDF font support:
-  - pdf.js 3.11.174 cmap files in `js/vendor/cmaps`
-  - standard fonts in `js/vendor/standard_fonts`
-  - fixes Arabic, Hebrew, and CJK PDFs with non-embedded fonts
-- Raster fallback mode for 7 vectorized or broken PDFs:
-  - pages pre-rendered to JPG by `tools/rasterize.py` (PyMuPDF)
-  - page images live in `*-pages` folders beside each PDF
-  - scroll mode, flip mode, thumbnails, bookmarks, progress, and themes all work with raster pages
+- Reader powered by a vendored EmbedPDF (PDFium) WASM engine:
+  - correct Arabic shaping and glyph rendering natively
+  - no server-side rasterization, no page-image folders
+  - no PDF.js and no external cmap or standard-font downloads
+- Three page rendering modes: Light, Dark, Sepia.
 - Reading progress and per-book bookmarks persisted in IndexedDB.
 - Continue-reading strip and pinned books on the library landing page.
 
@@ -120,8 +113,7 @@ There is no framework and no build step.
 - Offline: service worker with cache-first assets and network-first navigation.
 - Fonts: self-hosted Amiri for Arabic and Tajawal for UI.
 - Icons: Lucide-style SVG sprite in `assets/icons/sprite.svg`.
-- PDF rendering: pdf.js with local cmap and standard font data.
-- Raster fallback: PyMuPDF-generated page images for broken PDFs.
+- PDF rendering: EmbedPDF (PDFium compiled to WASM), vendored under `js/vendor/` and tracked in git.
 
 ## Data Merge Model
 
@@ -147,7 +139,7 @@ To update Hisn data:
 
 Clone the repository.
 
-Start a local server. The app requires a server for service worker registration and font/PDF handling.
+Start a local server. The app requires a server for service worker registration and PDF/font handling.
 
 ```cmd
 cd "C:\Users\Protagonist\Desktop\Html app\Sahib"
