@@ -64,12 +64,12 @@ async function initState(){
 
     if(storedVersion < currentVersion){
       const norm = (typeof hisnNormalize === 'function') ? hisnNormalize : (s => String(s || ''));
-      const existing = new Set(data.map(d => norm(d.arabic)));
+      const existing = new Set(data.map(d => norm(d.arabic) + '|' + (d.repeat || 1)));
       let hid = Math.max(0, ...data.map(d => d.id)) + 1;
       let added = 0;
 
       HISN_ADKAR.forEach(item => {
-        const key = norm(item.arabic);
+        const key = norm(item.arabic) + '|' + (item.repeat || 1);
         if(key && !existing.has(key)){
           existing.add(key);
           data.push({
@@ -100,11 +100,11 @@ first-install where hisn-data.js loaded a beat after initState ran. */
 const hisnInData = data.filter(d => d.hadith && String(d.hadith).indexOf('Hisn al-Muslim') === 0).length;
 if(hisnInData < HISN_ADKAR.length * 0.5){
 const norm = (typeof hisnNormalize === 'function') ? hisnNormalize : (s => String(s || ''));
-const existing = new Set(data.map(d => norm(d.arabic)));
+const existing = new Set(data.map(d => norm(d.arabic) + '|' + (d.repeat || 1)));
 let hid = Math.max(0, ...data.map(d => d.id)) + 1;
 let healed = 0;
 HISN_ADKAR.forEach(item => {
-const key = norm(item.arabic);
+const key = norm(item.arabic) + '|' + (item.repeat || 1);
 if(key && !existing.has(key)){
 existing.add(key);
 data.push({
