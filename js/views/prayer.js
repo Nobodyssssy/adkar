@@ -8,6 +8,29 @@ let _forbiddenLang = 'en';
 let _cycleLang = 'ar';
 let _cycleHelpLang = 'en';
 
+/* Human-friendly "X ago" for cached-at timestamps. */
+function _formatAgo(ts){
+  if(!ts) return '';
+  const mins = Math.max(0, Math.round((Date.now() - ts) / 60000));
+  if(mins < 1)   return 'just now';
+  if(mins < 60)  return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if(hrs < 24)   return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+/* Absolute local time, short form, for the offline hint. */
+function _formatStamp(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  const mo  = String(d.getMonth()+1).padStart(2,'0');
+  return `${day}/${mo} ${hh}:${mm}`;
+}
+
 async function openPrayerView(){
   showView('view-prayer');
   renderPrayerLoading();
@@ -908,6 +931,11 @@ function renderPrayerView(){
       <div class="prayer-loc">
         ${icon('map-pin', 12)} ${location.label ? esc(location.label) + ' \u00B7 ' : ''}${location.lat.toFixed(3)}, ${location.lng.toFixed(3)}
         \u00B7 <a href="#" onclick="event.preventDefault();openLocationPicker()" style="color:var(--accent);text-decoration:underline">Change</a>
+      </div>
+      <div class="prayer-updated" style="font-size:11px;color:var(--text3);margin-top:6px">
+        ${_prayerData.stale
+          ? `\u26A0 Offline \u00B7 last update ${_formatStamp(_prayerData.cachedAt)} (${_formatAgo(_prayerData.cachedAt)})`
+          : `Updated ${_formatAgo(_prayerData.cachedAt)}`}
       </div>
     </div>
 
