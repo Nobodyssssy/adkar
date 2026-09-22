@@ -417,3 +417,15 @@ color: var(--text3);
   background: linear-gradient(135deg, var(--ctp-green), var(--ctp-teal));
   color: var(--ctp-crust);
 }
+.chip-count{
+display:inline-block;
+margin-inline-start:6px;
+padding:0 6px;
+border-radius:9px;
+background:var(--accent);
+color:var(--on-accent);
+font-size:10px;
+font-weight:700;
+line-height:16px;
+vertical-align:middle;
+}
