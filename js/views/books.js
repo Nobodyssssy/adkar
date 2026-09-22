@@ -37,7 +37,9 @@ function renderBooksGrid(){
   }
 
   if(_booksCategory){
-    const list = getBooksByCategory(_booksCategory);
+    const list = isBeginnerCategoryId(_booksCategory)
+      ? getBeginnerBooks()
+      : getBooksByCategory(_booksCategory);
     renderBookList(host, list, false);
     return;
   }
@@ -77,6 +79,17 @@ function renderCategoryLanding(host){
       </div>
     ` : ''}
 
+    <div class="books-section books-beginner-banner-section">
+      <div class="books-beginner-banner" onclick="openBooksCategory('__beginner')">
+        <div class="books-beginner-icon">${icon('book-open', 22)}</div>
+        <div class="books-beginner-text">
+          <div class="books-beginner-title">${_booksLang === 'ar' ? 'ابدأ من هنا · مسار المبتدئ' : 'Start here · Beginner path'}</div>
+          <div class="books-beginner-sub">${_booksLang === 'ar' ? 'عشرة كتب مرتبة لبناء الأساس خطوة بخطوة' : 'Ten books in reading order to build your foundation step by step'}</div>
+        </div>
+        <div class="books-beginner-arrow">${icon('chevron-left', 18)}</div>
+      </div>
+    </div>
+
     <div class="books-section">
       <div class="books-section-title">${icon('library', 16)} ${_booksLang === 'ar' ? 'الفئات' : 'Categories'}</div>
       <div class="cat-cards-grid">
@@ -87,6 +100,21 @@ function renderCategoryLanding(host){
 
   if(typeof injectHeaderIcons === 'function'){
     setTimeout(() => injectHeaderIcons(), 0);
+  }
+
+  if(isBeginner){
+    list.forEach(b => {
+      const note = getBeginnerBookNote(b.id);
+      if(!note) return;
+      const card = host.querySelector(`.book-card[onclick*="${b.id}"]`);
+      if(!card) return;
+      const info = card.querySelector('.book-info');
+      if(!info) return;
+      const noteEl = document.createElement('div');
+      noteEl.className = 'book-beginner-note';
+      noteEl.textContent = note;
+      info.appendChild(noteEl);
+    });
   }
 
   if(typeof generateCoversForGrid === 'function'){
@@ -143,14 +171,19 @@ function continueCardHTML(b){
 }
 
 function renderBookList(host, list, isSearch){
-  const cat = isSearch ? null : getCategoryById(_booksCategory);
+  const isBeginner = !isSearch && isBeginnerCategoryId(_booksCategory);
+  const cat = (isSearch || isBeginner) ? null : getCategoryById(_booksCategory);
   const backLabel = _booksLang === 'ar' ? 'الفئات' : 'Categories';
   const title = isSearch
     ? (_booksLang === 'ar' ? 'نتائج البحث' : 'Search results')
-    : (_booksLang === 'ar' ? cat.ar : cat.en);
+    : isBeginner
+      ? (_booksLang === 'ar' ? 'مسار المبتدئ' : 'Beginner path')
+      : (_booksLang === 'ar' ? cat.ar : cat.en);
   const subtitle = isSearch
     ? `${list.length}`
-    : (_booksLang === 'ar' ? `${list.length} كتاب` : `${list.length} books`);
+    : isBeginner
+      ? (_booksLang === 'ar' ? 'اقرأ بالترتيب' : 'Read in order')
+      : (_booksLang === 'ar' ? `${list.length} كتاب` : `${list.length} books`);
 
   host.innerHTML = `
     <div class="books-list-header">
