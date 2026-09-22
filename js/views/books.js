@@ -102,24 +102,29 @@ function renderCategoryLanding(host){
     setTimeout(() => injectHeaderIcons(), 0);
   }
 
-  if(isBeginner){
-    list.forEach(b => {
-      const note = getBeginnerBookNote(b.id);
-      if(!note) return;
-      const card = host.querySelector(`.book-card[onclick*="${b.id}"]`);
-      if(!card) return;
-      const info = card.querySelector('.book-info');
-      if(!info) return;
-      const noteEl = document.createElement('div');
-      noteEl.className = 'book-beginner-note';
-      noteEl.textContent = note;
-      info.appendChild(noteEl);
-    });
-  }
-
   if(typeof generateCoversForGrid === 'function'){
     setTimeout(() => generateCoversForGrid(), 50);
   }
+
+  if(isBeginner){
+    setTimeout(() => injectBeginnerNotes(host, list), 120);
+  }
+}
+
+function injectBeginnerNotes(host, list){
+  list.forEach(b => {
+    const note = getBeginnerBookNote(b.id);
+    if(!note) return;
+    const card = host.querySelector(`.book-card[onclick*="${b.id}"]`);
+    if(!card) return;
+    const info = card.querySelector('.book-info');
+    if(!info) return;
+    if(info.querySelector('.book-beginner-note')) return;
+    const noteEl = document.createElement('div');
+    noteEl.className = 'book-beginner-note';
+    noteEl.textContent = note;
+    info.appendChild(noteEl);
+  });
 }
 
 function categoryCardHTML(cat, count){
