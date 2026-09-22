@@ -31,7 +31,7 @@ function openDetail(id){
 
   /* Show all categories + tags in the detail view */
   const catChips = renderCatChips(d.categories);
-  const tagChips = renderTagChips(d.tags);
+  const tagChips = '';
   const chipsRow = (catChips || tagChips)
     ? `<div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap">${catChips}${tagChips}</div>`
     : '';

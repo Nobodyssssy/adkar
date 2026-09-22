@@ -80,7 +80,7 @@ function handleSearch(){
       const catKey = Array.isArray(d.categories) ? d.categories[0] : null;
       const cat = getCat(catKey);
       const isFav = favs.includes(d.id);
-      return `<div class="search-result-card" style="--cc:${cat.color}" onclick="openDetail(${d.id})"> <div class="src-cat-label" style="color:${cat.color}"> ${cat.ar}${isFav ? ' ' + icon('favorite-filled', 12) : ''} </div> ${d.situation ? `<div class="src-situation">${d.situation}</div>` : ''} <div class="src-text">${d.arabic.slice(0,140)}${d.arabic.length>140?'...':''}</div> ${(d.tags && d.tags.length) ? `<div style="margin-top:6px">${renderTagChips(d.tags)}</div>` : ''} </div>`;
+      return `<div class="search-result-card" style="--cc:${cat.color}" onclick="openDetail(${d.id})"> <div class="src-cat-label" style="color:${cat.color}"> ${cat.ar}${isFav ? ' ' + icon('favorite-filled', 12) : ''} </div> ${d.situation ? `<div class="src-situation">${d.situation}</div>` : ''} <div class="src-text">${d.arabic.slice(0,140)}${d.arabic.length>140?'...':''}</div> ${''} </div>`;
     }).join('');
   }
 

@@ -28,16 +28,43 @@ _tagFilters[currentCat] = tag || null;
 renderAdkarGrid();
 }
 
+function _subcatsFor(catKey){
+const table = (typeof ADHKAR_SUBCATS !== 'undefined' && ADHKAR_SUBCATS) ? ADHKAR_SUBCATS[catKey] : null;
+return Array.isArray(table) ? table : [];
+}
+
+function _subcatCount(catKey, subKey){
+const tag = catKey + ':' + subKey;
+return _catItems(catKey).filter(d => Array.isArray(d.tags) && d.tags.indexOf(tag) > -1).length;
+}
+
+function _subcatLabel(catKey, subKey){
+if(typeof ADHKAR_SUBCAT_LABEL === 'function'){
+const l = ADHKAR_SUBCAT_LABEL(catKey, subKey);
+if(l) return l.ar + ' · ' + l.en;
+}
+return subKey;
+}
+
 function renderTagFilterRow(catKey){
-const tags = [...new Set(_catItems(catKey).flatMap(d => Array.isArray(d.tags) ? d.tags : []))];
-if(!tags.length) return '';
+const subs = _subcatsFor(catKey);
+if(!subs.length) return '';
 const active = _tagFilters[catKey] || null;
-const chips = ['', ...tags].map(t => {
-const on = (t === '' && !active) || (t !== '' && active === t);
-const label = t === '' ? 'الكل · All' : _tagLabel(t);
-return `<button class="filter-chip tag ${on ? 'on' : ''}" onclick="setTagFilter('${t}')">${label}</button>`;
-}).join('');
-return `<div class="adkar-tagbar">${chips}</div>`;
+const total = _catItems(catKey).length;
+const chips = [];
+
+const allOn = !active;
+chips.push(`<button class="filter-chip tag ${allOn ? 'on' : ''}" onclick="setTagFilter('')">الكل · All <span class="chip-count">${total}</span></button>`);
+
+subs.forEach(s => {
+const n = _subcatCount(catKey, s.key);
+if(n === 0) return;
+const on = active === s.key;
+const label = s.ar + ' · ' + s.en;
+chips.push(`<button class="filter-chip tag ${on ? 'on' : ''}" onclick="setTagFilter('${s.key}')">${label} <span class="chip-count">${n}</span></button>`);
+});
+
+return `<div class="adkar-tagbar">${chips.join('')}</div>`;
 }
 
 function renderAdkarGrid(){
@@ -45,24 +72,35 @@ const catKey = currentCat;
 let items = _catItems(catKey);
 const active = _tagFilters[catKey] || null;
 if(active){
-items = items.filter(d => Array.isArray(d.tags) && d.tags.includes(active));
+const subtag = catKey + ':' + active;
+items = items.filter(d => Array.isArray(d.tags) && d.tags.indexOf(subtag) > -1);
 }
 const g = $('adkar-grid');
 if(!items.length){
 g.innerHTML = `<div class="adkar-empty"> <div class="adkar-empty-icon">${icon('beads', 40)}</div> <div>No adkar here yet.</div> </div>`;
 return;
 }
-/* Group by first tag = subcategory */
+/* Group by the entry's subtag inside this bucket (falls back to "Other"). */
+function _entrySubtag(d, ck){
+if(!Array.isArray(d.tags)) return '';
+const prefix = ck + ':';
+for(let i = 0; i < d.tags.length; i++){
+const t = d.tags[i];
+if(typeof t === 'string' && t.indexOf(prefix) === 0) return t.slice(prefix.length);
+}
+return '';
+}
 const groups = new Map();
 items.forEach(d => {
-const key = (Array.isArray(d.tags) && d.tags.length) ? d.tags[0] : '';
+const key = _entrySubtag(d, catKey) || '';
 if(!groups.has(key)) groups.set(key, []);
 groups.get(key).push(d);
 });
 let html = renderTagFilterRow(catKey);
 groups.forEach((list, key) => {
 if(groups.size > 1){
-html += `<div class="adkar-group-head"><span>${key ? _tagLabel(key) : 'أخرى · Other'}</span><span class="adkar-group-count">${list.length}</span></div>`;
+const label = key ? _subcatLabel(catKey, key) : 'أخرى · Other';
+html += `<div class="adkar-group-head"><span>${label}</span><span class="adkar-group-count">${list.length}</span></div>`;
 }
 html += list.map(d => adkarCardHTML(d, getCat(catKey))).join('');
 });
@@ -89,7 +127,6 @@ function adkarCardHTML(d, catObj){
     : '';
 
   const catChips = catObj ? '' : renderCatChips(d.categories);
-  const tagChips = renderTagChips(d.tags);
 
   const html = `<div class="adkar-card ${isFav?'fav-glow':''}" style="--cc:${cat.color}" onclick="openDetail(${d.id})">
     <div class="adkar-left">
@@ -100,7 +137,6 @@ function adkarCardHTML(d, catObj){
         ${catChips}
         <span class="badge badge-repeat">× ${d.repeat}</span>
         ${relBadge}
-        ${tagChips}
       </div>
     </div>
     <div class="adkar-meta">${progressRing(pct, cat.color, isDone)}</div>

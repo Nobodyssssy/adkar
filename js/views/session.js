@@ -81,7 +81,7 @@ function renderSessionStep(){
     <div class="session-badges">
       <span class="badge badge-repeat" style="font-size:12px;padding:3px 10px">× ${d.repeat}</span>
       ${relBadge}
-      ${renderTagChips(d.tags)}
+      ${''}
     </div>
     ${d.hadith ? `<div class="session-info session-hadith">${d.hadith}</div>` : ''}
     ${d.virtue ? `<div class="session-info session-virtue">${d.virtue}</div>` : ''}
