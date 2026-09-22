@@ -1,7 +1,7 @@
 # Sahib (صاحب)
 
 Sahib is an offline-first, installable Progressive Web App designed as a daily Islamic companion.
-It provides fast, private, and readable access to adhkar, prayer times, the Hijri calendar, Names of Allah, a digital tasbih, and a local PDF library.
+It provides fast, private, and readable access to adhkar, prayer times, the Hijri calendar, Names of Allah, a digital tasbih, and a local PDF library with user uploads.
 
 The app is built with vanilla HTML, CSS, and JavaScript.
 There is no framework and no build step.
@@ -52,7 +52,7 @@ There is no framework and no build step.
 
 ### Library and Reader
 
-- Local PDF library stored under `assets/books`.
+- Curated local PDF library stored under `assets/books`.
 - Nine category folders, 70 books total:
   1. Quran & Its Sciences (5)
   2. Hadith & Its Sciences (9)
@@ -63,14 +63,22 @@ There is no framework and no build step.
   7. Modern Studies & Issues (7)
   8. General Books & Literature (5)
   9. Companions & Caliphs (5)
-- Catalog lives in `js/books-data.js`; helpers in `js/books.js`; view in `js/views/books.js`.
+- Beginner path banner on library landing: ten curated books in reading order with per-book notes (AR + EN).
+- Local PDF uploads:
+  - upload any PDF from device into IndexedDB (`local_books` store, DB v4)
+  - size limits: 500 MB per file, 900 MB warn threshold, ~1.2 GB refuse ceiling
+  - generated page-1 cover thumbnails cached locally
+  - edit title/author/description (AR + EN), delete single book, delete all
+  - merged into all lookups: search, category counts, detail modal, reader
 - Reader powered by a vendored EmbedPDF (PDFium) WASM engine:
   - correct Arabic shaping and glyph rendering natively
   - no server-side rasterization, no page-image folders
   - no PDF.js and no external cmap or standard-font downloads
 - Three page rendering modes: Light, Dark, Sepia.
-- Reading progress and per-book bookmarks persisted in IndexedDB.
-- Continue-reading strip and pinned books on the library landing page.
+- Page bookmarks: toggle, list panel, jump-to-page, remove; persisted in IndexedDB.
+- Header favorites dropdown: two buckets (favorite adkar + favorite books) with live count badges.
+- Continue-reading strip on library landing (recently opened books).
+- Reading progress persisted in IndexedDB.
 
 ### Digital Tasbih
 
@@ -83,6 +91,7 @@ There is no framework and no build step.
 - Fuzzy search across adhkar.
 - Filters by category, reliability, tag, and favorites.
 - Search bar visible on category and search views.
+- Library search covers curated + local uploaded books.
 
 ### Themes
 
@@ -103,17 +112,19 @@ There is no framework and no build step.
 - No accounts.
 - No tracking.
 - No cloud sync.
+- Uploaded PDFs never leave the device.
 
 ## Tech Stack
 
 - Frontend: vanilla JavaScript ES6+, HTML5, CSS3.
 - Styling: custom CSS variables, Catppuccin-inspired palette.
-- Storage: IndexedDB through a small custom wrapper.
+- Storage: IndexedDB through a small custom wrapper (DB v4).
 - Migration: automatic one-time migration from older localStorage data.
 - Offline: service worker with cache-first assets and network-first navigation.
 - Fonts: self-hosted Amiri for Arabic and Tajawal for UI.
 - Icons: Lucide-style SVG sprite in `assets/icons/sprite.svg`.
 - PDF rendering: EmbedPDF (PDFium compiled to WASM), vendored under `js/vendor/` and tracked in git.
+- Local uploads: Blob URLs served from IndexedDB `local_books` object store.
 
 ## Data Merge Model
 
