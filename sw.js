@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.10.13';
+const VERSION = 'v2.10.14';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -77,6 +77,7 @@ const APP_SHELL = [
   './js/views/adkar.js',
   './js/views/search.js',
   './js/views/favs.js',
+  './js/views/favs-menu.js',
   './js/views/detail.js',
   './js/views/session.js',
   './js/views/form.js',
