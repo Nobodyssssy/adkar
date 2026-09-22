@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 const DB_NAME    = 'adkar-db';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let _dbPromise = null;
 
@@ -52,6 +52,9 @@ function openDB(){
       }
       if(!db.objectStoreNames.contains('meta')){
         db.createObjectStore('meta', { keyPath: 'key' });
+      }
+      if(!db.objectStoreNames.contains('local_books')){
+        db.createObjectStore('local_books', { keyPath: 'id' });
       }
 	        /* v2 data migration: convert `cat: 'x'` → `categories: ['x']`, add tags:[].
          Runs once per browser on first load after DB_VERSION 2 deploy.
@@ -216,7 +219,8 @@ const db = {
     }),
   },
 
-  /* ── META (preferences, migration flags) ── */
+  /* ═══════════════════════════════════════════════════════════════════════
+     META (preferences, migration flags) ═══════════════════════════════════ */
   meta: {
     get: (key) => tx('meta').then(({store}) => reqToPromise(store.get(key)))
                   .then(x => x ? x.value : undefined),
@@ -225,6 +229,22 @@ const db = {
     }),
     delete: (key) => tx('meta', 'readwrite').then(async ({store, t}) => {
       store.delete(key); await txComplete(t);
+    }),
+  },
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LOCAL BOOKS — user-uploaded PDFs, stored as Blob ═════════════════════ */
+  localBooks: {
+    getAll: () => tx('local_books').then(({store}) => reqToPromise(store.getAll())),
+    get:    (id) => tx('local_books').then(({store}) => reqToPromise(store.get(id))),
+    put:    (obj) => tx('local_books', 'readwrite').then(async ({store, t}) => {
+      store.put(obj); await txComplete(t); return obj;
+    }),
+    delete: (id) => tx('local_books', 'readwrite').then(async ({store, t}) => {
+      store.delete(id); await txComplete(t);
+    }),
+    clear:  () => tx('local_books', 'readwrite').then(async ({store, t}) => {
+      store.clear(); await txComplete(t);
     }),
   },
 
