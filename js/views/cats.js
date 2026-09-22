@@ -20,7 +20,7 @@ function renderCatsGrid(){
     const n = items.length;
     const done = items.filter(d => (counters[`c_${d.id}`]||0) >= d.repeat).length;
     const pct = n > 0 ? Math.round(done / n * 100) : 0;
-    const iconName = CAT_ICONS[c.key] || CAT_ICON_DEFAULT;
+    const iconName = c.icon || CAT_ICONS[c.key] || CAT_ICON_DEFAULT;
 	return `<div class="cat-card" style="--cc:${c.color}" onclick="openCat('${c.key}')">
 	  <div class="cat-icon" style="background:${c.color}22;color:${c.color}">${icon(iconName, 24)}</div>
 	  <div class="cat-name">${c.ar}</div>

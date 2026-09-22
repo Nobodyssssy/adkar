@@ -2,20 +2,23 @@
 
 function defaultCats(){
   return [
-    {key:'nawm', ar:'أذكار النوم والاستيقاظ', en:'Sleep & Waking', color:'#8b4cc9'},
-    {key:'wudu', ar:'أذكار الوضوء والخلاء', en:'Wudu & Restroom', color:'#2ab5c4'},
-    {key:'masjid', ar:'أذكار المسجد والأذان', en:'Mosque & Athan', color:'#3e8ed0'},
-    {key:'salah', ar:'أذكار داخل الصلاة', en:'During Prayer', color:'#2ecc71'},
-    {key:'salah_after', ar:'أذكار بعد الصلاة', en:'After Prayer', color:'#4caf89'},
-    {key:'sabah', ar:'أذكار الصباح', en:'Morning', color:'#f5a623'},
-    {key:'masaa', ar:'أذكار المساء', en:'Evening', color:'#4c7fc9'},
-    {key:'duaa', ar:'دعاء', en:'Du\'a', color:'#c94c8b'},
-    {key:'food', ar:'أذكار الطعام', en:'Food & Drink', color:'#e67e22'},
-    {key:'travel', ar:'أذكار السفر', en:'Travel', color:'#c97f4c'},
-    {key:'sickness', ar:'أذكار المرض', en:'Sickness', color:'#7f4ce0'},
-    {key:'janazah', ar:'أذكار الجنازة', en:'Funeral', color:'#6c6c6c'},
-    {key:'aam', ar:'أذكار عامة', en:'General', color:'#c9604c'},
-    
+    {key:'nawm',        ar:'أذكار النوم والاستيقاظ', en:'Sleep & Waking',  color:'#5c6bc0', icon:'sleep'},
+    {key:'wudu',        ar:'أذكار الوضوء والخلاء',   en:'Wudu & Restroom', color:'#26a69a', icon:'wudu'},
+    {key:'masjid',      ar:'أذكار المسجد والأذان',   en:'Mosque & Athan',  color:'#66bb6a', icon:'mosque'},
+    {key:'salah',       ar:'أذكار داخل الصلاة',       en:'During Prayer',   color:'#42a5f5', icon:'prayer'},
+    {key:'salah_after', ar:'أذكار بعد الصلاة',        en:'After Prayer',    color:'#7e57c2', icon:'hand-heart'},
+    {key:'sabah',       ar:'أذكار الصباح',           en:'Morning',         color:'#ffa726', icon:'sunrise'},
+    {key:'masaa',       ar:'أذكار المساء',           en:'Evening',         color:'#8d6e63', icon:'sunset'},
+    {key:'duaa',        ar:'دعاء',                  en:"Du'a",            color:'#ef5350', icon:'dua'},
+    {key:'dhikr',       ar:'الذكر',                 en:'Adhkar',          color:'#f5a623', icon:'tasbih'},
+    {key:'food',        ar:'أذكار الطعام',           en:'Food & Drink',    color:'#9ccc65', icon:'utensils'},
+    {key:'travel',      ar:'أذكار السفر',            en:'Travel',          color:'#29b6f6', icon:'plane'},
+    {key:'hajj',        ar:'الحج',                  en:'Hajj',            color:'#ab47bc', icon:'kaaba'},
+    {key:'sickness',    ar:'أذكار المرض',            en:'Sickness',        color:'#ec407a', icon:'sick'},
+    {key:'janazah',     ar:'أذكار الجنازة',          en:'Funeral',         color:'#78909c', icon:'coffin'},
+    {key:'clothing',    ar:'أذكار اللباس',           en:'Clothing',        color:'#d4e157', icon:'cloth'},
+    {key:'home',        ar:'أذكار المنزل',           en:'Home',            color:'#ffca28', icon:'home'},
+    {key:'aam',         ar:'أذكار عامة',             en:'General',         color:'#9a9db5', icon:'circle-dot'}
   ];
 }
 

@@ -47,6 +47,28 @@ async function initState(){
   } else {
     cats = cache.cats;
   }
+/* Self-heal: ensure the 17 default categories carry their icon metadata.
+   Does not touch user-created categories. Idempotent. */
+try {
+  const fresh = defaultCats();
+  const storeCats = await store.getAllCats ? await store.getAllCats() : await db.cats.getAll();
+  const byKey = new Map(storeCats.map(c => [c.key, c]));
+  let needsSync = false;
+  fresh.forEach(f => {
+    const cur = byKey.get(f.key);
+    if(!cur || cur.icon !== f.icon){ needsSync = true; }
+  });
+  if(needsSync){
+    for (const f of fresh) {
+      const cur = byKey.get(f.key) || {};
+      const merged = { ...cur, ...f };
+      await db.cats.put(merged);
+      byKey.set(f.key, merged);
+    }
+    cats = await db.cats.getAll();
+    console.log('[cats] resynced ' + fresh.length + ' defaults with icons');
+  }
+} catch(e){ console.warn('[cats] resync failed', e); }
 
   if(!hasAdkar){
     data = defaultData();
@@ -74,7 +96,7 @@ async function initState(){
           existing.add(key);
           data.push({
             id: hid++,
-            categories: [item.cat],
+            categories: item.categories || [item.cat],
             tags: item.tags || [],
             repeat: item.repeat || 1,
             reliability: item.reliability || null,
@@ -109,7 +131,7 @@ if(key && !existing.has(key)){
 existing.add(key);
 data.push({
 id: hid++,
-categories: [item.cat],
+categories: item.categories || [item.cat],
 tags: item.tags || [],
 repeat: item.repeat || 1,
 reliability: item.reliability || null,
