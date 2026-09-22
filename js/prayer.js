@@ -84,6 +84,33 @@ function cleanTime(t){
   return String(t).trim().split(/\s+/)[0];
 }
 
+/* Remember the most recent month we successfully fetched, so we can
+   serve it when the network is down and the current month is not cached. */
+async function _rememberLastGoodMonth(data, lat, lng, year, month){
+  try{
+    await store.setMeta('prayer-last-good', {
+      data,
+      ts: Date.now(),
+      lat, lng, year, month,
+    });
+  }catch(e){
+    console.warn('[prayer] could not persist last-good month', e);
+  }
+}
+
+/* Read the last-good snapshot, or null if there is none. */
+async function _loadLastGoodMonth(){
+  try{
+    const snap = await store.getMeta('prayer-last-good');
+    if(snap && Array.isArray(snap.data) && snap.data.length){
+      return snap;
+    }
+  }catch(e){
+    console.warn('[prayer] could not read last-good month', e);
+  }
+  return null;
+}
+
 /* ═══════════════════════════════════════════════════════════
    API — fetch a month of prayer times
    ═══════════════════════════════════════════════════════════ */
@@ -98,15 +125,15 @@ async function fetchMonth(lat, lng, year, month){
   if(!res.ok) throw new Error('Aladhan API returned ' + res.status);
   const json = await res.json();
 
-  return json.data.map(day => ({
+const mapped = json.data.map(day => ({
     date: day.date.gregorian.date,       /* DD-MM-YYYY */
     weekday: day.date.gregorian.weekday.en,
-hijri: {
-  day: day.date.hijri.day,
-  month:      day.date.hijri.month.en,       /* e.g. "Rabi' al-thani" */
-  monthAr:    day.date.hijri.month.ar,       /* e.g. "ربيع الآخر" */
-  year: day.date.hijri.year,
-},
+    hijri: {
+      day: day.date.hijri.day,
+      month:   day.date.hijri.month.en,
+      monthAr: day.date.hijri.month.ar,
+      year:    day.date.hijri.year,
+    },
     timings: {
       Fajr:    cleanTime(day.timings.Fajr),
       Sunrise: cleanTime(day.timings.Sunrise),
@@ -116,6 +143,8 @@ hijri: {
       Isha:    cleanTime(day.timings.Isha),
     },
   }));
+  await _rememberLastGoodMonth(mapped, lat, lng, year, month);
+  return mapped;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -139,10 +168,17 @@ async function getToday(forceRefresh = false){
   let cached = forceRefresh ? null : await store.getMeta(key);
 
   if(!cached){
-    console.log('[prayer] Fetching month', month, year);
-    const data = await fetchMonth(loc.lat, loc.lng, year, month);
-    cached = { data, ts: Date.now() };
-    await store.setMeta(key, cached);
+    try{
+      console.log('[prayer] Fetching month', month, year);
+      const data = await fetchMonth(loc.lat, loc.lng, year, month);
+      cached = { data, ts: Date.now() };
+      await store.setMeta(key, cached);
+    }catch(err){
+      console.warn('[prayer] fetch failed, trying last-good snapshot', err.message);
+      const snap = await _loadLastGoodMonth();
+      if(!snap) throw err;
+      cached = { data: snap.data, ts: snap.ts, stale: true };
+    }
   }
 
   const todayStr =
@@ -150,7 +186,7 @@ async function getToday(forceRefresh = false){
     String(month).padStart(2,'0') + '-' + year;
 
   const today = cached.data.find(d => d.date === todayStr);
-  return { today, location: loc, cachedAt: cached.ts };
+  return { today, location: loc, cachedAt: cached.ts, stale: !!cached.stale };
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -161,12 +197,19 @@ async function getMonth(year, month){
   const loc = await getLocation();
   const key = monthKey(loc.lat, loc.lng, year, month);
   const cached = await store.getMeta(key);
-  if(cached) return cached.data;
-  const data = await fetchMonth(loc.lat, loc.lng, year, month);
-  await store.setMeta(key, { data, ts: Date.now() });
-  return data;
+  if(cached) return { data: cached.data, ts: cached.ts, stale: false };
+  try{
+    const data = await fetchMonth(loc.lat, loc.lng, year, month);
+    const ts = Date.now();
+    await store.setMeta(key, { data, ts });
+    return { data, ts, stale: false };
+  }catch(err){
+    console.warn('[prayer] getMonth fetch failed, falling back to last-good', err.message);
+    const snap = await _loadLastGoodMonth();
+    if(snap) return { data: snap.data, ts: snap.ts, stale: true };
+    throw err;
+  }
 }
-
 /* ═══════════════════════════════════════════════════════════
    PUBLIC — ensureCache()
    Prefetches up to 90 days ahead (in monthly chunks).

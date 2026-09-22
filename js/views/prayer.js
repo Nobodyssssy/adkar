@@ -18,11 +18,15 @@ async function openPrayerView(){
     const year  = today.getFullYear();
     const month = today.getMonth() + 1;
 
-    const monthData = await getMonth(year, month);
+    const monthResult = await getMonth(year, month);
+    const monthData = monthResult.data;
+    const cachedAt = monthResult.ts || Date.now();
+    const stale = !!monthResult.stale;
 
     _prayerData = {
       location:    loc,
-      cachedAt:    Date.now(),
+      cachedAt,
+      stale,
       monthData,
       monthYear:   year,
       monthMonth:  month,
@@ -958,10 +962,13 @@ async function _prayerLoadDay(targetDate){
   let monthData = _prayerData.monthData;
   if(year !== _prayerData.monthYear || month !== _prayerData.monthMonth){
     try{
-      monthData = await getMonth(year, month);
+      const monthResult = await getMonth(year, month);
+      monthData = monthResult.data;
       _prayerData.monthData   = monthData;
       _prayerData.monthYear   = year;
       _prayerData.monthMonth  = month;
+      _prayerData.cachedAt    = monthResult.ts || _prayerData.cachedAt;
+      _prayerData.stale       = !!monthResult.stale;
     }catch(err){
       toast('Could not load that month', 'alert');
       console.error('[prayer-view]', err);
