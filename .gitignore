@@ -61,4 +61,4 @@ Desktop.ini
 # EmbedPDF build artifacts (regenerable from package.json)
 tools/embedpdf-build/node_modules/
 tools/embedpdf-build/dist-*/
-tools/embedpdf-build/*.tgz
+tools/embedpdf-build/*.tgz*.pre-v3 
