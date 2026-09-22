@@ -200,9 +200,9 @@ function getBeginnerBookNote(bookId){
    ========================================================================== */
 
 const LOCAL_BOOK_LIMITS = {
-  single:  100 * 1024 * 1024,        /* 100 MB hard cap per file */
-  warn:    500 * 1024 * 1024,        /* 500 MB soft cap: confirm before adding */
-  refuse: 1024 * 1024 * 1024,        /* 1 GB hard cap for the whole store */
+  single:  500 * 1024 * 1024,        /* 500 MB hard cap per file */
+  warn:    900 * 1024 * 1024,        /* 900 MB soft cap: confirm before adding */
+  refuse: 1229 * 1024 * 1024,        /* ~1.2 GB hard cap for the whole store */
 };
 
 let _localBooks = null;   /* in-memory cache: array of metadata objects (no Blob) */
@@ -323,12 +323,26 @@ async function deleteLocalBook(id){
     _localBooks = _localBooks.filter(b => b.id !== id);
   }
   if(row) _localBooksBytes = Math.max(0, _localBooksBytes - (row.size || 0));
+
+  /* Drop the cached cover so it does not leak in the meta store */
+  if(typeof store !== 'undefined'){
+    try{
+      const stored = await store.getMeta('book-covers-local');
+      if(stored && typeof stored === 'object' && id in stored){
+        delete stored[id];
+        await store.setMeta('book-covers-local', stored);
+      }
+    }catch(e){}
+  }
 }
 
 async function deleteAllLocalBooks(){
   await db.localBooks.clear();
   _localBooks = [];
   _localBooksBytes = 0;
+  if(typeof store !== 'undefined'){
+    try{ await store.setMeta('book-covers-local', {}); }catch(e){}
+  }
 }
 
 async function getLocalBookBlobUrl(id){

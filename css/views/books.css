@@ -624,3 +624,148 @@
   border-top:1px dashed color-mix(in srgb, var(--text3) 30%, transparent);
   padding-top:8px;
 }
+
+/* --- Local books --- */
+.local-badge{
+  background:color-mix(in srgb, #7aa2f7 22%, transparent);
+  color:#7aa2f7;
+  border-color:#7aa2f7;
+}
+
+.local-upload-bar{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px 16px;
+  margin-bottom:14px;
+  border:1px dashed color-mix(in srgb, var(--text3) 40%, transparent);
+  border-radius:12px;
+}
+.local-upload-note{
+  font-size:12px;
+  color:var(--text3);
+  line-height:1.4;
+}
+
+.local-book-card{
+  position:relative;
+}
+.local-trash-btn{
+  position:absolute;
+  top:8px;
+  inset-inline-end:8px;
+  width:28px;
+  height:28px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:color-mix(in srgb, var(--bg) 70%, transparent);
+  border:1px solid color-mix(in srgb, var(--text3) 30%, transparent);
+  color:var(--text2);
+  padding:0;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:2;
+  opacity:.7;
+  transition:opacity .15s ease, color .15s ease, border-color .15s ease;
+}
+.local-book-card:hover .local-trash-btn{
+  opacity:1;
+}
+.local-trash-btn:hover{
+  background:color-mix(in srgb, #f38ba8 20%, transparent);
+  color:#f38ba8;
+  border-color:#f38ba8;
+}
+.local-trash-btn:hover{
+  background:color-mix(in srgb, #f38ba8 25%, transparent);
+  color:#f38ba8;
+}
+
+.local-danger-zone{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid color-mix(in srgb, var(--text3) 20%, transparent);
+  text-align:center;
+}
+.local-warn{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--text3);
+}
+
+/* --- Local book card cover + trash button --- */
+.local-book-cover{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(160deg,
+    color-mix(in srgb, #7aa2f7 18%, var(--bg2)),
+    color-mix(in srgb, #7aa2f7 6%, var(--bg2)));
+  border:1px solid color-mix(in srgb, #7aa2f7 35%, transparent);
+  border-radius:8px;
+}
+.local-cover-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  color:#7aa2f7;
+  opacity:.85;
+}
+.local-cover-label{
+  font-size:10px;
+  letter-spacing:.14em;
+  font-weight:700;
+  opacity:.9;
+}
+
+/* --- Local detail modal actions --- */
+.local-detail-primary-row{
+  display:flex;
+  align-items:stretch;
+  gap:8px;
+  margin-top:8px;
+}
+.local-detail-primary-row .btn-save{
+  flex:1;
+  padding:14px;
+  font-size:15px;
+}
+.local-icon-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:48px;
+  border-radius:10px;
+  border:1px solid color-mix(in srgb, var(--text3) 30%, transparent);
+  background:transparent;
+  color:var(--text2);
+  cursor:pointer;
+}
+.local-icon-btn:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.local-delete-btn{
+  display:block;
+  width:100%;
+  margin-top:12px;
+  padding:11px;
+  background:transparent;
+  border:1px solid color-mix(in srgb, #f38ba8 40%, transparent);
+  border-radius:10px;
+  color:#f38ba8;
+  font-size:13px;
+  cursor:pointer;
+}
+.local-delete-btn:hover{
+  background:color-mix(in srgb, #f38ba8 15%, transparent);
+}
+.book-detail-cover img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:inherit;
+  display:block;
+}

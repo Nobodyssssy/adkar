@@ -30,14 +30,15 @@ async function initPdfEngine(){
   }
 }
 
-async function loadPdfDocument(bookId){
+async function loadPdfDocument(bookId, overrideUrl){
   if(_pdfDocs[bookId]) return _pdfDocs[bookId];
 
   const book = getBookById(bookId);
   if(!book) throw new Error('Book not found');
 
   const engine = await initPdfEngine();
-  const url = resolveBookPath(book);
+  const url = overrideUrl || resolveBookPath(book);
+  if(!url) throw new Error('No source URL for book');
 
   const doc = await engine.openDocumentUrl({ id: bookId, url }).toPromise();
 
@@ -236,4 +237,92 @@ function enterFullscreen(el){
 }
 function exitFullscreen(){
   if(document.fullscreenElement) document.exitFullscreen().catch(() => {});
+}
+
+/* ==========================================================================
+   Local book covers - rendered page 1, cached separately from static books.
+   ========================================================================== */
+
+const COVER_CACHE_LOCAL_KEY = 'book-covers-local';
+let _coverCacheLocal = null;
+
+async function loadCoverCacheLocal(){
+  if(_coverCacheLocal) return _coverCacheLocal;
+  const stored = await store.getMeta(COVER_CACHE_LOCAL_KEY);
+  _coverCacheLocal = (stored && typeof stored === 'object') ? stored : {};
+  return _coverCacheLocal;
+}
+
+async function saveCoverCacheLocal(){
+  await store.setMeta(COVER_CACHE_LOCAL_KEY, _coverCacheLocal || {});
+}
+
+function getCachedLocalCover(bookId){
+  if(!_coverCacheLocal) return null;
+  return _coverCacheLocal[bookId] || null;
+}
+
+async function generateLocalBookCover(bookId){
+  await loadCoverCacheLocal();
+
+  const cached = getCachedLocalCover(bookId);
+  if(cached) return cached;
+
+  try{
+    const book = getLocalBookById(bookId);
+    if(!book) return null;
+
+    const url = await getLocalBookBlobUrl(bookId);
+    if(!url) return null;
+
+    const engine = await initPdfEngine();
+    const doc = await engine.openDocumentUrl({ id: 'cover-' + bookId, url }).toPromise();
+    const page = doc.pages[0];
+
+    const baseWidth = page.size.width;
+    const scale = COVER_WIDTH / baseWidth;
+
+    const blob = await engine.renderPage(doc, page, {
+      scaleFactor: scale,
+      dpr: 1,
+      imageType: 'image/jpeg',
+    }).toPromise();
+
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    if(typeof engine.closeDocument === 'function'){
+      try{ await engine.closeDocument(doc).toPromise(); }catch(e){ /* ignore */ }
+    }
+
+    try{ URL.revokeObjectURL(url); }catch(e){}
+
+    _coverCacheLocal[bookId] = dataUrl;
+    await saveCoverCacheLocal();
+    return dataUrl;
+
+  }catch(err){
+    console.warn('[reader] local cover generation failed for', bookId, err);
+    return null;
+  }
+}
+
+async function attachLocalBookCover(bookId, element){
+  if(!element) return;
+  const dataUrl = await generateLocalBookCover(bookId);
+  if(!dataUrl) return;
+  element.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.alt = '';
+  img.loading = 'lazy';
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.objectFit = 'cover';
+  img.style.borderRadius = '8px';
+  element.appendChild(img);
 }

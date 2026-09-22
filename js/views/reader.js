@@ -21,6 +21,7 @@ let _readerObserver = null;
 let _readerAutoSaveTimer = null;
 let _readerScrolledToRestore = false;
 let _readerTheme = 'light';
+let _readerBlobUrl = null;
 
 /* ═══════════════════════════════════════════════════════════
    Open / close
@@ -43,7 +44,13 @@ async function openReader(bookId){
 
   renderReaderLoading();
   try{
-    _readerPdf = await loadPdfDocument(bookId);
+    let overrideUrl = null;
+    if(book.isLocal){
+      overrideUrl = await getLocalBookBlobUrl(bookId);
+      if(!overrideUrl) throw new Error('Local book not found');
+      _readerBlobUrl = overrideUrl;
+    }
+    _readerPdf = await loadPdfDocument(bookId, overrideUrl);
     _readerTotalPages = _readerPdf.numPages;
     _readerToc = await getPdfOutline(_readerPdf);
 
@@ -403,6 +410,11 @@ function closeReader(){
   /* Close the WASM doc handle to free memory */
   if(_readerPdf && typeof clearPdfCache === 'function'){
     clearPdfCache(_readerBookId);
+  }
+
+  if(_readerBlobUrl){
+    try{ URL.revokeObjectURL(_readerBlobUrl); }catch(e){}
+    _readerBlobUrl = null;
   }
 
   const el = $('reader-overlay');
