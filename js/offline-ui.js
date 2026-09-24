@@ -167,7 +167,7 @@ const OFFLINE_UI = (() => {
     host.innerHTML = `
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.7">
         Cached: ${cachedIds.size} books · ${_formatMB(cachedBytes)}<br>
-        Free storage: ${freeMB == null ? 'unknown' : _formatMB(freeMB * 1024 * 1024)}
+        Origin quota remaining: ${freeMB == null ? 'unknown' : _formatMB(freeMB * 1024 * 1024)}
       </div>
 
       <div class="offline-ui-card">
