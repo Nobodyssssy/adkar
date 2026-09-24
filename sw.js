@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.10.18';
+const VERSION = 'v2.10.19';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -59,6 +59,7 @@ const APP_SHELL = [
   './js/asma.js',
   './js/books-data.js',
   './js/books.js',
+  './js/offline-books.js',
   './js/reader.js',
   './js/vendor/embedpdf/engines/dist/index.js',
   './js/vendor/embedpdf/engines/dist/lib/pdfium/index.js',
@@ -113,7 +114,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((k) => (k.startsWith('adkar-') || k.startsWith('sahib-')) && k !== CACHE)
+        keys.filter((k) => (k.startsWith('adkar-') || k.startsWith('sahib-')) && k !== CACHE && k !== 'sahib-books')
             .map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())
@@ -132,8 +133,18 @@ self.addEventListener('fetch', (event) => {
   /* Only handle same-origin requests (fonts are now local) */
   if (!isSameOrigin) return;
 
-  /* PDFs and Range requests are handled natively by the browser for streaming */
-  if (url.pathname.includes('/assets/books/') || url.pathname.endsWith('.pdf') || req.headers.has('range')) {
+    /* Range requests: let the browser stream them directly. */
+  if (req.headers.has('range')) return;
+
+  /* Book PDFs: if the URL is already in the offline-books cache, serve it;
+     otherwise pass through to the network. Lazy caching on first read is
+     done by js/offline-books.js, not here. */
+  if (url.pathname.includes('/assets/books/') || url.pathname.endsWith('.pdf')) {
+    event.respondWith(
+      caches.open('sahib-books').then((c) =>
+        c.match(req).then((cached) => cached || fetch(req))
+      )
+    );
     return;
   }
 
