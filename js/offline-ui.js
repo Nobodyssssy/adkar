@@ -148,18 +148,21 @@ const OFFLINE_UI = (() => {
     const host = document.getElementById('offline-ui-body');
     if(!host) return;
 
-    const cachedIds = await _cachedIdSet();
-    const cachedBytes = await _cachedBytes();
+    host.innerHTML = '<div style="font-size:12px;color:var(--text3)">Loading…</div>';
 
-    const beginnerIds = _beginnerIds();
-    const beginnerBytes = await _bytesForIds(beginnerIds, cachedIds);
-    const beginnerCachedCount = beginnerIds.filter(id => cachedIds.has(id)).length;
+    try{
+      const cachedIds = await _cachedIdSet();
+      const cachedBytes = await _cachedBytes();
 
-    const allIds = await _libraryIdsAll();
-    const libraryBytes = await _bytesForIds(allIds, cachedIds);
-    const libraryCachedCount = allIds.filter(id => cachedIds.has(id)).length;
+      const beginnerIds = _beginnerIds();
+      const beginnerBytes = await _bytesForIds(beginnerIds, cachedIds);
+      const beginnerCachedCount = beginnerIds.filter(id => cachedIds.has(id)).length;
 
-    const freeMB = await _freeStorageMB();
+      const allIds = await _libraryIdsAll();
+      const libraryBytes = await _bytesForIds(allIds, cachedIds);
+      const libraryCachedCount = allIds.filter(id => cachedIds.has(id)).length;
+
+      const freeMB = await _freeStorageMB();
 
     host.innerHTML = `
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.7">
@@ -189,7 +192,12 @@ const OFFLINE_UI = (() => {
         <div style="margin-top:18px;text-align:center">
           <button class="btn-cancel" onclick="window.OFFLINE_UI.clear()">Clear cached books</button>
         </div>` : ''}
-    `;
+      `;
+    }catch(err){
+      console.error('[offline-ui] renderBody failed:', err);
+      host.innerHTML = '<div style="font-size:12px;color:var(--red,#f38ba8)">' +
+        'Failed to load. See console. ' + (err && err.message ? err.message : '') + '</div>';
+    }
   }
 
   async function _freeStorageMB(){
