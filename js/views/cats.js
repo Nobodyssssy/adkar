@@ -4,6 +4,32 @@
    Categories grid
    Counts items by checking categories.includes(key)
    ═══════════════════════════════════════════════════════════ */
+   
+/* Display order for category cards. Buckets not listed here fall to the end
+   in their natural order. */
+var CAT_DISPLAY_ORDER = [
+  'sabah',
+  'masaa',
+  'nawm',
+  'salah',
+  'salah_after',
+  'wudu',
+  'masjid',
+  'food',
+  'travel',
+  'hajj',
+  'sickness',
+  'janazah',
+  'clothing',
+  'home',
+  'duaa',
+  'dhikr',
+  'aam'
+];
+function _catOrderIndex(key){
+  var i = CAT_DISPLAY_ORDER.indexOf(key);
+  return i === -1 ? 9999 : i;
+}
 
 function renderCatsGrid(){
   /* Render the daily quote card above the categories */
@@ -13,7 +39,8 @@ function renderCatsGrid(){
   ensureCatsSettingsButton();
   
   const g = $('cats-grid');
-  g.innerHTML = cats.map(c => {
+  const sortedCats = cats.slice().sort((a, b) => _catOrderIndex(a.key) - _catOrderIndex(b.key));
+  g.innerHTML = sortedCats.map(c => {
     const items = data.filter(d =>
       Array.isArray(d.categories) && d.categories.includes(c.key)
     );
@@ -40,10 +67,34 @@ function renderCatsGrid(){
 }
 
 function openCat(key){
+  window._catsSavedScroll = window.scrollY || window.pageYOffset || 0;
   currentCat = key;
   $('adkar-view-title').textContent = getCat(key).ar;
   renderAdkarGrid();
+  window.scrollTo(0, 0);
   showView('view-adkar');
+  pushViewState('adkar');
+}
+
+/* Called by the popstate handler. Does the close without pushing another entry. */
+function _closeCatFromHistory(){
+  currentCat = null;
+  if(typeof clearSearch === 'function') clearSearch();
+  $('btn-favs').classList.remove('active');
+  showView('view-cats');
+  renderCatsGrid();
+  requestAnimationFrame(() => {
+    window.scrollTo(0, window._catsSavedScroll || 0);
+  });
+}
+
+/* UI-initiated close of the adhkar view. Pops the history entry. */
+function closeAdkarView(){
+  if(window.history && window.history.length > 1){
+    history.back();
+  } else {
+    _closeCatFromHistory();
+  }
 }
 
 function showView(id){
@@ -82,7 +133,9 @@ function goToAdkarCategories(){
   clearSearch();
   $('btn-favs').classList.remove('active');
   renderCatsGrid();
-  window.scrollTo(0, 0);
+  requestAnimationFrame(() => {
+    window.scrollTo(0, window._catsSavedScroll || 0);
+  });
 }
 
 /* Navigate to the main dashboard (home) */

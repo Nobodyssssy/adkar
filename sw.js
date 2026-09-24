@@ -1,13 +1,13 @@
-/* ─────────────────────────────────────────────
-   Service Worker — adkar app
+/* =================================================================
+   Service Worker - adkar app
    Strategy:
-     • Precache app shell on install
-     • Cache-first for same-origin assets
-     • Network-first for HTML navigation (so updates flow)
-     • Stale-while-revalidate for fonts
-   ───────────────────────────────────────────── */
+     - Precache app shell on install
+     - Cache-first for same-origin assets
+     - Network-first for HTML navigation (so updates flow)
+     - Stale-while-revalidate for fonts
+   ================================================================= */
 
-const VERSION = 'v2.10.30';
+const VERSION = 'v2.10.42';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -100,7 +100,7 @@ const APP_SHELL = [
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
-/* ── Install: precache the shell ── */
+/* â”€â”€ Install: precache the shell â”€â”€ */
 self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
@@ -132,7 +132,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-/* ── Activate: drop old caches ── */
+/* â”€â”€ Activate: drop old caches â”€â”€ */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -144,7 +144,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-/* ── Fetch handling ── */
+/* â”€â”€ Fetch handling â”€â”€ */
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -171,7 +171,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* HTML navigation → network-first, fall back to cache when offline */
+  /* HTML navigation â†’ network-first, fall back to cache when offline */
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req)
@@ -185,7 +185,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* Same-origin static assets → cache-first */
+  /* Same-origin static assets â†’ cache-first */
   event.respondWith(
     caches.match(req).then((cached) =>
       cached || fetch(req).then((res) => {
@@ -199,7 +199,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-/* ── Allow the page to trigger skipWaiting ── */
+/* â”€â”€ Allow the page to trigger skipWaiting â”€â”€ */
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });

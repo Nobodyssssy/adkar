@@ -40,6 +40,7 @@ async function startSession(){
   $('sess-body').style.borderRadius = '';
   lockBody();
   renderSessionStep();
+  pushViewState('session');
 }
 
 function closeSession(){
@@ -70,21 +71,45 @@ function renderSessionStep(){
   const relBadge = d.reliability
     ? `<span class="badge badge-${d.reliability}" style="font-size:12px;padding:3px 10px">${icon(REL_ICON[d.reliability], 12)} ${REL_LABEL[d.reliability]}</span>`
     : '';
-  const translit = d.transliteration
-    ? `<div class="session-info" style="background:var(--surface2);border:1px solid var(--border);direction:ltr;text-align:center;font-style:italic;font-size:12px;color:var(--text3)">${esc(d.transliteration)}</div>`
+
+  /* Arabic and English live in the same shell box. */
+  const hasTranslit = !!d.transliteration;
+  const toggleRow = hasTranslit
+    ? `<div class="detail-lang-toggle">
+         <button type="button" class="detail-lang-btn on" data-lang="ar" onclick="sessSetLang('ar')">عربي</button>
+         <button type="button" class="detail-lang-btn" data-lang="en" onclick="sessSetLang('en')">English</button>
+       </div>`
+    : '';
+  const translitBlock = hasTranslit
+    ? `<div class="session-arabic translit-swap" id="sess-translit" style="display:none">${esc(d.transliteration)}</div>`
+    : '';
+
+  /* Single collapsible for Source and Virtue inside the session overlay. */
+  const hasRef = !!(d.hadith || d.virtue);
+  let refBody = '';
+  if(d.hadith){
+    refBody += `<div class="detail-sub-label">Source</div><div class="detail-sub-body">${d.hadith}</div>`;
+  }
+  if(d.virtue){
+    refBody += `<div class="detail-sub-label">Virtue</div><div class="detail-sub-body">${d.virtue}</div>`;
+  }
+  const refBlock = hasRef
+    ? `<details class="detail-fold" autocomplete="off">
+         <summary><span class="detail-fold-icon">${icon('book-open', 14)}</span><span class="detail-fold-label">Source &amp; Virtue</span>${icon('chevron-down', 14)}</summary>
+         <div class="detail-fold-body">${refBody}</div>
+       </details>`
     : '';
 
   $('sess-body').innerHTML = `
     ${d.situation ? `<div class="session-situation">${d.situation}</div>` : ''}
-    <div class="session-arabic">${d.arabic}</div>
-    ${translit}
+    <div class="session-arabic" id="sess-arabic">${d.arabic}</div>
+    ${translitBlock}
+    ${toggleRow}
     <div class="session-badges">
       <span class="badge badge-repeat" style="font-size:12px;padding:3px 10px">× ${d.repeat}</span>
       ${relBadge}
-      ${''}
     </div>
-    ${d.hadith ? `<div class="session-info session-hadith">${d.hadith}</div>` : ''}
-    ${d.virtue ? `<div class="session-info session-virtue">${d.virtue}</div>` : ''}
+    ${refBlock}
     <div class="session-counter-area">
       <button class="session-tap-btn ${isDone?'done':''}" id="sess-tap" onclick="sessionTap(${d.id},${d.repeat})">
         <span id="sess-tap-num">${sessTapCount}</span>
@@ -96,6 +121,11 @@ function renderSessionStep(){
       </div>
     </div>`;
 
+  /* Force all folds collapsed inside the session body. */
+  setTimeout(() => {
+    document.querySelectorAll('#sess-body details').forEach(el => el.removeAttribute('open'));
+  }, 0);
+
   $('sess-next-btn').textContent = sessIdx < sessItems.length - 1 ? 'Next' : 'Finish';
   $('sess-next-btn').classList.toggle('done', isDone);
   $('sess-footer').style.display = 'flex';
@@ -103,6 +133,22 @@ function renderSessionStep(){
   var body = $('sess-body');
   body.style.borderBottom = '';
   body.style.borderRadius = '';
+}
+
+/* AR/EN toggle for the Arabic / transliteration block in the session overlay. */
+function sessSetLang(lang){
+  const ar = document.getElementById('sess-arabic');
+  const tr = document.getElementById('sess-translit');
+  if(!ar) return;
+  const btns = document.querySelectorAll('#sess-body .detail-lang-btn');
+  btns.forEach(b => b.classList.toggle('on', b.getAttribute('data-lang') === lang));
+  if(lang === 'en' && tr){
+    ar.style.display = 'none';
+    tr.style.display = '';
+  } else {
+    ar.style.display = '';
+    if(tr) tr.style.display = 'none';
+  }
 }
 
 async function _saveSessProgress(){
@@ -186,4 +232,38 @@ function renderSessionDone(){
   }
   $('sess-back-btn').style.opacity = '0.3';
   $('sess-back-btn').style.pointerEvents = 'none';
+}
+
+
+/* History-driven session back.
+   Per design: if there is a previous dhikr in this session, go there
+   and re-push so back can be pressed again. Only close on the first dhikr. */
+function _closeSessionFromHistory(){
+  if(sessIdx > 0){
+    sessionPrev();
+    pushViewState('session');
+    return;
+  }
+  _closeSessionHard();
+}
+
+/* Does the actual DOM close, no history. */
+function _closeSessionHard(){
+  $('session-overlay').classList.remove('open');
+  $('session-overlay').classList.remove('is-done');
+  var body = $('sess-body');
+  body.style.borderBottom = '';
+  body.style.borderRadius = '';
+  unlockBody();
+  renderAdkarGrid();
+  renderCatsGrid();
+}
+
+/* UI-driven close. Pops the history entry. */
+function closeSession(){
+  if(window.history && window.history.length > 1){
+    history.back();
+    return;
+  }
+  _closeSessionHard();
 }

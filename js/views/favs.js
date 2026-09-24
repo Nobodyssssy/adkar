@@ -3,9 +3,20 @@
 function toggleFavsView(){
   renderFavsGrid();
   showView('view-favs');
+  pushViewState('favs');
 }
 
+/* UI-driven close. Pops the history entry. */
 function closeFavsView(){
+  if(window.history && window.history.length > 1){
+    history.back();
+    return;
+  }
+  _closeFavsFromHistory();
+}
+
+/* History-driven close. Does the actual close, no push. */
+function _closeFavsFromHistory(){
   const btn = $('btn-favs');
   if(btn) btn.classList.remove('active');
   if(typeof goHomeView === 'function') goHomeView();

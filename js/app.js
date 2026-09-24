@@ -36,6 +36,9 @@
     /* 5.1 Render home dashboard */
     renderHome();
 
+    /* 5.2 Scroll-to-top button */
+    initScrollTopButton();
+
     /* 6. Global keyboard shortcuts */
     document.addEventListener('keydown', e => {
       if(e.key === 'Escape'){
@@ -268,3 +271,66 @@ window.injectAttribution = function(){
     };
   }
 })();
+
+
+/* =================================================================
+   Floating scroll-to-top button
+   - Appears after 300px of scroll
+   - Hidden when the session overlay or reader overlay is open
+   ================================================================= */
+function initScrollTopButton(){
+  if(document.getElementById('scroll-top-btn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'scroll-top-btn';
+  btn.className = 'scroll-top-btn';
+  btn.setAttribute('aria-label', 'Scroll to top');
+  btn.innerHTML = icon('chevron-up', 20);
+  document.body.appendChild(btn);
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  let raf = 0;
+  function update(){
+    raf = 0;
+    const y = window.scrollY || window.pageYOffset || 0;
+    const sessOpen = document.getElementById('session-overlay')?.classList.contains('open');
+    const readOpen = document.querySelector('.reader-overlay.open');
+    const show = y > 300 && !sessOpen && !readOpen;
+    btn.classList.toggle('show', !!show);
+  }
+  window.addEventListener('scroll', () => {
+    if(!raf) raf = requestAnimationFrame(update);
+  }, { passive: true });
+  update();
+}
+
+
+/* =================================================================
+   History integration
+   - pushViewState(name) pushes a state so the OS back button pops it
+   - popstate handler invokes the close handler registered for the top state
+   - No URL change (uses history.pushState with null url)
+   ================================================================= */
+var _viewStack = [];
+
+function pushViewState(name){
+  _viewStack.push(name);
+  try{ history.pushState({ sahibView: name }, ''); }catch(e){}
+}
+
+function popViewStateSilently(){
+  if(_viewStack.length) _viewStack.pop();
+}
+
+window.addEventListener('popstate', function(){
+  var name = _viewStack.pop();
+  if(!name) return;
+  if(name === 'detail' && typeof _closeDetailFromHistory === 'function') _closeDetailFromHistory();
+  else if(name === 'session' && typeof _closeSessionFromHistory === 'function') _closeSessionFromHistory();
+  else if(name === 'reader' && typeof _closeReaderFromHistory === 'function') _closeReaderFromHistory();
+  else if(name === 'adkar' && typeof _closeCatFromHistory === 'function') _closeCatFromHistory();
+  else if(name === 'favs' && typeof _closeFavsFromHistory === 'function') _closeFavsFromHistory();
+});

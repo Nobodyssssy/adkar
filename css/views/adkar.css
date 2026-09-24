@@ -5,7 +5,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  padding: 16px 18px;
+  padding: 14px 16px;
   cursor: pointer;
   transition: all var(--tr);
   position: relative;
@@ -14,6 +14,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-height: 0;
 }
 .adkar-card::before {
   content: '';
@@ -27,7 +28,10 @@
 .adkar-card:hover {
   border-color: var(--cc, var(--accent));
   transform: translateX(-2px);
-  box-shadow: var(--sh);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--cc) 25%, transparent);
+}
+.adkar-card:focus-within {
+  border-color: var(--cc, var(--accent));
 }
 .adkar-card.fav-glow {
   border-color: var(--accent);
@@ -116,11 +120,11 @@
 }
 
 .adkar-btn {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--text3);
   font-size: 11px;
   cursor: pointer;
@@ -129,6 +133,7 @@
   justify-content: center;
   transition: all var(--tr);
   position: relative;
+  opacity: .55;
 }
 .adkar-btn::before {
   content: '';
@@ -141,17 +146,29 @@
   height: 14px;
   display: block;
 }
+.adkar-card:hover .adkar-btn,
+.adkar-card:focus-within .adkar-btn,
+.adkar-btn:hover,
+.adkar-btn:focus-visible {
+  opacity: 1;
+}
+.adkar-btn:hover,
+.adkar-btn:focus-visible {
+  background: var(--surface2);
+  border-color: var(--border);
+}
 .adkar-btn.fav.on {
-color: var(--accent2);
-border-color: var(--accent2);
-background: color-mix(in srgb, var(--accent2) 10%, transparent);
+  opacity: 1;
+  color: var(--accent2);
+  border-color: var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 10%, transparent);
 }
 .adkar-btn.fav.on svg {
-fill: var(--accent2);
+  fill: var(--accent2);
 }
 .adkar-btn.fav:hover {
-color: var(--accent2);
-border-color: var(--accent2);
+  color: var(--accent2);
+  border-color: var(--accent2);
 }
 .adkar-btn.edit:hover {
   color: var(--blue);
@@ -220,31 +237,31 @@ border-color: var(--accent2);
 }
 
 .adkar-tagbar {
-display: flex;
-gap: 6px;
-flex-wrap: wrap;
-padding: 0 0 6px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0 0 6px;
 }
 .adkar-group-head {
-display: flex;
-align-items: center;
-gap: 8px;
-margin: 12px 0 2px;
-font-size: 12px;
-font-weight: 700;
-color: var(--accent);
-letter-spacing: .04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: .04em;
 }
 .adkar-group-head::after {
-content: '';
-flex: 1;
-height: 1px;
-background: var(--border);
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 .adkar-group-count {
-font-family: 'DM Mono', monospace;
-font-size: 10px;
-color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -319,11 +336,6 @@ color: var(--text3);
   background: color-mix(in srgb, var(--ctp-mauve) 10%, transparent);
   border-color: var(--ctp-mauve);
   color: var(--ctp-mauve);
-}
-
-/* ── Adkar card hover glow ── */
-.adkar-card:hover {
-  box-shadow: 0 4px 20px color-mix(in srgb, var(--cc) 25%, transparent);
 }
 
 /* ── Filter chips ── */
@@ -417,6 +429,47 @@ color: var(--text3);
   background: linear-gradient(135deg, var(--ctp-green), var(--ctp-teal));
   color: var(--ctp-crust);
 }
+
+/* ── Mobile: actions drop below content, touch targets preserved ── */
+@media (max-width: 480px) {
+  .adkar-card {
+    flex-wrap: wrap;
+    direction: ltr;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+  .adkar-left {
+    order: 1;
+    flex: 1 1 100%;
+    direction: rtl;
+  }
+  .adkar-actions {
+    order: 2;
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+  }
+  .adkar-meta {
+    order: 3;
+    flex-direction: row;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+  }
+  .adkar-btn {
+    width: 34px;
+    height: 34px;
+  }
+}
+@media (pointer: coarse) {
+  .adkar-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .adkar-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
 .chip-count{
 display:inline-block;
 margin-inline-start:6px;

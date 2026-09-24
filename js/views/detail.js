@@ -20,30 +20,62 @@ function openDetail(id){
   favBtn.style.color = isFav ? 'var(--accent2)' : 'var(--text3)';
   favBtn.setAttribute('aria-label', isFav ? 'Remove from favorites' : 'Add to favorites');
 
+  /* Close button glyph - injected directly so it renders even if
+     injectHeaderIcons() is delayed or misses this node. */
+  const closeBtn = document.querySelector('#ov-detail .sheet-head .btn-close[aria-label="Close"]');
+  if(closeBtn){
+    closeBtn.innerHTML = `<span class="btn-icon">${icon('x', 16)}</span>`;
+  }
+
   const relBadge = d.reliability
     ? `<div style="display:flex;justify-content:center">
          <span class="badge badge-${d.reliability}" style="font-size:12px;padding:3px 10px">${icon(REL_ICON[d.reliability], 12)} ${REL_LABEL[d.reliability]}</span>
        </div>`
     : '';
-  const translit = d.transliteration
-    ? `<div class="translit-box">${esc(d.transliteration)}</div>`
+
+  /* Arabic and English live in the same shell box.
+     Toggle swaps which one is visible. Height stays constant. */
+  const hasTranslit = !!d.transliteration;
+  const toggleRow = hasTranslit
+    ? `<div class="detail-lang-toggle">
+         <button type="button" class="detail-lang-btn on" data-lang="ar" onclick="detailSetLang('ar')">عربي</button>
+         <button type="button" class="detail-lang-btn" data-lang="en" onclick="detailSetLang('en')">English</button>
+       </div>`
+    : '';
+  const translitBlock = hasTranslit
+    ? `<div class="arabic-big translit-swap" id="d-translit" style="display:none">${esc(d.transliteration)}</div>`
     : '';
 
-  /* Show all categories + tags in the detail view */
+  /* Single collapsible for Source and Virtue. */
+  const hasRef = !!(d.hadith || d.virtue);
+  let refBody = '';
+  if(d.hadith){
+    refBody += `<div class="detail-sub-label">Source</div><div class="detail-sub-body">${d.hadith}</div>`;
+  }
+  if(d.virtue){
+    refBody += `<div class="detail-sub-label">Virtue</div><div class="detail-sub-body">${d.virtue}</div>`;
+  }
+  const refBlock = hasRef
+    ? `<details class="detail-fold" autocomplete="off">
+         <summary><span class="detail-fold-icon">${icon('book-open', 14)}</span><span class="detail-fold-label">Source &amp; Virtue</span>${icon('chevron-down', 14)}</summary>
+         <div class="detail-fold-body">${refBody}</div>
+       </details>`
+    : '';
+
+  /* Show all categories */
   const catChips = renderCatChips(d.categories);
-  const tagChips = '';
-  const chipsRow = (catChips || tagChips)
-    ? `<div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap">${catChips}${tagChips}</div>`
+  const chipsRow = catChips
+    ? `<div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap">${catChips}</div>`
     : '';
 
   $('d-body').innerHTML = `
     ${d.situation ? `<div><span class="situation-pill">${d.situation}</span></div>` : ''}
-    <div class="arabic-big">${d.arabic}</div>
-    ${translit}
+    <div class="arabic-big" id="d-arabic">${d.arabic}</div>
+    ${translitBlock}
+    ${toggleRow}
     ${relBadge}
     ${chipsRow}
-    ${d.hadith ? `<div class="info-box hadith-box"><div class="info-label">${icon('book-open', 14)} Source</div>${d.hadith}</div>` : ''}
-    ${d.virtue ? `<div class="info-box virtue-box"><div class="info-label">${icon('sparkles', 14)} Virtue</div>${d.virtue}</div>` : ''}
+    ${refBlock}
     <div class="counter-wrap">
       <div class="info-label" style="text-align:center;margin-bottom:12px;direction:ltr">Counter</div>
       <div class="counter-row">
@@ -63,8 +95,31 @@ function openDetail(id){
   $('ov-detail').classList.add('open');
   lockBody();
 
+  /* Force all folds collapsed, regardless of browser form-state restore.
+     Same Chromium session-state caveat as session.js. */
+  setTimeout(() => {
+    document.querySelectorAll('#d-body details').forEach(el => el.removeAttribute('open'));
+  }, 0);
+
   if(typeof injectHeaderIcons === 'function'){
     setTimeout(() => injectHeaderIcons(), 0);
+  }
+    pushViewState('detail');
+}
+
+/* AR/EN toggle for the Arabic / transliteration block in the detail modal. */
+function detailSetLang(lang){
+  const ar = document.getElementById('d-arabic');
+  const tr = document.getElementById('d-translit');
+  if(!ar) return;
+  const btns = document.querySelectorAll('#d-body .detail-lang-btn');
+  btns.forEach(b => b.classList.toggle('on', b.getAttribute('data-lang') === lang));
+  if(lang === 'en' && tr){
+    ar.style.display = 'none';
+    tr.style.display = '';
+  } else {
+    ar.style.display = '';
+    if(tr) tr.style.display = 'none';
   }
 }
 
@@ -106,4 +161,26 @@ function resetCtr(id){
   store.setCounter(id, 0);
   $(`cv-${id}`).textContent = 0;
   $(`cp-${id}`).style.width = '0%';
+}
+
+/* History-driven close. Does the actual close, no push. */
+function _closeDetailFromHistory(){
+  $('ov-detail').classList.remove('open');
+  detailId = null;
+  unlockBody();
+  if(currentCat) renderAdkarGrid();
+  renderCatsGrid();
+  requestAnimationFrame(() => {
+    const y = window._adkarSavedScroll || 0;
+    window.scrollTo(0, y);
+  });
+}
+
+/* UI-driven close. Pops the history entry. */
+function closeDetail(){
+  if(window.history && window.history.length > 1){
+    history.back();
+    return;
+  }
+  _closeDetailFromHistory();
 }

@@ -1,10 +1,10 @@
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
+/* =================================================================
    Adkar list view
    Uses `categories: []` (array) and `tags: []`.
    `currentCat` filtering is done via categories.includes().
-   ═══════════════════════════════════════════════════════════ */
+   ================================================================= */
 
 /* Per-category subcategory (tag) filter */
 let _tagFilters = {};
@@ -122,9 +122,8 @@ function adkarCardHTML(d, catObj){
     ? `<span class="badge badge-${d.reliability}">${icon(REL_ICON[d.reliability], 12)} ${REL_LABEL[d.reliability]}</span>`
     : '';
 
-  const translit = d.transliteration
-    ? `<div class="adkar-translit">${esc(d.transliteration.slice(0, 120))}</div>`
-    : '';
+  /* Transliteration intentionally not shown on cards.
+     It is available in the detail modal behind the AR/EN toggle. */
 
   const catChips = catObj ? '' : renderCatChips(d.categories);
 
@@ -132,7 +131,6 @@ function adkarCardHTML(d, catObj){
     <div class="adkar-left">
       ${d.situation ? `<div class="adkar-situation">${d.situation}</div>` : ''}
       <div class="adkar-text">${d.arabic.length > 110 ? d.arabic.slice(0,110)+'...' : d.arabic}</div>
-      ${translit}
       <div class="adkar-badges">
         ${catChips}
         <span class="badge badge-repeat">× ${d.repeat}</span>
@@ -143,8 +141,8 @@ function adkarCardHTML(d, catObj){
 
     <div class="adkar-actions" onclick="event.stopPropagation()">
       <button class="adkar-btn fav ${isFav?'on':''}" onclick="toggleFav(${d.id})" title="Favorite" aria-label="${isFav?'Remove from favorites':'Add to favorites'}">${icon(isFav ? 'favorite-filled' : 'favorite-empty', 14)}</button>
-      <button class="adkar-btn edit" onclick="openForm(${d.id})" title="Edit">${icon('pencil', 14)}</button>
-      <button class="adkar-btn del" onclick="askDelDhikr(${d.id})" title="Delete">${icon('trash', 14)}</button>
+      <button class="adkar-btn edit" onclick="openForm(${d.id})" title="Edit" aria-label="Edit">${icon('pencil', 14)}</button>
+      <button class="adkar-btn del" onclick="askDelDhikr(${d.id})" title="Delete" aria-label="Delete">${icon('trash', 14)}</button>
     </div>
   </div>`;
 
@@ -155,7 +153,7 @@ function adkarCardHTML(d, catObj){
   return html;
 }
 
-/* Small helpers for chips — used in favorites + detail views */
+/* Small helpers for chips - used in favorites + detail views */
 function renderCatChips(catKeys){
   if(!Array.isArray(catKeys) || !catKeys.length) return '';
   return catKeys.map(key => {

@@ -1917,3 +1917,231 @@ background: var(--bg);
 }
 .favs-menu-item:hover{ background:var(--ctp-surface0, #313244); }
 .favs-menu-icon{ display:inline-flex; width:18px; height:18px; }
+
+/* ═══════════════════════════════════════════════════════════
+   DETAIL MODAL — progressive disclosure + AR/EN toggle
+   ═══════════════════════════════════════════════════════════ */
+.detail-lang-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+  width: max-content;
+  margin: 0 auto;
+}
+.detail-lang-btn {
+  padding: 5px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all var(--tr);
+}
+.detail-lang-btn.on {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.detail-lang-btn:hover:not(.on) {
+  color: var(--accent);
+}
+
+.detail-fold {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  overflow: visible;
+}
+.detail-fold > summary {
+  border-radius: var(--rs) var(--rs) 0 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text2);
+  user-select: none;
+}
+.detail-fold > summary::-webkit-details-marker { display: none; }
+.detail-fold > summary > svg:last-child {
+  margin-inline-start: auto;
+  transition: transform var(--tr);
+  color: var(--text3);
+}
+.detail-fold[open] > summary > svg:last-child {
+  transform: rotate(180deg);
+}
+.detail-fold-icon {
+  display: inline-flex;
+  color: var(--accent);
+}
+.detail-fold-label {
+  flex: 1;
+}
+.detail-fold-body {
+  padding: 4px 15px 13px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text2);
+  direction: rtl;
+  text-align: right;
+  border-top: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADKAR CARD — mobile layout: ring joins the action row
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .adkar-card {
+    flex-wrap: wrap;
+  }
+  .adkar-meta {
+    flex-direction: row;
+    justify-content: flex-end;
+    order: 3;
+    flex: 0 0 auto;
+  }
+  .adkar-actions {
+    order: 2;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+  .adkar-left {
+    order: 1;
+    flex: 1 1 100%;
+  }
+}
+
+/* --- Merged fold body: sub-label rows --- */
+.detail-sub-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-top: 4px;
+  margin-bottom: 4px;
+  direction: ltr;
+  text-align: left;
+}
+.detail-sub-body {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text2);
+  direction: rtl;
+  text-align: right;
+  margin-bottom: 10px;
+}
+.detail-sub-body:last-child {
+  margin-bottom: 0;
+}
+
+/* --- AR/EN shared shell: Arabic and English use the same box --- */
+.arabic-big.translit-swap,
+.session-arabic.translit-swap {
+  direction: ltr;
+  text-align: left;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
+  font-style: normal;
+  font-weight: 400;
+  color: var(--text2);
+  letter-spacing: 0;
+}
+
+/* Give both blocks a shared min-height so AR/EN toggle does not shift
+   the layout under the cursor. JS sets a numeric min-height at runtime;
+   this is the floor for cases where JS has not run yet. */
+#d-translit,
+#sess-translit {
+  box-sizing: border-box;
+}
+
+/* Inside the flex shell above, the text itself needs its own wrapper
+   to keep vertical centering clean while preserving RTL/LTR rules. */
+#d-arabic,
+#sess-arabic {
+  text-align: center;
+}
+
+/* Session overlay: the fold should not sit flush against the badges row. */
+#sess-body .detail-fold {
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+
+/* Session overlay: the AR/EN toggle should not sit flush against Arabic. */
+#sess-body .detail-lang-toggle {
+  margin-top: 6px;
+}
+
+/* Detail modal: same spacing for the AR/EN toggle. */
+#d-body .detail-lang-toggle {
+  margin-top: 6px;
+}
+/* Session overlay: prevents the flex column from compressing the fold. */
+#sess-body .detail-fold-body {
+  max-height: none;
+  overflow: visible;
+}
+#sess-body .detail-fold {
+  flex-shrink: 0;
+}
+
+
+/* --- Scroll to top button --- */
+.scroll-top-btn {
+  position: fixed;
+  right: 16px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity .18s ease, transform .18s ease, background var(--tr), color var(--tr), border-color var(--tr);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+}
+.scroll-top-btn.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.scroll-top-btn:hover {
+  background: var(--glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.scroll-top-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+@media (max-width: 480px) {
+  .scroll-top-btn {
+    width: 40px;
+    height: 40px;
+    right: 12px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}

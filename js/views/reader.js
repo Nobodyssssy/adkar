@@ -69,6 +69,8 @@ async function openReader(bookId){
     applyReaderTheme();
     await renderReaderContent();
 
+    pushViewState('reader');
+
   }catch(err){
     console.error('[reader]', err);
     renderReaderError(err.message);
@@ -399,7 +401,17 @@ async function renderFlipCurrentPage(width){
   scheduleAutoSave();
 }
 
+/* UI-driven close. Pops the history entry. */
 function closeReader(){
+  if(window.history && window.history.length > 1){
+    history.back();
+    return;
+  }
+  _closeReaderFromHistory();
+}
+
+/* History-driven close. Does the actual close, no push. */
+function _closeReaderFromHistory(){
   if(_readerBookId && _readerCurrentPage){
     saveBookProgress(_readerBookId, _readerCurrentPage, _readerTotalPages);
   }
