@@ -937,11 +937,6 @@ function renderPrayerView(){
           ? 'Offline \u00B7 last update ' + _formatStamp(_prayerData.cachedAt) + ' (' + _formatAgo(_prayerData.cachedAt) + ')'
           : 'Updated ' + _formatAgo(_prayerData.cachedAt)}
       </div>
-      <div class="prayer-updated" style="font-size:11px;color:var(--text3);margin-top:6px">
-        ${_prayerData.stale
-          ? `\u26A0 Offline \u00B7 last update ${_formatStamp(_prayerData.cachedAt)} (${_formatAgo(_prayerData.cachedAt)})`
-          : `Updated ${_formatAgo(_prayerData.cachedAt)}`}
-      </div>
     </div>
 
     <div class="prayer-countdown-card">
