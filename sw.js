@@ -7,7 +7,7 @@
      • Stale-while-revalidate for fonts
    ───────────────────────────────────────────── */
 
-const VERSION = 'v2.10.19';
+const VERSION = 'v2.10.20';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -60,6 +60,7 @@ const APP_SHELL = [
   './js/books-data.js',
   './js/books.js',
   './js/offline-books.js',
+  './js/offline-ui.js',
   './js/reader.js',
   './js/vendor/embedpdf/engines/dist/index.js',
   './js/vendor/embedpdf/engines/dist/lib/pdfium/index.js',

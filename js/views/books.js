@@ -63,7 +63,10 @@ function renderCategoryLanding(host){
 
   host.innerHTML = `
     <div class="books-header">
-      <div class="books-title-block">
+      <div class="books-title-block books-title-block--has-dl">
+        <button class="books-offline-btn" onclick="window.OFFLINE_UI.open()" aria-label="Download books" title="Download books">
+          <span data-icon="download" class="btn-icon"></span>
+        </button>
         <div class="books-title">${_booksLang === 'ar' ? 'المكتبة' : 'Library'}</div>
         <div class="books-subtitle">${_booksLang === 'ar' ? `${total} كتاب` : `${total} books`}</div>
       </div>
