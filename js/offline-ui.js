@@ -176,10 +176,13 @@ const OFFLINE_UI = (() => {
           <span class="offline-ui-sep"> · </span>
           <span dir="rtl">مسار المبتدئ</span>
         </div>
-        <div class="offline-ui-card-sub" dir="ltr">
-          ${_formatMB(beginnerBytes)} to download · ${beginnerIds.length - beginnerCachedCount} of ${beginnerIds.length} books not cached
-        </div>
-        <button class="btn-save offline-ui-start" onclick="window.OFFLINE_UI.start('beginner')">Download</button>
+        ${beginnerIds.length === beginnerCachedCount
+          ? `<div class="offline-ui-card-sub" dir="ltr">All ${beginnerIds.length} books cached</div>
+             <button class="btn-save offline-ui-start offline-ui-done" disabled aria-disabled="true">${icon('check', 16)} Downloaded</button>`
+          : `<div class="offline-ui-card-sub" dir="ltr">
+               ${_formatMB(beginnerBytes)} to download · ${beginnerIds.length - beginnerCachedCount} of ${beginnerIds.length} books not cached
+             </div>
+             <button class="btn-save offline-ui-start" onclick="window.OFFLINE_UI.start('beginner')">Download</button>`}
       </div>
 
       <div class="offline-ui-card">
@@ -188,12 +191,14 @@ const OFFLINE_UI = (() => {
           <span class="offline-ui-sep"> · </span>
           <span dir="rtl">المكتبة كاملة</span>
         </div>
-        <div class="offline-ui-card-sub" dir="ltr">
-          ${_formatMB(libraryBytes)} to download · ${allIds.length - libraryCachedCount} of ${allIds.length} books not cached
-        </div>
-        <button class="btn-save offline-ui-start" onclick="window.OFFLINE_UI.start('library')">Download</button>
+        ${allIds.length === libraryCachedCount
+          ? `<div class="offline-ui-card-sub" dir="ltr">All ${allIds.length} books cached</div>
+             <button class="btn-save offline-ui-start offline-ui-done" disabled aria-disabled="true">${icon('check', 16)} Downloaded</button>`
+          : `<div class="offline-ui-card-sub" dir="ltr">
+               ${_formatMB(libraryBytes)} to download · ${allIds.length - libraryCachedCount} of ${allIds.length} books not cached
+             </div>
+             <button class="btn-save offline-ui-start" onclick="window.OFFLINE_UI.start('library')">Download</button>`}
       </div>
-
       <div id="offline-ui-progress" style="display:none;margin-top:14px;font-size:12px;color:var(--text2)"></div>
 
       ${cachedIds.size > 0 ? `
