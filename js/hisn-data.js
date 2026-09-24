@@ -401,7 +401,7 @@ transliteration:'With the Name of Allah, the Most Gracious, the Most Merciful. (
 hadith:'Hisn al-Muslim 70 · Abu Dawud 2/86, An-Nasa\'i 3/68; Al-Albani, Sahih At-Tirmidhi 2/8',
 virtue:'', tags:['salah_after:after-fard','freq:daily','ctx:time','len:short'] },
 
-{ cat:'nawm', categories:['salah_after'], repeat:1, reliability:'sahih', situation:'الأذكار بعد السلام من الصلاة (آية الكرسي)',
+{ cat:'salah_after', categories:['salah_after'], repeat:1, reliability:'sahih', situation:'الأذكار بعد السلام من الصلاة (آية الكرسي)',
 arabic:'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ، مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ، وَلَا يَؤُودُهُ حِفْظُهُمَا، وَهُوَ الْعَلِيُّ الْعَظِيمُ',
 transliteration:'Allah! There is none worthy of worship but He, the Ever-Living, the One Who sustains and protects all that exists. Neither slumber nor sleep overtakes Him. To Him belongs whatever is in the heavens and whatever is on the earth. Who is he that can intercede with Him except with His Permission? He knows what happens to them in this world, and what will happen to them in the Hereafter. And they will never compass anything of His Knowledge except that which He wills. His Throne extends over the heavens and the earth, and He feels no fatigue in guarding and preserving them. And He is the Most High, the Most Great.',
 hadith:'Hisn al-Muslim 71 · An-Nasa\'i, Amalul-Yawm wal-Laylah 100; Ibn As-Sunni 121; Al-Albani, Sahihul-Jami\' 5/339 · Hisn al-Muslim 100 · Al-Baqarah 2:255; Al-Bukhari, Fathul-Bari 4/487',
@@ -437,7 +437,7 @@ transliteration:'Allah! There is none worthy of worship but He, the Ever-Living,
 hadith:'Hisn al-Muslim 75 · Al-Hakim 1/562; Al-Albani, Sahihut-Targhib 1/273',
 virtue:'Whoever says this in the morning will be protected from jinns until evening, and whoever says it in the evening will be protected until morning.', tags:['sabah:protection','masaa:protection','freq:daily','ctx:time','len:medium'] },
 
-{ cat:'nawm', categories:['sabah','masaa'], repeat:3, reliability:'sahih', situation:'أذكار الصباح والمساء (المعوذات)',
+{ cat:'sabah', categories:['sabah','masaa'], repeat:3, reliability:'sahih', situation:'أذكار الصباح والمساء (المعوذات)',
 arabic:'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ﴿قُلْ هُوَ اللَّهُ أَحَدٌ ۞ اللَّهُ الصَّمَدُ ۞ لَمْ يَلِدْ وَلَمْ يُولَدْ ۞ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ﴾ بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ﴿قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۞ مِنْ شَرِّ مَا خَلَقَ ۞ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۞ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۞ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ﴾ بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ﴿قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۞ مَلِكِ النَّاسِ ۞ إِلَهِ النَّاسِ ۞ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۞ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۞ مِنَ الْجِنَّةِ وَالنَّاسِ﴾',
 transliteration:'(Recite these three times each in Arabic.) With the Name of Allah, the Most Gracious, the Most Merciful. (Surahs al-Ikhlas 112, al-Falaq 113, an-Nas 114.)',
 hadith:'Hisn al-Muslim 76 · Abu Dawud 4/322, At-Tirmidhi 5/567; Al-Albani, Sahih At-Tirmidhi 3/182 · Hisn al-Muslim 99 · Al-Bukhari, Fathul-Bari 9/62, Muslim 4/1723',
