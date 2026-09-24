@@ -173,7 +173,7 @@ const OFFLINE_UI = (() => {
       <div class="offline-ui-card">
         <div class="offline-ui-card-title">Beginner path · مسار المبتدئ</div>
         <div class="offline-ui-card-sub">
-          ${beginnerIds.length - beginnerCachedCount} of ${beginnerIds.length} remaining · ${_formatMB(beginnerBytes)}
+          ${_formatMB(beginnerBytes)} to download · ${beginnerIds.length - beginnerCachedCount} of ${beginnerIds.length} books not cached
         </div>
         <button class="btn-save" onclick="window.OFFLINE_UI.start('beginner')">Download</button>
       </div>
@@ -181,7 +181,7 @@ const OFFLINE_UI = (() => {
       <div class="offline-ui-card">
         <div class="offline-ui-card-title">Whole library · المكتبة كاملة</div>
         <div class="offline-ui-card-sub">
-          ${allIds.length - libraryCachedCount} of ${allIds.length} remaining · ${_formatMB(libraryBytes)}
+          ${_formatMB(libraryBytes)} to download · ${allIds.length - libraryCachedCount} of ${allIds.length} books not cached
         </div>
         <button class="btn-save" onclick="window.OFFLINE_UI.start('library')">Download</button>
       </div>

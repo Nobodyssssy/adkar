@@ -65,7 +65,7 @@ function renderCategoryLanding(host){
     <div class="books-header">
       <div class="books-title-block books-title-block--has-dl">
         <button class="books-offline-btn" onclick="window.OFFLINE_UI.open()" aria-label="Download books" title="Download books">
-          ${icon('download', 16)}
+          ${icon('download', 18)}
         </button>
         <div class="books-title">${_booksLang === 'ar' ? 'المكتبة' : 'Library'}</div>
         <div class="books-subtitle">${_booksLang === 'ar' ? `${total} كتاب` : `${total} books`}</div>

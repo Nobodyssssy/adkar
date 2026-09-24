@@ -772,6 +772,7 @@
 /* --- offline download button in library header --- */
 .books-title-block--has-dl{display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0}
 .books-title-block--has-dl .books-title-block-inner{flex:1;min-width:0}
-.books-offline-btn{width:34px;height:34px;flex:0 0 auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-.books-offline-btn:hover{color:var(--accent);border-color:var(--accent)}
+.books-offline-btn{width:38px;height:38px;flex:0 0 auto;border:1.5px solid var(--accent);border-radius:12px;background:color-mix(in srgb, var(--accent) 14%, var(--surface));color:var(--accent);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s, box-shadow .15s, transform .12s}
+.books-offline-btn:hover{background:color-mix(in srgb, var(--accent) 28%, var(--surface));box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent)}
+.books-offline-btn:active{transform:scale(0.94)}
 
