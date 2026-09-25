@@ -6,7 +6,8 @@ async function startSession(){
   );
   const activeTag = (typeof _tagFilters !== 'undefined' && _tagFilters[currentCat]) ? _tagFilters[currentCat] : null;
   if(activeTag){
-    items = items.filter(d => Array.isArray(d.tags) && d.tags.includes(activeTag));
+    const prefixed = currentCat + ':' + activeTag;
+    items = items.filter(d => Array.isArray(d.tags) && d.tags.indexOf(prefixed) > -1);
   }
   if(!items.length){ toast('No adkar in this selection'); return; }
 
@@ -43,17 +44,6 @@ async function startSession(){
   pushViewState('session');
 }
 
-function closeSession(){
-  $('session-overlay').classList.remove('open');
-  $('session-overlay').classList.remove('is-done');
-  var body = $('sess-body');
-  body.style.borderBottom = '';
-  body.style.borderRadius = '';
-  unlockBody();
-  renderAdkarGrid();
-  renderCatsGrid();
-}
-
 function renderSessionStep(){
   if(sessIdx >= sessItems.length){ renderSessionDone(); return; }
   const d = sessItems[sessIdx];
@@ -72,7 +62,6 @@ function renderSessionStep(){
     ? `<span class="badge badge-${d.reliability}" style="font-size:12px;padding:3px 10px">${icon(REL_ICON[d.reliability], 12)} ${REL_LABEL[d.reliability]}</span>`
     : '';
 
-  /* Arabic and English live in the same shell box. */
   const hasTranslit = !!d.transliteration;
   const toggleRow = hasTranslit
     ? `<div class="detail-lang-toggle">
@@ -84,7 +73,6 @@ function renderSessionStep(){
     ? `<div class="session-arabic translit-swap" id="sess-translit" style="display:none">${esc(d.transliteration)}</div>`
     : '';
 
-  /* Single collapsible for Source and Virtue inside the session overlay. */
   const hasRef = !!(d.hadith || d.virtue);
   let refBody = '';
   if(d.hadith){
@@ -121,7 +109,6 @@ function renderSessionStep(){
       </div>
     </div>`;
 
-  /* Force all folds collapsed inside the session body. */
   setTimeout(() => {
     document.querySelectorAll('#sess-body details').forEach(el => el.removeAttribute('open'));
   }, 0);
@@ -135,7 +122,6 @@ function renderSessionStep(){
   body.style.borderRadius = '';
 }
 
-/* AR/EN toggle for the Arabic / transliteration block in the session overlay. */
 function sessSetLang(lang){
   const ar = document.getElementById('sess-arabic');
   const tr = document.getElementById('sess-translit');
@@ -186,7 +172,9 @@ function sessionTap(id, target){
     tapBtn.classList.add('done');
     nextBtn.classList.add('done');
     $('sess-pfill').classList.add('done-fill');
-    toast('Completed', 'check');
+    /* No toast here: session mode already has strong visual completion
+       feedback (green tap, green Next, filled progress bar), and the
+       toast overlaps the Next / Skip footer. */
   } else {
     tapBtn.classList.remove('done');
     nextBtn.classList.remove('done');
@@ -234,20 +222,7 @@ function renderSessionDone(){
   $('sess-back-btn').style.pointerEvents = 'none';
 }
 
-
-/* History-driven session back.
-   Per design: if there is a previous dhikr in this session, go there
-   and re-push so back can be pressed again. Only close on the first dhikr. */
-function _closeSessionFromHistory(){
-  if(sessIdx > 0){
-    sessionPrev();
-    pushViewState('session');
-    return;
-  }
-  _closeSessionHard();
-}
-
-/* Does the actual DOM close, no history. */
+/* Does the actual DOM close. No history side effects. */
 function _closeSessionHard(){
   $('session-overlay').classList.remove('open');
   $('session-overlay').classList.remove('is-done');
@@ -259,10 +234,29 @@ function _closeSessionHard(){
   renderCatsGrid();
 }
 
-/* UI-driven close. Pops the history entry. */
+/* Explicit close. Called by the X button and the Done-Back button.
+   Pops the in-memory history entry, replaces the browser entry, and
+   closes hard. Does NOT go through history.back(), so it cannot be
+   misinterpreted as a system back press. */
 function closeSession(){
-  if(window.history && window.history.length > 1){
-    history.back();
+  if(typeof _viewStack !== 'undefined' && _viewStack.length && _viewStack[_viewStack.length - 1] === 'session'){
+    _viewStack.pop();
+    try{
+      history.replaceState({ sahibView: _viewStack[_viewStack.length - 1] || null }, '');
+    }catch(e){}
+  }
+  _closeSessionHard();
+}
+
+/* System back press. If there is a previous dhikr in this session,
+   go there and re-push so back can be pressed again. Only close when
+   we are already on the first dhikr. */
+function _closeSessionFromHistory(){
+  const ov = $('session-overlay');
+  if(!ov || !ov.classList.contains('open')) return;
+  if(sessIdx > 0){
+    sessionPrev();
+    pushViewState('session');
     return;
   }
   _closeSessionHard();
