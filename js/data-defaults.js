@@ -24,8 +24,7 @@ function defaultCats(){
 
 function defaultData(){
   return [
-    {id:103,categories:['sabah','masaa'],tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'],situation:'عند الصباح والمساء',repeat:3,reliability:'hasan',transliteration:'',arabic:'رَضِيتُ بِاللَّهِ رَبَّاً، وَبِالْإِسْلَامِ دِيناً، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيّاً',hadith:'رواه أبو داود برقم ٥٠٧٢ والترمذي برقم ٣٣٨٩',virtue:'من قالها ثلاثاً حين يصبح وثلاثاً حين يمسي كان حقاً على الله أن يرضيه يوم القيامة'},
-    {id:104,categories:['sabah','masaa'],tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'],situation:'عند الصباح والمساء',repeat:1,reliability:'sahih',transliteration:'',arabic:'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ',hadith:'رواه الحاكم وصححه الذهبي',virtue:null},
+
     {id:115,categories:['salah_after'],tags:['salah_after:after-fard','freq:daily','ctx:time','len:short'],situation:'دبر الصلاة المكتوبة',repeat:1,reliability:'sahih',transliteration:'',arabic:'اللَّهُمَّ أَنْتَ السَّلاَمُ وَمِنْكَ السَّلاَمُ، تَبَارَكْتَ يَا ذَا الْجَلاَلِ وَالإِكْرَامِ',hadith:'رواه مسلم برقم ٥٩١',virtue:null},
     {id:125,categories:['salah'],tags:['salah:ruku','freq:daily','ctx:action','len:medium'],situation:'في الركوع والسجود',repeat:1,reliability:'sahih',transliteration:'',arabic:'سُبُّوحٌ، قُدُّوسٌ، رَبُّ الْمَلَائِكَةِ وَالرُّوحِ',hadith:'رواه مسلم برقم ٤٨٧',virtue:null},
     {id:126,categories:['salah'],tags:['salah:sujud','freq:daily','ctx:action','len:medium'],situation:'في السجود',repeat:1,reliability:'sahih',transliteration:'',arabic:'اللَّهُمَّ اغْفِرْ لِي ذَنْبِي كُلَّهُ: دِقَّهُ وَجِلَّهُ، وَأَوَّلَهُ وَآخِرَهُ، وَعَلَانِيَتَهُ وَسِرَّهُ',hadith:'رواه مسلم برقم ٤٨٣',virtue:null},

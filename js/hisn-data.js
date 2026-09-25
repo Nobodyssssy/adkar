@@ -1,7 +1,7 @@
 'use strict';
 /* Hisn al-Muslim — full dataset (sunnah.com/hisn). Guarded: safe to load twice. */
 /* Bump HISN_VERSION every time you edit this file — state.js re-merges on change. */
-window.HISN_VERSION = 4;
+window.HISN_VERSION = 5;
 if (typeof window.HISN_ADKAR === 'undefined') {
 
 window.HISN_ADKAR = [
@@ -443,11 +443,17 @@ transliteration:'(Recite these three times each in Arabic.) With the Name of All
 hadith:'Hisn al-Muslim 76 · Abu Dawud 4/322, At-Tirmidhi 5/567; Al-Albani, Sahih At-Tirmidhi 3/182 · Hisn al-Muslim 99 · Al-Bukhari, Fathul-Bari 9/62, Muslim 4/1723',
 virtue:'Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.', tags:['sabah:protection','masaa:protection','freq:daily','ctx:time','len:medium'] },
 
-{ cat:'sabah', categories:['sabah','masaa'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء',
+{ cat:'sabah', categories:['sabah'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء',
 arabic:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذَا الْيَوْمِ وَخَيْرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ',
-transliteration:'We have entered a new day and with it all dominion is Allah\'s. Praise is to Allah. None has the right to be worshipped but Allah alone, Who has no partner. To Allah belongs the dominion, and to Him is the praise and He is Able to do all things. My Lord, I ask You for the goodness of this day and of the days that come after it, and I seek refuge in You from the evil of this day and of the days that come after it. My Lord, I seek refuge in You from laziness and helpless old age. My Lord, I seek refuge in You from the punishment of Hell-fire, and from the punishment of the grave. [In the evening: Amsayna wa amsal-mulku lillah...]',
+transliteration:'We have entered a new day and with it all dominion is Allah\'s. Praise is to Allah. None has the right to be worshipped but Allah alone, Who has no partner. To Allah belongs the dominion, and to Him is the praise and He is Able to do all things. My Lord, I ask You for the goodness of this day and of the days that come after it, and I seek refuge in You from the evil of this day and of the days that come after it. My Lord, I seek refuge in You from laziness and helpless old age. My Lord, I seek refuge in You from the punishment of Hell-fire, and from the punishment of the grave.',
 hadith:'Hisn al-Muslim 77 · Muslim 4/2088',
-virtue:'', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
+virtue:'', tags:['sabah:core','freq:daily','ctx:time','len:medium'] },
+{ cat:'masaa', categories:['masaa'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء',
+arabic:'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ، وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذِهِ اللَّيْلَةِ وَخَيْرَ مَا بَعْدَهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذِهِ اللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ',
+transliteration:'We have entered the evening and the dominion belongs to Allah, and praise is due to Allah. There is no god but Allah alone, with no partner. To Him belongs the dominion, and to Him is all praise, and He is over all things competent. My Lord, I ask You for the good of this night and the good of what comes after it, and I seek refuge in You from the evil of this night and the evil of what comes after it. My Lord, I seek refuge in You from laziness and the misery of old age. My Lord, I seek refuge in You from punishment in the Fire and punishment in the grave.',
+hadith:'Hisn al-Muslim 77 · Muslim 4/2088',
+virtue:'', tags:['masaa:core','freq:daily','ctx:time','len:medium'] },
+
 
 { cat:'sabah', categories:['sabah','masaa'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء',
 arabic:'اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ',
@@ -461,17 +467,27 @@ transliteration:'O Allah, You are my Lord, there is none worthy of worship but Y
 hadith:'Hisn al-Muslim 79 · Al-Bukhari 7/150; An-Nasa\'i; At-Tirmidhi',
 virtue:'Whoever recites this with conviction in the evening and dies during that night shall enter Paradise, and whoever recites it with conviction in the morning and dies during that day shall enter Paradise.', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
 
-{ cat:'sabah', categories:['sabah','masaa'], repeat:4, reliability:'hasan', situation:'أذكار الصباح والمساء',
+{ cat:'sabah', categories:['sabah'], repeat:4, reliability:'hasan', situation:'أذكار الصباح والمساء',
 arabic:'اللَّهُمَّ إِنِّي أَصْبَحْتُ أُشْهِدُكَ، وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلَائِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ',
 transliteration:'O Allah, I have entered a new morning and call upon You and upon the bearers of Your Throne, upon Your angels and all creation to bear witness that surely You are Allah, there is none worthy of worship but You alone, You have no partners, and that Muhammad is Your slave and Your Messenger. (Recite four times in Arabic.)',
 hadith:'Hisn al-Muslim 80 · Abu Dawud 4/317; An-Nasa\'i; Ibn As-Sunni (hasan)',
-virtue:'Allah will spare whoever says this four times in the morning or evening from the fire of Hell.', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
+virtue:'Allah will spare whoever says this four times in the morning or evening from the fire of Hell.', tags:['sabah:core','freq:daily','ctx:time','len:medium'] },
+{ cat:'masaa', categories:['masaa'], repeat:4, reliability:'hasan', situation:'أذكار الصباح والمساء',
+arabic:'اللَّهُمَّ إِنِّي أَمْسَيْتُ أُشْهِدُكَ، وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلَائِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ',
+transliteration:'O Allah, I have entered the evening calling upon You, and upon the bearers of Your Throne, and upon Your angels, and upon all of Your creation, to bear witness that You are Allah, there is no deity worthy of worship except You alone, with no partner, and that Muhammad is Your servant and Your Messenger.',
+hadith:'Hisn al-Muslim 80 · Abu Dawud 4/317; An-Nasa\'i; Ibn As-Sunni (hasan)',
+virtue:'Allah will spare whoever says this four times in the morning or evening from the fire of Hell.', tags:['masaa:core','freq:daily','ctx:time','len:medium'] },
 
-{ cat:'sabah', categories:['sabah','masaa'], repeat:1, reliability:'hasan', situation:'أذكار الصباح والمساء',
+{ cat:'sabah', categories:['sabah'], repeat:1, reliability:'hasan', situation:'أذكار الصباح والمساء',
 arabic:'اللَّهُمَّ مَا أَصْبَحَ بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ، فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ',
 transliteration:'O Allah, whatever blessing has been received by me or anyone of Your creation is from You alone, You have no partner. All praise is for you and thanks is to You.',
 hadith:'Hisn al-Muslim 81 · Abu Dawud 4/318, An-Nasa\'i, Ibn As-Sunni 41, Ibn Hibban 2361 (hasan)',
-virtue:'Whoever recites this in the morning has completed his obligation to thank Allah for that day; and whoever says it in the evening has completed his obligation for that night.', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
+virtue:'Whoever recites this in the morning has completed his obligation to thank Allah for that day; and whoever says it in the evening has completed his obligation for that night.', tags:['sabah:core','freq:daily','ctx:time','len:medium'] },
+{ cat:'masaa', categories:['masaa'], repeat:1, reliability:'hasan', situation:'أذكار الصباح والمساء',
+arabic:'اللَّهُمَّ مَا أَمْسَى بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ',
+transliteration:'O Allah, whatever blessing has come to me or to any of Your creation in this evening, it is from You alone, without partner. To You be all praise and to You be all gratitude.',
+hadith:'Hisn al-Muslim 81 · Abu Dawud 4/318, An-Nasa\'i, Ibn As-Sunni 41, Ibn Hibban 2361 (hasan)',
+virtue:'Whoever recites this in the morning has completed his obligation to thank Allah for that day; and whoever says it in the evening has completed his obligation for that night.', tags:['masaa:core','freq:daily','ctx:time','len:medium'] },
 
 { cat:'sabah', categories:['sabah','masaa'], repeat:3, reliability:'hasan', situation:'أذكار الصباح والمساء',
 arabic:'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ. اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ، وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ',
@@ -506,7 +522,7 @@ virtue:'Whoever recites it three times in the morning will not be afflicted by a
 { cat:'sabah', categories:['sabah','masaa'], repeat:3, reliability:'hasan', situation:'أذكار الصباح والمساء',
 arabic:'رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا',
 transliteration:'I am pleased with Allah as my Lord, with Islam as my religion, and with Muhammad ﷺ as my Prophet. (Recite three times in Arabic.)',
-hadith:'Hisn al-Muslim 87 · Ahmad 4/337, An-Nasa\'i, Ibn As-Sunni 68, At-Tirmidhi 5/465 (hasan)',
+hadith:'Hisn al-Muslim 87 · Ahmad 4/337, An-Nasa\'i, Ibn As-Sunni 68, At-Tirmidhi 5/465 (hasan) · Abu Dawud 5072, al-Tirmidhi 3389',
 virtue:'Allah has promised that anyone who says this three times every morning or evening will be pleased on the Day of Resurrection.', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
 
 { cat:'sabah', categories:['sabah','masaa'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء',
@@ -515,17 +531,27 @@ transliteration:'O Ever-Living One, O Eternal One, by Your mercy I call on You t
 hadith:'Hisn al-Muslim 88 · Al-Hakim 1/545 (sahih); Al-Albani, Sahihut-Targhib 1/273',
 virtue:'', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
 
-{ cat:'sabah', categories:['sabah','masaa'], repeat:1, reliability:'hasan', situation:'أذكار الصباح والمساء',
+{ cat:'sabah', categories:['sabah'], repeat:1, reliability:'hasan', situation:'أذكار الصباح والمساء',
 arabic:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ، اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذَا الْيَوْمِ: فَتْحَهُ، وَنَصْرَهُ، وَنُورَهُ، وَبَرَكَتَهُ، وَهُدَاهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهِ وَشَرِّ مَا بَعْدَهُ',
 transliteration:'We have entered a new day and with it all the dominion which belongs to Allah, Lord of all that exists. O Allah, I ask You for the goodness of this day, its victory, its help, its light, its blessings, and its guidance. I seek refuge in You from the evil that is in it, and from the evil that follows it.',
 hadith:'Hisn al-Muslim 89 · Abu Dawud 4/322 (hasan)',
-virtue:'', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
+virtue:'', tags:['sabah:core','freq:daily','ctx:time','len:medium'] },
+{ cat:'masaa', categories:['masaa'], repeat:1, reliability:'hasan', situation:'أذكار الصباح والمساء',
+arabic:'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ، اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذِهِ اللَّيْلَةِ: فَتْحَهَا وَنَصْرَهَا وَنُورَهَا وَبَرَكَتَهَا وَهُدَاهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهَا وَشَرِّ مَا بَعْدَهَا',
+transliteration:'We have entered the evening, and the dominion belongs to Allah, Lord of the worlds. O Allah, I ask You for the good of this night: its opening, its victory, its light, its blessings, and its guidance. And I seek refuge in You from the evil of what is in it and the evil of what comes after it.',
+hadith:'Hisn al-Muslim 89 · Abu Dawud 4/322 (hasan)',
+virtue:'', tags:['masaa:core','freq:daily','ctx:time','len:medium'] },
 
-{ cat:'sabah', categories:['sabah','masaa'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء',
+{ cat:'sabah', categories:['sabah'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء',
 arabic:'أَصْبَحْنَا عَلَى فِطْرَةِ الْإِسْلَامِ، وَعَلَى كَلِمَةِ الْإِخْلَاصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ، حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ',
 transliteration:'We have entered a new day upon the natural religion of Islam, the word of sincere devotion, the religion of our Prophet Muhammad ﷺ, and the faith of our father Ibrahim. He was upright (in worshipping Allah), and a Muslim. He was not of those who worship others besides Allah.',
 hadith:'Hisn al-Muslim 90 · Ahmad 3/406-7, 5/123, An-Nasa\'i 34, At-Tirmidhi 4/209',
-virtue:'', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
+virtue:'', tags:['sabah:core','freq:daily','ctx:time','len:medium'] },
+{ cat:'masaa', categories:['masaa'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء',
+arabic:'أَمْسَيْنَا عَلَى فِطْرَةِ الْإِسْلَامِ، وَعَلَى كَلِمَةِ الْإِخْلَاصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ',
+transliteration:'We have entered the evening upon the fitrah of Islam, and upon the word of sincerity (La ilaha illallah), and upon the religion of our Prophet Muhammad (peace be upon him), and upon the creed of our father Ibrahim, who was a monotheist, a Muslim, and he was not of the polytheists.',
+hadith:'Hisn al-Muslim 90 · Ahmad 3/406-7, 5/123, An-Nasa\'i 34, At-Tirmidhi 4/209',
+virtue:'', tags:['masaa:core','freq:daily','ctx:time','len:medium'] },
 
 { cat:'sabah', categories:['sabah','masaa'], repeat:100, reliability:'sahih', situation:'أذكار الصباح والمساء',
 arabic:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',

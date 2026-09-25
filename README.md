@@ -83,6 +83,25 @@ There is no framework and no build step.
   - Mobile layout: content row on top, actions and completion ring on one row beneath
   - Edit and delete buttons are dimmed by default, brighten on card hover
 - Adhkar detail modal progressive disclosure is live as of v2.10.42.
+
+- Morning/evening dual-wording split (Hisn 77, 80, 81, 89, 90):
+  - Each of the five entries has a sabah copy with the morning wording
+    and a masaa copy with the evening wording.
+  - Sabah bucket: 25 entries.
+  - Masaa bucket: 22 entries.
+- Sabah seed dedupe:
+  - Seed ids 103 and 104 were removed from `js/data-defaults.js`.
+  - Their Hisn counterparts (87 and 88) are the surviving entries.
+  - The Abu Dawud 5072 / al-Tirmidhi 3389 citation from seed 103 was
+    merged into Hisn 87 before the seed line was deleted.
+- Existing installs are migrated by a one-time cleanup keyed on meta
+  `hisnCleanupV1` in `js/state.js`.
+- Reference for verifying Arabic against Hisn al-Muslim:
+  https://surahquran.com/Dua-and-Dhikr.html
+  and its per-section pages (Morning, Evening, etc.).
+  Do not auto-scrape. Use it manually to confirm any Arabic you write
+  into `js/hisn-data.js`.
+  
 ### Prayer Times and Daily Cycle
 
 - Prayer times through the Aladhan API.
@@ -472,6 +491,13 @@ Offline core (shell precache, prayer snapshot, sahib-books cache, five beginner 
 21. Empty-state audit.
 22. Attribution footer verification.
 23. Dead-code sweep and `.adkar-grid` consolidation.
+24. Tasbih enhancements:
+   - minus button and reset button on the tasbih counter
+   - Settings option to pick the dhikr that the tasbih is counting
+     (for example سُبْحَانَ اللَّهِ وَبِحَمْدِهِ or سُبْحَانَ اللَّهِ الْعَظِيمِ,
+     or any entry from the Hisn list)
+   - counter ring grows visually on each tap
+   - completion message shown when the target is reached
 
 ## Project Principles
 

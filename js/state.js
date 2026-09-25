@@ -77,6 +77,37 @@ try {
     data = cache.adkar;
   }
 
+  /* One-time cleanup v1: morning/evening split fix.
+     Before HISN_VERSION 5, five entries (Hisn 77, 80, 81, 89, 90) were
+     dual-tagged sabah+masaa with the same Arabic text. Now each has a
+     sabah copy with the morning wording and a masaa copy with the evening
+     wording. Existing installs still have the old dual-tagged morning
+     copies. Fix them in place. Runs once per browser. */
+  if(!(await store.getMeta('hisnCleanupV1'))){
+    try{
+      const _ids = [237, 240, 241, 249, 250];
+      let _touched = 0;
+      for(const _id of _ids){
+        const _d = data.find(d => d.id === _id);
+        if(!_d) continue;
+        if(Array.isArray(_d.categories)){
+          _d.categories = _d.categories.filter(c => c !== 'masaa');
+        }
+        if(Array.isArray(_d.tags)){
+          _d.tags = _d.tags.filter(t => t !== 'masaa:core');
+        }
+        _touched++;
+      }
+      if(_touched){
+        await store.saveAdkar(data);
+      }
+      await store.setMeta('hisnCleanupV1', true);
+      console.log('[state] cleanup v1: fixed ' + _touched + ' morning entries');
+    }catch(e){
+      console.warn('[state] cleanup v1 failed', e);
+    }
+  }
+
   /* ── One-time merge of Hisn al-Muslim dataset (js/hisn-data.js) ──
      Uses HISN_VERSION for idempotent re-merge: bump it in hisn-data.js
      every time you edit the dataset, and this runs again automatically. */
