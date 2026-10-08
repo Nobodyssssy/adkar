@@ -431,9 +431,7 @@ They should be deleted manually after confirming stability.
 ## Current Roadmap
 Offline core (shell precache, prayer snapshot, sahib-books cache, five beginner PDFs auto-precached, download modal, honest quota label) is shipped as of v2.10.30.
 
-1. Per-book download button:
-   - badge and button on each book card
-   - uses existing `OFFLINE_BOOKS.cacheBookById`
+1. ~~Per-book download button: badge and button on each book card, uses existing OFFLINE_BOOKS.cacheBookById~~ ✅ Shipped — download icon on grid cards and in the detail modal; icon updates to a checkmark in both places after caching; offline modal counter scans the real Cache Storage bucket and reflects the true cached count.
 2. Offline indicator pill:
    - small Online/Offline badge in Settings and/or Home
 3. Qibla UI:

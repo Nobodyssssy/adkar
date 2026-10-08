@@ -148,6 +148,16 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.book-offline-status {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: auto;
+  font-family: 'DM Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .book-author {
   font-size: 11px;
   color: var(--text3);

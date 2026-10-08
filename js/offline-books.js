@@ -61,7 +61,7 @@ async function isBookCached(id){
 async function listCachedBookIds(){
   const c = await offlineBooksCache();
   const keys = await c.keys();
-  const urls = keys.map(r => new URL(r.url).pathname.replace(/^\/adkar\//, ''));
+  const urls = keys.map(r => new URL(r.url).pathname.replace(/^\/adkar\//, '').replace(/^\//, ''));
   const out = [];
   for(const [id, u] of Object.entries(ALL_KNOWN_BOOK_URLS)){
     if(urls.includes(u)) out.push(id);
@@ -78,6 +78,10 @@ async function cacheBookById(id, signal){
   const res = await fetch(url, { signal });
   if(!res.ok) throw new Error('HTTP ' + res.status + ' for ' + id);
   await c.put(url, res.clone());
+  // Notify UI to update the cached count
+  if (window.OFFLINE_UI && typeof window.OFFLINE_UI.refresh === 'function') {
+    window.OFFLINE_UI.refresh();
+  }
   return { id, cached: true, skipped: false };
 }
 

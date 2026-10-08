@@ -7,7 +7,7 @@
      - Stale-while-revalidate for fonts
    ================================================================= */
 
-const VERSION = 'v2.10.45';
+const VERSION = 'v2.10.46';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -164,8 +164,30 @@ self.addEventListener('fetch', (event) => {
      done by js/offline-books.js, not here. */
   if (url.pathname.includes('/assets/books/') || url.pathname.endsWith('.pdf')) {
     event.respondWith(
-      caches.open('sahib-books').then((c) =>
-        c.match(req).then((cached) => cached || fetch(req))
+      caches.open('sahib-books').then((cache) =>
+        cache.match(req).then((cachedResponse) => {
+          // Return cached version immediately if found
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          
+          // Otherwise, try the network
+          return fetch(req).then((networkResponse) => {
+            // If network succeeds, cache it for future offline use
+            if (networkResponse && networkResponse.status === 200) {
+              const responseToCache = networkResponse.clone();
+              caches.open('sahib-books').then((cache) => {
+                cache.put(req, responseToCache);
+              });
+            }
+            return networkResponse;
+          }).catch(() => {
+            // Fallback if both fail (e.g., offline and not in cache)
+            return new Response(JSON.stringify({ error: "Offline and not cached" }), {
+              headers: { 'Content-Type': 'application/json' }
+            });
+          });
+        })
       )
     );
     return;

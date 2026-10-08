@@ -320,6 +320,12 @@ function renderBookList(host, list, isSearch){
   if(isBeginner){
     setTimeout(() => injectBeginnerNotes(host, list), 120);
   }
+
+  setTimeout(async () => {
+    for(const b of list){
+      await updateDownloadButtonCard(b.id);
+    }
+  }, 50);
 }
 
 function bookCardHTML(b){
@@ -357,6 +363,9 @@ function bookCardHTML(b){
       <div class="book-author">${esc(author)}</div>
       ${progressLine}
     </div>
+    <button class="icon-btn" id="download-card-btn-${b.id}" title="${_booksLang === 'ar' ? 'تحميل للاستخدام بلا إنترنت' : 'Download for offline use'}" onclick="event.stopPropagation(); onDownloadBookCard('${b.id}')">
+      ${icon('download', 16)}
+    </button>
   </div>`;
 }
 
@@ -471,11 +480,14 @@ function renderBookDetail(b){
         </div>
       </div>` : ''}
 
-    <div class="book-detail-actions">
+    <div class="book-detail-actions" style="display:flex;gap:10px">
       <button class="btn-save" style="flex:1;padding:14px;font-size:15px" onclick="readBook('${b.id}')">
         ${isRead
           ? `${icon('book-open', 16)} ${ar ? 'متابعة القراءة' : 'Continue reading'}`
           : `${icon('book-open', 16)} ${ar ? 'ابدأ القراءة' : 'Start reading'}`}
+      </button>
+      <button class="icon-btn" id="download-btn-${b.id}" style="padding:10px" onclick="onDownloadBook('${b.id}')" aria-label="${ar ? 'تحميل' : 'Download'}">
+        ${icon('download', 16)}
       </button>
     </div>
 
@@ -488,6 +500,92 @@ function renderBookDetail(b){
   const coverEl = $(`detail-cover-${b.id}`);
   if(coverEl && typeof attachBookCover === 'function'){
     setTimeout(() => attachBookCover(b.id, coverEl), 30);
+  }
+  setTimeout(() => updateDownloadButton(b.id), 30);
+}
+
+async function updateDownloadButton(id){
+  const btn = document.getElementById(`download-btn-${id}`);
+  if(!btn) return;
+  try {
+    const isCached = await window.OFFLINE_BOOKS.isBookCached(id);
+    if(isCached){
+      btn.innerHTML = icon('check', 16);
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+    }
+  } catch(e) {
+    console.error('Error checking cache', e);
+  }
+}
+
+async function updateDownloadButtonCard(id){
+  const btn = document.getElementById(`download-card-btn-${id}`);
+  if(!btn) return;
+  try {
+    const isCached = await window.OFFLINE_BOOKS.isBookCached(id);
+    if(isCached){
+      btn.innerHTML = icon('check', 16);
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+    } else {
+      btn.innerHTML = icon('download', 16);
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  } catch(e){
+    console.error('Error checking cache (card)', e);
+  }
+}
+
+async function updateDownloadButtonCard(id){
+  const btn = document.getElementById(`download-card-btn-${id}`);
+  if(!btn) return;
+  try {
+    const isCached = await window.OFFLINE_BOOKS.isBookCached(id);
+    if(isCached){
+      btn.innerHTML = icon('check', 16);
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+    } else {
+      btn.innerHTML = icon('download', 16);
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  } catch(e){
+    console.error('Error checking cache (card)', e);
+  }
+}
+
+async function onDownloadBook(id){
+  const btn = document.getElementById(`download-btn-${id}`);
+  if(!btn) return;
+  const ar = _booksLang === 'ar';
+  btn.innerHTML = icon('loader', 16);
+  btn.disabled = true;
+  try {
+    await window.OFFLINE_BOOKS.cacheBookById(id);
+    toast(ar ? 'تم التحميل' : 'Downloaded', 'check');
+    updateDownloadButton(id);
+  } catch(e) {
+    console.error('Download error', e);
+    toast(ar ? 'فشل التحميل' : 'Download failed');
+    btn.innerHTML = icon('download', 16);
+    btn.disabled = false;
+  }
+}
+
+async function onDownloadBookCard(id){
+  const ar = _booksLang === 'ar';
+  try {
+    await window.OFFLINE_BOOKS.cacheBookById(id);
+    toast(ar ? 'تم التحميل' : 'Downloaded', 'check');
+    updateDownloadButtonCard(id);
+    if(window.OFFLINE_UI) window.OFFLINE_UI.refresh();
+  } catch(e) {
+    console.error('Download error', e);
+    toast(ar ? 'فشل التحميل' : 'Download failed');
+    updateDownloadButtonCard(id);
   }
 }
 
