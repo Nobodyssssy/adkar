@@ -12,9 +12,9 @@ There is no framework and no build step.
 
 - Full Hisn al-Muslim dataset with v4 taxonomy and visible subcategory UI.
 - Current data state:
-  - 251 Hisn entries
-  - 42 curated seed entries
-  - 293 total adhkar on a fresh install
+  - 256 Hisn entries
+  - 40 curated seed entries
+  - 296 total adhkar on a fresh install
 - 17 frozen top-level buckets:
   - nawm
   - wudu
@@ -224,11 +224,31 @@ There is no framework and no build step.
 
 ### Digital Tasbih
 
-- Tactile counter interface.
-- Preset configurations.
-- Done-state feedback.
+- Tactile counter interface with a growing ring around an Arabic dhikr.
+- Plus tap increments count toward target.
+- Minus button decrements count, never below zero.
+- Reset button returns count to zero.
+- Editable count: tap the counter number in the ring to enter a specific value inline. Enter confirms, Escape cancels.
+- Settings gear (top-right of the ring) opens a modal with:
+  - Dhikr presets: eight curated dhikr chips in Arabic (سُبْحَانَ اللَّهِ وَبِحَمْدِهِ, سُبْحَانَ اللَّهِ الْعَظِيمِ, etc.).
+  - Target chips: 33, 99, 100, plus a custom target input.
+  - Color swatches: theme, peach, green, mauve, teal, blue.
+  - OK button confirms and closes.
+- Selected chip uses a solid accent block with a glow ring for immediate feedback.
+- Visual growth:
+  - The progress ring grows in scale as count approaches target.
+  - The dhikr text scales proportionally.
+  - The tier is chosen by the target: 33 or less (small), up to 100 (medium), up to 1000 (large).
+  - Target and count in the center remain the visual anchor.
+- Completion feedback:
+  - When the target is reached, the progress ring turns Catppuccin green.
+  - A pill with مكتمل shows below the ring.
+  - Does not cover the counter or tap area.
+- Persistence:
+  - State stored under the `tasbih` meta key.
+  - Fields: `presetIndex`, `selectedDhikrId`, `target`, `customTarget`, `count`, `color`.
 - Fully offline.
-- The tasbih view itself makes no direct fetch, HTTP, localStorage, or IndexedDB calls.
+- The tasbih view itself makes no direct fetch, HTTP, localStorage, or IndexedDB calls. Persistence goes through `store`.
 
 ### Search
 
@@ -309,7 +329,7 @@ Sahib uses a deterministic, versioned merge system.
 - Hisn al-Muslim data lives in `js/hisn-data.js`.
 - Taxonomy labels live in `js/adhkar-taxonomy.js`.
 - On boot, `js/state.js` compares local `hisnMergedV2` meta against `window.HISN_VERSION`.
-- Current Hisn version: 4.
+- Current Hisn version: 5.
 - If the dataset version is newer:
   - new entries are merged into IndexedDB
   - duplicate Arabic text is skipped
@@ -489,14 +509,7 @@ Offline core (shell precache, prayer snapshot, sahib-books cache, five beginner 
 21. Empty-state audit.
 22. Attribution footer verification.
 23. Dead-code sweep and `.adkar-grid` consolidation.
-24. Tasbih enhancements:
-   - minus button and reset button on the tasbih counter
-   - Settings option to pick the dhikr that the tasbih is counting
-     (for example سُبْحَانَ اللَّهِ وَبِحَمْدِهِ or سُبْحَانَ اللَّهِ الْعَظِيمِ,
-     or any entry from the Hisn list)
-   - counter ring grows visually on each tap
-   - completion message shown when the target is reached
-
+24. ~~Tasbih enhancements~~ ✅ Shipped as of v2.10.47 — minus, reset, editable count, dhikr presets, target chips, color swatches, growing ring, green completion state.
 ## Project Principles
 
 - Offline-first.

@@ -7,7 +7,7 @@
      - Stale-while-revalidate for fonts
    ================================================================= */
 
-const VERSION = 'v2.10.47';
+const VERSION = 'v2.10.49';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -109,11 +109,11 @@ self.addEventListener('install', (event) => {
 
       /* Small beginner-path PDFs, cached on install. ~14 MB. */
       const smallBooks = [
-        './assets/books/1.%20%D8%A7%D9%84%D9%82%D8%B1%D8%A2%D9%86%20%D9%88%D8%B9%D9%84%D9%88%D9%85%D9%87%20-%20Quran%20%26%20Its%20Sciences/Noor-Book.com%20%D8%A7%D9%84%D9%85%D9%82%D8%AF%D9%85%D8%A9%20%D8%A7%D9%84%D8%AC%D8%B2%D8%B1%D9%8A%D8%A9%203%20.pdf',
-        './assets/books/4.%20%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9%20%D9%88%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D9%8A%D8%AF%20-%20Islamic%20Creed%20%26%20Theology/%D9%84%D8%AA%D9%88%D8%AD%D9%8A%D8%AF%20%D8%A7%D9%84%D8%B0%D9%8A%20%D9%87%D9%88%20%D8%AD%D9%82%20%D8%A7%D9%84%D9%84%D9%87%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%B9%D8%A8%D9%8A%D8%AF%20%D9%85%D8%A4%D9%84%D9%81%20%D8%A7%D9%84%D9%83%D8%AA%D8%A7%D8%A8%20%D9%85%D8%AD%D9%85%D8%AF%20%D8%A8%D9%86%20%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%88%D9%87%D8%A7%D8%A8.pdf',
-        './assets/books/4.%20%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9%20%D9%88%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D9%8A%D8%AF%20-%20Islamic%20Creed%20%26%20Theology/%D9%85%D8%A7%20%D9%84%D8%A7%20%D9%8A%D8%B3%D8%B9%20%D8%A7%D9%84%D9%85%D8%B3%D9%84%D9%85%20%D8%AC%D9%87%D9%84%D9%87.pdf',
-        './assets/books/5.%20%D8%A7%D9%84%D9%81%D9%82%D9%87%20%D9%88%D8%A3%D8%B5%D9%88%D9%84%D9%87%20-%20Islamic%20Jurisprudence%20(Fiqh)/%D9%85%D9%86%D9%87%D8%AC%20%D8%A7%D9%84%D8%B3%D8%A7%D9%84%D9%83%D9%8A%D9%86%20%D9%88%D8%AA%D9%88%D8%B6%D9%8A%D8%AD%20%D8%A7%D9%84%D9%81%D9%82%D9%87%20%D9%81%D9%8A%20%D8%A7%D9%84%D8%AF%D9%8A%D9%86.pdf',
-        './assets/books/6.%20%D8%A7%D9%84%D8%B1%D9%82%D8%A7%D8%A6%D9%82%D8%8C%20%D8%A7%D9%84%D8%A3%D8%B0%D9%83%D8%A7%D8%B1%20%D9%88%D8%A7%D9%84%D8%AA%D8%B2%D9%83%D9%8A%D8%A9%20-%20Purification%20of%20the%20Soul%20%26%20Adhkar/%D8%AD%D8%B5%D9%86%20%D8%A7%D9%84%D9%85%D8%B3%D9%84%D9%85.pdf',
+        'https://sahib-proxy.sahib-app.workers.dev/books/1.%20%D8%A7%D9%84%D9%82%D8%B1%D8%A2%D9%86%20%D9%88%D8%B9%D9%84%D9%88%D9%85%D9%87%20-%20Quran%20%26%20Its%20Sciences/Noor-Book.com%20%D8%A7%D9%84%D9%85%D9%82%D8%AF%D9%85%D8%A9%20%D8%A7%D9%84%D8%AC%D8%B2%D8%B1%D9%8A%D8%A9%203%20.pdf',
+        'https://sahib-proxy.sahib-app.workers.dev/books/4.%20%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9%20%D9%88%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D9%8A%D8%AF%20-%20Islamic%20Creed%20%26%20Theology/%D9%84%D8%AA%D9%88%D8%AD%D9%8A%D8%AF%20%D8%A7%D9%84%D8%B0%D9%8A%20%D9%87%D9%88%20%D8%AD%D9%82%20%D8%A7%D9%84%D9%84%D9%87%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%B9%D8%A8%D9%8A%D8%AF%20%D9%85%D8%A4%D9%84%D9%81%20%D8%A7%D9%84%D9%83%D8%AA%D8%A7%D8%A8%20%D9%85%D8%AD%D9%85%D8%AF%20%D8%A8%D9%86%20%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%88%D9%87%D8%A7%D8%A8.pdf',
+        'https://sahib-proxy.sahib-app.workers.dev/books/4.%20%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9%20%D9%88%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D9%8A%D8%AF%20-%20Islamic%20Creed%20%26%20Theology/%D9%85%D8%A7%20%D9%84%D8%A7%20%D9%8A%D8%B3%D8%B9%20%D8%A7%D9%84%D9%85%D8%B3%D9%84%D9%85%20%D8%AC%D9%87%D9%84%D9%87.pdf',
+        'https://sahib-proxy.sahib-app.workers.dev/books/5.%20%D8%A7%D9%84%D9%81%D9%82%D9%87%20%D9%88%D8%A3%D8%B5%D9%88%D9%84%D9%87%20-%20Islamic%20Jurisprudence%20(Fiqh)/%D9%85%D9%86%D9%87%D8%AC%20%D8%A7%D9%84%D8%B3%D8%A7%D9%84%D9%83%D9%8A%D9%86%20%D9%88%D8%AA%D9%88%D8%B6%D9%8A%D8%AD%20%D8%A7%D9%84%D9%81%D9%82%D9%87%20%D9%81%D9%8A%20%D8%A7%D9%84%D8%AF%D9%8A%D9%86.pdf',
+        'https://sahib-proxy.sahib-app.workers.dev/books/6.%20%D8%A7%D9%84%D8%B1%D9%82%D8%A7%D8%A6%D9%82%D8%8C%20%D8%A7%D9%84%D8%A3%D8%B0%D9%83%D8%A7%D8%B1%20%D9%88%D8%A7%D9%84%D8%AA%D8%B2%D9%83%D9%8A%D8%A9%20-%20Purification%20of%20the%20Soul%20%26%20Adhkar/%D8%AD%D8%B5%D9%86%20%D8%A7%D9%84%D9%85%D8%B3%D9%84%D9%85.pdf',
       ];
       const booksCache = await caches.open('sahib-books');
       for (const url of smallBooks) {
@@ -152,9 +152,10 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
 
   const isSameOrigin = url.origin === self.location.origin;
+  const isBookProxy = url.origin === 'https://sahib-proxy.sahib-app.workers.dev';
 
-  /* Only handle same-origin requests (fonts are now local) */
-  if (!isSameOrigin) return;
+  /* Handle same-origin requests and book-proxy requests. */
+  if (!isSameOrigin && !isBookProxy) return;
 
     /* Range requests: let the browser stream them directly. */
   if (req.headers.has('range')) return;
@@ -162,7 +163,7 @@ self.addEventListener('fetch', (event) => {
   /* Book PDFs: if the URL is already in the offline-books cache, serve it;
      otherwise pass through to the network. Lazy caching on first read is
      done by js/offline-books.js, not here. */
-  if (url.pathname.includes('/assets/books/') || url.pathname.endsWith('.pdf')) {
+  if (url.pathname.includes('/books/') || url.pathname.endsWith('.pdf')) {
     event.respondWith(
       caches.open('sahib-books').then((cache) =>
         cache.match(req).then((cachedResponse) => {

@@ -581,7 +581,6 @@ async function onDownloadBookCard(id){
     await window.OFFLINE_BOOKS.cacheBookById(id);
     toast(ar ? 'تم التحميل' : 'Downloaded', 'check');
     updateDownloadButtonCard(id);
-    if(window.OFFLINE_UI) window.OFFLINE_UI.refresh();
   } catch(e) {
     console.error('Download error', e);
     toast(ar ? 'فشل التحميل' : 'Download failed');

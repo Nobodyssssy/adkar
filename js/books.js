@@ -8,7 +8,7 @@
    - Reading progress + bookmarks (via store.meta)
    ========================================================================== */
 
-const BOOKS_BASE_PATH = 'assets/books/';
+const BOOKS_BASE_PATH = 'https://sahib-proxy.sahib-app.workers.dev/books/';
 
 /* --- Basic lookups ----------------------------------------------------- */
 
