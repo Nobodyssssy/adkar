@@ -1,352 +1,573 @@
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
-   Tasbih counter view
-   • One persisted counter, tap/click/hotkey to increment by 1
-   • Settings panel (target, colour, hotkey info)
-   ═══════════════════════════════════════════════════════════ */
+/* Tasbih view - counter, minus, reset, visual growth, completion, settings */
 
-const TASBIH_COLORS = [
-  { key: 'peach', label: 'Peach', accent: '#fab387', glow: 'rgba(250,179,135,.25)' },
-  { key: 'green', label: 'Green', accent: '#a6e3a1', glow: 'rgba(166,227,161,.25)' },
-  { key: 'gold',  label: 'Gold',  accent: '#c9a84c', glow: 'rgba(201,168,76,.25)'  },
-  { key: 'mauve', label: 'Mauve', accent: '#cba6f7', glow: 'rgba(203,166,247,.25)' },
-  { key: 'teal',  label: 'Teal',  accent: '#94e2d5', glow: 'rgba(148,226,213,.25)' },
-  { key: 'blue',  label: 'Blue',  accent: '#89b4fa', glow: 'rgba(137,180,250,.25)' },
+const TASBIH_PRESETS = [
+  { label: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',            repeat: 100 },
+  { label: 'سُبْحَانَ اللَّهِ الْعَظِيمِ',             repeat: 100 },
+  { label: 'لَا إِلَهَ إِلَّا اللَّهُ',                repeat: 100 },
+  { label: 'أَسْتَغْفِرُ اللَّهَ',                      repeat: 100 },
+  { label: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ', repeat: 100 },
+  { label: 'سُبْحَانَ اللَّهِ',                          repeat: 33  },
+  { label: 'الْحَمْدُ لِلَّهِ',                          repeat: 33  },
+  { label: 'اللَّهُ أَكْبَرُ',                           repeat: 33  }
 ];
 
-const TASBIH_TARGETS = [33, 99, 100];
+const TASBIH_COLORS = [
+  { key: 'theme', label: 'Theme', css: '' },
+  { key: 'peach', label: 'Peach', css: 'var(--ctp-peach)' },
+  { key: 'green', label: 'Green', css: 'var(--ctp-green)' },
+  { key: 'mauve', label: 'Mauve', css: 'var(--ctp-mauve)' },
+  { key: 'teal',  label: 'Teal',  css: 'var(--ctp-teal)'  },
+  { key: 'blue',  label: 'Blue',  css: 'var(--ctp-blue)'  }
+];
 
-let _tasbihState = null;
+let tasbihState = null;
 
-/* ═══════════════════════════════════════════════════════════
-   STATE
-   ═══════════════════════════════════════════════════════════ */
-async function _loadTasbihState(){
-  if(_tasbihState) return _tasbihState;
-  const saved = await store.getMeta('tasbih');
-  _tasbihState = Object.assign({
-    count:        0,
-    target:       33,
+/* ── State ── */
+async function _loadTasbihState() {
+  if (tasbihState) return tasbihState;
+  let stored = null;
+  try { stored = await store.getMeta('tasbih'); } catch (e) {}
+  tasbihState = Object.assign({
+    presetIndex: 0,
+    selectedDhikrId: null,
+    target: 100,
     customTarget: null,
-    color:        'peach',
-  }, saved || {});
-  return _tasbihState;
+    count: 0,
+    color: 'theme'
+  }, stored || {});
+  return tasbihState;
 }
 
-async function _saveTasbihState(){
-  if(!_tasbihState) return;
-  await store.setMeta('tasbih', _tasbihState);
+async function _saveTasbihState() {
+  if (!tasbihState) return;
+  try {
+    await store.setMeta('tasbih', {
+      presetIndex: tasbihState.presetIndex,
+      selectedDhikrId: tasbihState.selectedDhikrId,
+      target: tasbihState.target,
+      customTarget: tasbihState.customTarget,
+      count: tasbihState.count,
+      color: tasbihState.color
+    });
+  } catch (e) {}
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ENTRY / EXIT
-   ═══════════════════════════════════════════════════════════ */
-async function openTasbihView(){
-  await _loadTasbihState();
-  showView('view-tasbih');
-  renderTasbihView();
-  _attachTasbihKeyHandler();
-  window.scrollTo(0, 0);
-}
-
-function closeTasbihView(){
-  _detachTasbihKeyHandler();
-  goHome();
-}
-
-/* ═══════════════════════════════════════════════════════════
-   RENDER
-   ═══════════════════════════════════════════════════════════ */
-function renderTasbihView(){
-  const host = $('tasbih-body');
-  if(!host || !_tasbihState) return;
-
-  const s = _tasbihState;
-  const color = TASBIH_COLORS.find(c => c.key === s.color) || TASBIH_COLORS[0];
-  const target = s.target === 'custom' ? (s.customTarget || 0) : s.target;
-  const pct = target > 0 ? Math.min(100, Math.round(s.count / target * 100)) : 0;
-  const done = target > 0 && s.count >= target;
-
-  const R = 90, C = 2 * Math.PI * R;
-  const dash = C * pct / 100;
-
-  host.innerHTML = `
-    <div class="tasbih-wrap" style="--tb-accent:${color.accent}; --tb-glow:${color.glow};">
-
-      <!-- Settings button (top-right of the wrap) -->
-      <button class="tasbih-settings-btn" onclick="tasbihOpenSettings()" title="Settings" aria-label="Settings">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </button>
-
-      <!-- Progress ring + count -->
-      <div class="tasbih-ring-wrap">
-        <svg class="tasbih-ring" viewBox="0 0 200 200">
-          <circle cx="100" cy="100" r="${R}"
-                  fill="none" stroke="var(--surface2)" stroke-width="8"/>
-          <circle cx="100" cy="100" r="${R}"
-                  fill="none" stroke="${color.accent}" stroke-width="8"
-                  stroke-linecap="round"
-                  stroke-dasharray="${dash} ${C}"
-                  transform="rotate(-90 100 100)"
-                  style="transition: stroke-dasharray .3s ease;"/>
-        </svg>
-        <div class="tasbih-center">
-          <div class="tasbih-count ${done ? 'done' : ''}" id="tasbih-count">${s.count}</div>
-          <div class="tasbih-target">
-            ${target > 0 ? `/ ${target}` : 'no target'}
-          </div>
-        </div>
-      </div>
-
-      <!-- Big tap button -->
-      <button class="tasbih-tap-btn" id="tasbih-tap" onclick="tasbihIncrement()">
-        <span class="tasbih-tap-plus">+1</span>
-        <span class="tasbih-tap-hint">tap · click · space</span>
-      </button>
-
-      <!-- Actions -->
-      <div class="tasbih-actions">
-        <button class="tasbih-reset" onclick="tasbihConfirmReset()">
-          Reset
-        </button>
-      </div>
-    </div>
-  `;
-
-  if(typeof injectHeaderIcons === 'function'){
-    setTimeout(() => injectHeaderIcons(), 0);
+/* ── Selection helpers ── */
+function _getSelectedDhikr() {
+  if (tasbihState.selectedDhikrId !== null && typeof data !== 'undefined' && Array.isArray(data)) {
+    const d = data.find(x => x.id === tasbihState.selectedDhikrId);
+    if (d) return d;
   }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   INCREMENT
-   ═══════════════════════════════════════════════════════════ */
-function tasbihIncrement(){
-  if(!_tasbihState) return;
-  _tasbihState.count += 1;
-  _saveTasbihState();
-  _renderTasbihCount();
-
-  if(navigator.vibrate) navigator.vibrate(15);
-
-  const btn = $('tasbih-tap');
-  if(btn){
-    btn.classList.remove('pop');
-    void btn.offsetWidth;
-    btn.classList.add('pop');
+  if (tasbihState.presetIndex !== null) {
+    return TASBIH_PRESETS[tasbihState.presetIndex] || null;
   }
+  return null;
 }
 
-function _renderTasbihCount(){
-  const el = $('tasbih-count');
-  if(!el || !_tasbihState) return;
-  const s = _tasbihState;
-  el.textContent = s.count;
-
-  const target = s.target === 'custom' ? (s.customTarget || 0) : s.target;
-  const done = target > 0 && s.count >= target;
-  el.classList.toggle('done', done);
-
-  const ring = document.querySelector('.tasbih-ring circle:nth-child(2)');
-  if(ring){
-    const R = 90, C = 2 * Math.PI * R;
-    const pct = target > 0 ? Math.min(100, s.count / target * 100) : 0;
-    ring.setAttribute('stroke-dasharray', `${C * pct / 100} ${C}`);
-  }
-
-  const tEl = document.querySelector('.tasbih-target');
-  if(tEl) tEl.textContent = target > 0 ? `/ ${target}` : 'no target';
+function _getDhikrText() {
+  const d = _getSelectedDhikr();
+  if (!d) return '';
+  return d.arabic || d.label || '';
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SETTINGS PANEL
-   ═══════════════════════════════════════════════════════════ */
-function tasbihOpenSettings(){
-  if(!_tasbihState) return;
-  const s = _tasbihState;
-  const target = s.target === 'custom' ? (s.customTarget || 0) : s.target;
-
-  let modal = $('ov-tasbih-settings');
-  if(!modal){
-    modal = document.createElement('div');
-    modal.className = 'ov center';
-    modal.id = 'ov-tasbih-settings';
-    modal.setAttribute('onclick', 'if(event.target===this)tasbihCloseSettings()');
-    modal.innerHTML = `
-      <div class="modal-box" style="max-width:420px">
-        <div class="mh">
-          <h2>Tasbih settings</h2>
-             <button class="btn-close" onclick="tasbihCloseSettings()" aria-label="Close">${icon('x', 16)}</button>
-        </div>
-        <div class="mb" id="tasbih-settings-body"></div>
-      </div>`;
-    document.body.appendChild(modal);
-  }
-
-  /* Build the body fresh each time */
-  const body = $('tasbih-settings-body');
-  body.innerHTML = `
-    <!-- Target -->
-    <div class="tasbih-section">
-      <div class="tasbih-section-label">Target</div>
-      <div class="tasbih-chips">
-        ${TASBIH_TARGETS.map(n => `
-          <button class="tasbih-chip ${s.target === n ? 'on' : ''}"
-                  onclick="tasbihSetTarget(${n})">${n}</button>
-        `).join('')}
-        <button class="tasbih-chip ${s.target === 'custom' ? 'on' : ''}"
-                onclick="tasbihSetCustomTarget()">custom${s.target === 'custom' ? ' · ' + target : ''}</button>
-      </div>
-    </div>
-
-    <!-- Colour -->
-    <div class="tasbih-section">
-      <div class="tasbih-section-label">Colour</div>
-      <div class="tasbih-colors">
-        ${TASBIH_COLORS.map(c => `
-          <button class="tasbih-color ${s.color === c.key ? 'on' : ''}"
-                  style="--c:${c.accent}"
-                  onclick="tasbihSetColor('${c.key}')"
-                  title="${c.label}"></button>
-        `).join('')}
-      </div>
-    </div>
-
-    <!-- Hotkeys -->
-    <div class="tasbih-section">
-      <div class="tasbih-section-label" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-        Hotkeys
-        <button class="tasbih-info-btn" onclick="tasbihToggleHotkeyInfo()" aria-label="About hotkeys">?</button>
-      </div>
-      <div class="tasbih-hotkeys">
-        <div class="tasbih-hotkey-row"><kbd>Space</kbd><span>increment</span></div>
-        <div class="tasbih-hotkey-row"><kbd>Enter</kbd><span>increment</span></div>
-        <div class="tasbih-hotkey-row"><kbd>↑</kbd><span>increment</span></div>
-      </div>
-      <div class="tasbih-hotkey-note" id="tasbih-hotkey-info" style="display:none">
-        Hotkeys work only while the Tasbih view is open and no text field is focused.
-        The big tap button and hotkeys all increment by +1.
-      </div>
-    </div>
-  `;
-
-  modal.classList.add('open');
-  lockBody();
+function _getTargetCount() {
+  if (tasbihState.customTarget) return tasbihState.customTarget;
+  if (tasbihState.target) return tasbihState.target;
+  const d = _getSelectedDhikr();
+  if (d && d.repeat) return d.repeat;
+  return 100;
 }
 
-function tasbihCloseSettings(){
-  const modal = $('ov-tasbih-settings');
-  if(modal) modal.classList.remove('open');
-  unlockBody();
-  /* Re-render the main view so target/colour changes reflect immediately */
-  renderTasbihView();
-}
-
-function tasbihToggleHotkeyInfo(){
-  const el = $('tasbih-hotkey-info');
-  if(!el) return;
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-/* ═══════════════════════════════════════════════════════════
-   SETTINGS ACTIONS
-   ═══════════════════════════════════════════════════════════ */
-function tasbihSetTarget(n){
-  if(!_tasbihState) return;
-  _tasbihState.target = n;
-  _saveTasbihState();
-  tasbihOpenSettings();   /* re-render body */
-}
-
-function tasbihSetCustomTarget(){
-  if(!_tasbihState) return;
-  const current = _tasbihState.customTarget || 33;
-  const raw = prompt('Enter target (positive number):', String(current));
-  if(raw == null) return;
-  const n = parseInt(raw, 10);
-  if(!Number.isFinite(n) || n <= 0){
-    toast('Enter a positive number');
-    return;
-  }
-  _tasbihState.target = 'custom';
-  _tasbihState.customTarget = n;
-  _saveTasbihState();
-  tasbihOpenSettings();
-}
-
-function tasbihSetColor(key){
-  if(!_tasbihState) return;
-  if(!TASBIH_COLORS.find(c => c.key === key)) return;
-  _tasbihState.color = key;
-  _saveTasbihState();
-  tasbihOpenSettings();
-}
-
-/* ═══════════════════════════════════════════════════════════
-   RESET
-   ═══════════════════════════════════════════════════════════ */
-function tasbihConfirmReset(){
-  if(!_tasbihState || _tasbihState.count === 0){
-    toast('Already at zero');
-    return;
-  }
-  const modal = $('ov-confirm');
-  if(modal){
-    $('conf-ico').innerHTML = icon('rotate-ccw', 32);
-    $('conf-t').textContent = 'Reset counter?';
-    $('conf-x').textContent = `Current count: ${_tasbihState.count}. This cannot be undone.`;
-    const delBtn = modal.querySelector('.btn-del');
-    const origClick = delBtn.onclick;
-    delBtn.textContent = 'Reset';
-    delBtn.onclick = () => {
-      tasbihDoReset();
-      delBtn.onclick = origClick;
-      delBtn.textContent = 'Delete';
-      closeConfirm();
-    };
-    modal.classList.add('open');
-    lockBody();
+function _applyColor() {
+  const wrap = document.querySelector('.tasbih-wrap');
+  if (!wrap) return;
+  const c = TASBIH_COLORS.find(x => x.key === tasbihState.color) || TASBIH_COLORS[0];
+  if (c.css) {
+    wrap.style.setProperty('--tb-accent', c.css);
+    wrap.style.setProperty('--tb-glow', 'color-mix(in srgb, ' + c.css + ' 40%, transparent)');
   } else {
-    if(confirm('Reset count to zero?')) tasbihDoReset();
+    wrap.style.removeProperty('--tb-accent');
+    wrap.style.removeProperty('--tb-glow');
   }
 }
 
-function tasbihDoReset(){
-  if(!_tasbihState) return;
-  _tasbihState.count = 0;
-  _saveTasbihState();
-  _renderTasbihCount();
-  toast('Counter reset');
-}
+/* ── Visuals ── */
+function _updateVisuals() {
+  if (!tasbihState) return;
+  const target = _getTargetCount();
+  if (!target || target <= 0) return;
+  const progress = Math.min(Math.max(tasbihState.count / target, 0), 1);
 
-/* ═══════════════════════════════════════════════════════════
-   KEYBOARD
-   ═══════════════════════════════════════════════════════════ */
-function _attachTasbihKeyHandler(){
-  document.addEventListener('keydown', _tasbihKeyDown);
-}
+  let tier;
+  if (target <= 33) tier = 1;
+  else if (target <= 100) tier = 2;
+  else tier = 3;
 
-function _detachTasbihKeyHandler(){
-  document.removeEventListener('keydown', _tasbihKeyDown);
-}
+  const ringMin = 0.8;
+  const ringMax = { 1: 1.0, 2: 1.2, 3: 1.4 }[tier];
+  const textMin = 0.8;
+  const textMax = { 1: 1.2, 2: 1.4, 3: 1.6 }[tier];
 
-function _tasbihKeyDown(e){
-  const view = $('view-tasbih');
-  if(!view || !view.classList.contains('active')) return;
+  const ringScale = ringMin + (ringMax - ringMin) * progress;
+  const textScale = textMin + (textMax - textMin) * progress;
 
-  /* Ignore typing in fields */
-  const tag = (e.target.tagName || '').toLowerCase();
-  if(tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+  const svg = document.querySelector('.tasbih-ring');
+  if (svg) svg.style.transform = 'scale(' + ringScale + ')';
 
-  /* Don't fire hotkeys when a modal is open */
-  if(document.querySelector('.ov.open, .session-overlay.open')) return;
-
-  if(e.code === 'Space' || e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowUp'){
-    e.preventDefault();
-    tasbihIncrement();
+  const arc = document.querySelector('.tasbih-ring .tasbih-arc');
+  if (arc) {
+    const C = 2 * Math.PI * 45;
+    arc.style.strokeDashoffset = String(C * (1 - progress));
   }
+
+  const wrap = document.querySelector('.tasbih-wrap');
+  if (wrap) {
+    wrap.classList.toggle('tasbih-done', progress >= 1);
+  }
+
+  const countEl = document.querySelector('.tasbih-count');
+  if (countEl) countEl.style.transform = 'scale(' + textScale + ')';
+
+  const dhikrEl = document.querySelector('.tasbih-dhikr');
+  if (dhikrEl) dhikrEl.style.transform = 'scale(' + textScale + ')';
+
+  const targetEl = document.querySelector('.tasbih-target');
+  if (targetEl) targetEl.textContent = '/ ' + target;
 }
+
+function _updateCounter() {
+  const el = document.querySelector('.tasbih-count');
+  if (el) el.textContent = String(tasbihState.count);
+}
+
+function _refreshDhikrDisplay() {
+  const el = document.querySelector('.tasbih-dhikr');
+  if (el) el.textContent = _getDhikrText();
+  const tgt = document.querySelector('.tasbih-target');
+  if (tgt) tgt.textContent = '/ ' + _getTargetCount();
+}
+
+/* ── Handlers ── */
+async function tasbihPlus() {
+  const target = _getTargetCount();
+  if (tasbihState.count >= target) return;
+  tasbihState.count++;
+  await _saveTasbihState();
+  _updateCounter();
+  _updateVisuals();
+  if (tasbihState.count >= target) _showCompletion();
+}
+
+async function tasbihMinus() {
+  if (tasbihState.count <= 0) return;
+  tasbihState.count--;
+  await _saveTasbihState();
+  _updateCounter();
+  _updateVisuals();
+  _hideCompletion();
+}
+
+async function tasbihReset() {
+  tasbihState.count = 0;
+  await _saveTasbihState();
+  _updateCounter();
+  _updateVisuals();
+  _hideCompletion();
+}
+
+/* ── Completion ── */
+function _showCompletion() {
+  _hideCompletion();
+  const center = document.querySelector('.tasbih-center');
+  if (!center) return;
+  const el = document.createElement('div');
+  el.className = 'tasbih-completion';
+  el.setAttribute('dir', 'rtl');
+  el.textContent = 'مكتمل';
+  center.appendChild(el);
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+
+function _hideCompletion() {
+  const el = document.querySelector('.tasbih-completion');
+  if (!el) return;
+  el.classList.remove('show');
+  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+}
+
+/* ── DOM builder ── */
+function _buildTasbih() {
+  const wrap = document.createElement('div');
+  wrap.className = 'tasbih-wrap';
+
+  const settingsBtn = document.createElement('button');
+  settingsBtn.className = 'tasbih-settings-btn';
+  settingsBtn.setAttribute('aria-label', 'Settings');
+  settingsBtn.innerHTML = icon('settings', 18);
+  settingsBtn.onclick = openTasbihSettings;
+  wrap.appendChild(settingsBtn);
+
+  const ringWrap = document.createElement('div');
+  ringWrap.className = 'tasbih-ring-wrap';
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('class', 'tasbih-ring');
+
+  const bg = document.createElementNS(svgNS, 'circle');
+  bg.setAttribute('cx', '50');
+  bg.setAttribute('cy', '50');
+  bg.setAttribute('r', '45');
+  bg.setAttribute('fill', 'none');
+  bg.setAttribute('stroke', 'var(--border)');
+  bg.setAttribute('stroke-width', '10');
+  svg.appendChild(bg);
+
+  const arc = document.createElementNS(svgNS, 'circle');
+  arc.setAttribute('cx', '50');
+  arc.setAttribute('cy', '50');
+  arc.setAttribute('r', '45');
+  arc.setAttribute('fill', 'none');
+  arc.setAttribute('stroke', 'var(--tb-accent, var(--accent))');
+  arc.setAttribute('stroke-width', '10');
+  arc.setAttribute('stroke-linecap', 'round');
+  arc.setAttribute('stroke-dasharray', '283');
+  arc.setAttribute('stroke-dashoffset', '283');
+  arc.setAttribute('transform', 'rotate(-90 50 50)');
+  arc.setAttribute('class', 'tasbih-arc');
+  svg.appendChild(arc);
+
+  ringWrap.appendChild(svg);
+
+  const center = document.createElement('div');
+  center.className = 'tasbih-center';
+
+  const count = document.createElement('div');
+  count.className = 'tasbih-count';
+  count.textContent = String(tasbihState.count);
+  count.title = 'Tap to set count';
+  count.style.cursor = 'pointer';
+  count.onclick = function () {
+    if (count.dataset.editing === '1') return;
+    count.dataset.editing = '1';
+
+    const original = String(tasbihState.count);
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.className = 'tasbih-count-input';
+    inp.value = original;
+    inp.min = '0';
+    inp.max = '100000';
+    count.replaceWith(inp);
+    inp.focus();
+    inp.select();
+
+    let done = false;
+    const finish = async function (commit) {
+      if (done) return;
+      done = true;
+      if (commit) {
+        const v = parseInt(inp.value, 10);
+        if (!isNaN(v) && v >= 0) {
+          tasbihState.count = v;
+          await _saveTasbihState();
+        }
+      }
+      count.dataset.editing = '0';
+      count.textContent = String(tasbihState.count);
+      if (inp.parentNode) inp.replaceWith(count);
+      _updateCounter();
+      _updateVisuals();
+      if (tasbihState.count >= _getTargetCount()) _showCompletion();
+      else _hideCompletion();
+    };
+
+    inp.onblur = function () { finish(true); };
+    inp.onkeydown = function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+    };
+  };
+
+  const dhikr = document.createElement('div');
+  dhikr.className = 'tasbih-dhikr';
+  dhikr.setAttribute('dir', 'rtl');
+  dhikr.textContent = _getDhikrText();
+
+  const target = document.createElement('div');
+  target.className = 'tasbih-target';
+  target.textContent = '/ ' + _getTargetCount();
+
+  center.appendChild(count);
+  center.appendChild(dhikr);
+  center.appendChild(target);
+  ringWrap.appendChild(center);
+  wrap.appendChild(ringWrap);
+
+  const tapBtn = document.createElement('button');
+  tapBtn.className = 'tasbih-tap-btn';
+  tapBtn.setAttribute('aria-label', 'Increment');
+  tapBtn.innerHTML = icon('plus', 36);
+  tapBtn.onclick = tasbihPlus;
+  wrap.appendChild(tapBtn);
+
+  const actions = document.createElement('div');
+  actions.className = 'tasbih-actions';
+
+  const minusBtn = document.createElement('button');
+  minusBtn.className = 'tasbih-minus-btn';
+  minusBtn.setAttribute('aria-label', 'Decrement');
+  minusBtn.innerHTML = icon('minus', 22);
+  minusBtn.onclick = tasbihMinus;
+
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'tasbih-reset-btn';
+  resetBtn.setAttribute('aria-label', 'Reset');
+  resetBtn.innerHTML = icon('rotate-ccw', 22);
+  resetBtn.onclick = tasbihReset;
+
+  actions.appendChild(minusBtn);
+  actions.appendChild(resetBtn);
+  wrap.appendChild(actions);
+
+  return wrap;
+}
+
+/* ── View entry ── */
+async function openTasbihView() {
+  await _loadTasbihState();
+  if (typeof showView === 'function') showView('view-tasbih');
+
+  const container =
+    document.getElementById('tasbih-body') ||
+    document.querySelector('#view-tasbih .tasbih-body') ||
+    document.querySelector('#view-tasbih');
+
+  if (!container) {
+    console.error('[tasbih] container not found');
+    return;
+  }
+
+  container.innerHTML = '';
+  container.appendChild(_buildTasbih());
+  _applyColor();
+  _updateVisuals();
+  _updateCounter();
+}
+
+function closeTasbihView() {
+  if (typeof goHome === 'function') goHome();
+}
+
+/* ── Settings ── */
+function openTasbihSettings() {
+  const old = document.getElementById('ov-tasbih-settings');
+  if (old) old.remove();
+
+  const ov = document.createElement('div');
+  ov.className = 'ov center';
+  ov.id = 'ov-tasbih-settings';
+  ov.onclick = function (e) { if (e.target === ov) closeTasbihSettings(); };
+
+  const box = document.createElement('div');
+  box.className = 'modal-box';
+
+  const head = document.createElement('div');
+  head.className = 'mh';
+
+  const title = document.createElement('h2');
+  title.textContent = 'Tasbih Settings';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'btn-close';
+  closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.innerHTML = icon('x', 15);
+  closeBtn.onclick = closeTasbihSettings;
+
+  head.appendChild(title);
+  head.appendChild(closeBtn);
+  box.appendChild(head);
+
+  const body = document.createElement('div');
+  body.className = 'mb';
+  body.appendChild(_buildDhikrSection());
+  body.appendChild(_buildTargetSection());
+  body.appendChild(_buildColorSection());
+  box.appendChild(body);
+
+  const footer = document.createElement('div');
+  footer.className = 'mf';
+  const okBtn = document.createElement('button');
+  okBtn.className = 'btn-save';
+  okBtn.textContent = 'OK';
+  okBtn.onclick = closeTasbihSettings;
+  footer.appendChild(okBtn);
+  box.appendChild(footer);
+
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('open'));
+  document.body.classList.add('modal-open');
+}
+
+function closeTasbihSettings() {
+  const ov = document.getElementById('ov-tasbih-settings');
+  if (!ov) return;
+  ov.classList.remove('open');
+  document.body.classList.remove('modal-open');
+  setTimeout(() => ov.remove(), 250);
+
+  _applyColor();
+  _refreshDhikrDisplay();
+  _updateCounter();
+  _updateVisuals();
+}
+
+function _rebuildSettingsBody() {
+  const ov = document.getElementById('ov-tasbih-settings');
+  if (!ov) return;
+  const body = ov.querySelector('.mb');
+  if (!body) return;
+  body.innerHTML = '';
+  body.appendChild(_buildDhikrSection());
+  body.appendChild(_buildTargetSection());
+  body.appendChild(_buildColorSection());
+}
+
+function _buildDhikrSection() {
+  const sec = document.createElement('div');
+  sec.className = 'tasbih-section';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'tasbih-section-label';
+  lbl.textContent = 'Dhikr';
+  sec.appendChild(lbl);
+
+  const chips = document.createElement('div');
+  chips.className = 'tasbih-chips';
+
+  TASBIH_PRESETS.forEach((p, i) => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'tasbih-chip';
+    chip.textContent = p.label;
+    if (tasbihState.presetIndex === i && tasbihState.selectedDhikrId === null) chip.classList.add('on');
+    chip.onclick = async () => {
+      tasbihState.presetIndex = i;
+      tasbihState.selectedDhikrId = null;
+      tasbihState.customTarget = null;
+      tasbihState.target = p.repeat || 100;
+      tasbihState.count = 0;
+      await _saveTasbihState();
+      _refreshDhikrDisplay();
+      _updateCounter();
+      _updateVisuals();
+      _rebuildSettingsBody();
+    };
+    chips.appendChild(chip);
+  });
+
+  sec.appendChild(chips);
+  return sec;
+}
+
+function _buildTargetSection() {
+  const sec = document.createElement('div');
+  sec.className = 'tasbih-section';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'tasbih-section-label';
+  lbl.textContent = 'Target';
+  sec.appendChild(lbl);
+
+  const chips = document.createElement('div');
+  chips.className = 'tasbih-chips';
+
+  const current = _getTargetCount();
+  [33, 99, 100].forEach(n => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'tasbih-chip';
+    chip.textContent = String(n);
+    if (current === n && !tasbihState.customTarget) chip.classList.add('on');
+    chip.onclick = async () => {
+      tasbihState.customTarget = null;
+      tasbihState.target = n;
+      tasbihState.count = 0;
+      await _saveTasbihState();
+      _refreshDhikrDisplay();
+      _updateCounter();
+      _updateVisuals();
+      _rebuildSettingsBody();
+    };
+    chips.appendChild(chip);
+  });
+
+  sec.appendChild(chips);
+
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.className = 'tasbih-custom-input';
+  input.placeholder = 'Custom';
+  input.min = '1';
+  input.max = '10000';
+  if (tasbihState.customTarget) input.value = tasbihState.customTarget;
+  input.onchange = async () => {
+    const v = parseInt(input.value, 10);
+    if (v > 0) {
+      tasbihState.customTarget = v;
+      tasbihState.count = 0;
+      await _saveTasbihState();
+      _refreshDhikrDisplay();
+      _updateCounter();
+      _updateVisuals();
+      _rebuildSettingsBody();
+    }
+  };
+  sec.appendChild(input);
+
+  return sec;
+}
+
+function _buildColorSection() {
+  const sec = document.createElement('div');
+  sec.className = 'tasbih-section';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'tasbih-section-label';
+  lbl.textContent = 'Color';
+  sec.appendChild(lbl);
+
+  const colors = document.createElement('div');
+  colors.className = 'tasbih-colors';
+
+  TASBIH_COLORS.forEach(c => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'tasbih-color tasbih-color-' + c.key;
+    chip.setAttribute('aria-label', c.label);
+    if (tasbihState.color === c.key) chip.classList.add('on');
+    chip.onclick = async () => {
+      tasbihState.color = c.key;
+      await _saveTasbihState();
+      _applyColor();
+      _rebuildSettingsBody();
+    };
+    colors.appendChild(chip);
+  });
+
+  sec.appendChild(colors);
+  return sec;
+}
+
+window.openTasbihView = openTasbihView;
+window.closeTasbihView = closeTasbihView;
+window.openTasbihSettings = openTasbihSettings;
+window.closeTasbihSettings = closeTasbihSettings;
+window.tasbihPlus = tasbihPlus;
+window.tasbihMinus = tasbihMinus;
+window.tasbihReset = tasbihReset;
