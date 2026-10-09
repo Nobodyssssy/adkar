@@ -180,12 +180,12 @@ There is no framework and no build step.
   - book PDF requests are served cache-first when available
   - Range requests pass through to the network
   - outbound source links such as sunnah.com or quran.com are not fetched or cached
-  - PDF hosting: library PDFs live in the separate private repository
+- PDF hosting: library PDFs live in the separate private repository
   `Nobodyssssy/sahib-assets`. They are served through a Cloudflare Worker
   proxy at `sahib-proxy.sahib-app.workers.dev` that holds a fine-grained
   GitHub PAT server-side; the token never reaches the browser. The main
   Sahib repo no longer contains `assets/books/`.
-  - Reader powered by a vendored EmbedPDF PDFium WASM engine:
+- Reader powered by a vendored EmbedPDF PDFium WASM engine:
   - correct Arabic shaping and glyph rendering natively
   - no server-side rasterization
   - no page-image folders
@@ -326,6 +326,30 @@ There is no framework and no build step.
 - Local uploads: Blob URLs served from IndexedDB `local_books` object store.
 - Auto-precache of five small beginner PDFs on service worker install (~14 MB).
 - Library download modal for on-demand caching of the beginner path or the whole library.
+
+
+## Packaging and Distribution
+
+The web app is the source of truth. Native wrappers are generated from the live
+PWA URL and distributed via GitHub Releases only. No app stores.
+
+- Windows: PakePlus cloud build produces `Sahib_1.0.0_x64-setup.exe` and
+  `Sahib_1.0.0_x64_en-US.msi`. Tauri-based. Roughly 4 to 6 MB each.
+- Android: PakePlus cloud build produces `Sahib_1.0.0.apk`. Not yet built.
+  Target Android 7.0+.
+- iOS: PakePlus cloud build produces an unsigned IPA. Not yet built.
+  Target iOS 15.6+. Users install via AltStore, SideStore, or Sideloadly.
+  Apple Developer Program membership ($99/year) is required for a signed
+  IPA that does not need weekly re-signing.
+
+All three wrappers load `https://nobodyssssy.github.io/adkar/` in a native shell
+and inherit the Worker proxy for PDF fetching. They do not bundle the PDFs.
+
+PakePlus free tier: 3 cloud builds per 24 hours.
+
+Distribution: attach the built files to a release at
+`https://github.com/Nobodyssssy/adkar/releases`.
+
 ## Data Merge Model
 
 Sahib uses a deterministic, versioned merge system.
@@ -399,6 +423,25 @@ The offline book system is intentionally selective.
 - Do not label `navigator.storage.estimate().quota` as free disk space.
 - It is the per-origin quota, typically around 10 GB on Chromium.
 
+
+### Cloudflare Worker Proxy
+
+PDF fetching goes through a Cloudflare Worker, not directly to GitHub.
+
+- Worker name: `sahib-proxy`
+- Worker URL: `https://sahib-proxy.sahib-app.workers.dev`
+- Worker source repo (private): `Nobodyssssy/sahib-proxy`
+- Local source: `E:\sahib-proxy\src\index.js`
+- Secret name: `GITHUB_TOKEN` (fine-grained PAT, Contents: Read-only)
+- Secret scope: only `Nobodyssssy/sahib-assets`
+- Secret expiry: 2027-01-07. Rotate with `wrangler secret put GITHUB_TOKEN`.
+- The Worker uses `api.github.com/repos/Nobodyssssy/sahib-assets/contents/<path>`
+  with `Accept: application/vnd.github.v3.raw` to stream raw file bytes.
+- CORS headers are added so the browser can fetch cross-origin.
+- The token never reaches the client. Client code only knows the Worker URL.
+- Do not bypass the Worker. Do not call `api.github.com` or
+  `raw.githubusercontent.com` directly from the app.
+  
 ## Prayer Offline Snapshot Model
 
 Prayer times now degrade gracefully offline.
@@ -424,7 +467,7 @@ Clone the repository.
 Start a local server. The app requires a server for service worker registration and PDF/font handling.
 
 ```cmd
-cd "C:\Users\Protagonist\Desktop\Html app\Sahib"
+cd /d E:\Sahib
 python start.py
 ```
 
@@ -438,9 +481,17 @@ For production testing, deploy the `main` branch to GitHub Pages.
 
 ## Repository Hygiene
 
-Git history was rewritten to purge removed raster JPEG folders from past commits.
-The remote repository is now smaller, but the remaining weight is dominated by the curated PDF collection itself, around 743 MB.
-Further reduction would require removing books from the repository, not more history surgery.
+Git history was rewritten once to purge removed raster JPEG folders from past commits.
+PDF assets were moved out of this repository in commit 241fd03. The 70 PDFs now
+live in the private repo `Nobodyssssy/sahib-assets` and are served through the
+Cloudflare Worker proxy `sahib-proxy`. The main Sahib repository working tree is
+now under 50 MB.
+
+Note: GitHub's own repo size metric does not shrink immediately after removing
+large files. The PDFs remain reachable in git history until GitHub's garbage
+collection runs on its own schedule. A second `git filter-repo` pass is NOT
+planned. Small app packages (APK/MSIX/IPA) are built from the working tree, not
+from git history, so this has no effect on distribution size.
 
 Current known debt:
 
