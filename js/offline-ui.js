@@ -98,46 +98,8 @@ const OFFLINE_UI = (() => {
 
   async function _cachedIdSet(){
     if(!window.OFFLINE_BOOKS) return new Set();
-    /* ------------------------------------------------------------------
-     * New implementation – walk the Cache API and match *any* cached URL
-     * to a book id.  This works even for books that are not present in the
-     * static ALL_KNOWN_BOOK_URLS table (e.g. newly‑added books, user‑uploaded
-     * content, etc.).
-     *
-     * Steps:
-     *   1. Open the cache used by OFFLINE_BOOKS (its name is stored in
-     *      OFFLINE_BOOKS.CACHE).
-     *   2. Grab every request key (`cache.keys()`).
-     *   3. Build a reverse‑lookup map from **normalized URL → bookId** using
-     *      the full library list (`_allLibraryUrls()` – see below).
-     *   4. For each cached request, normalise its pathname and see if we
-     *      have a matching id; if so, add it to the Set.
-     * ------------------------------------------------------------------ */
-    const cache = await caches.open(window.OFFLINE_BOOKS.CACHE);
-    const requests = await cache.keys();
-
-    // 1. Get the *complete* mapping of every book id → its URL
-    const allBooks = _allLibraryUrls();        // defined later in this file
-    const urlToId = {};
-    for (const [id, url] of Object.entries(allBooks)) {
-      // Strip leading “/adkar/” or a single leading slash – the cache
-      // stores URLs as absolute paths (e.g. /adkar/books/123.json)
-      const norm = url.replace(/^\/+|^adkar\//, '').replace(/^\/+/, '');
-      urlToId[norm] = id;
-    }
-
-    const cachedIds = new Set();
-
-    // 2. Walk the cached request list and match against the map above
-    for (const req of requests) {
-      const path = new URL(req.url).pathname
-          .replace(/^\/+|^adkar\//, '')   // normalise the same way as above
-          .replace(/^\/+/, '');
-      const id = urlToId[path];
-      if (id) cachedIds.add(id);
-    }
-
-    return cachedIds;
+    const ids = await window.OFFLINE_BOOKS.listCachedBookIds();
+    return new Set(ids);
   }
 
   function _beginnerIds(){

@@ -59,12 +59,9 @@ async function isBookCached(id){
 }
 
 async function listCachedBookIds(){
-  const c = await offlineBooksCache();
-  const keys = await c.keys();
-  const urls = keys.map(r => new URL(r.url).pathname.replace(/^\/adkar\//, '').replace(/^\//, ''));
   const out = [];
-  for(const [id, u] of Object.entries(ALL_KNOWN_BOOK_URLS)){
-    if(urls.includes(u)) out.push(id);
+  for(const id of Object.keys(ALL_KNOWN_BOOK_URLS)){
+    if(await isBookCached(id)) out.push(id);
   }
   return out;
 }
