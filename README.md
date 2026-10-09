@@ -180,7 +180,12 @@ There is no framework and no build step.
   - book PDF requests are served cache-first when available
   - Range requests pass through to the network
   - outbound source links such as sunnah.com or quran.com are not fetched or cached
-- Reader powered by a vendored EmbedPDF PDFium WASM engine:
+  - PDF hosting: library PDFs live in the separate private repository
+  `Nobodyssssy/sahib-assets`. They are served through a Cloudflare Worker
+  proxy at `sahib-proxy.sahib-app.workers.dev` that holds a fine-grained
+  GitHub PAT server-side; the token never reaches the browser. The main
+  Sahib repo no longer contains `assets/books/`.
+  - Reader powered by a vendored EmbedPDF PDFium WASM engine:
   - correct Arabic shaping and glyph rendering natively
   - no server-side rasterization
   - no page-image folders
