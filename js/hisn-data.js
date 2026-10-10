@@ -1,7 +1,7 @@
 'use strict';
 /* Hisn al-Muslim — full dataset (sunnah.com/hisn). Guarded: safe to load twice. */
 /* Bump HISN_VERSION every time you edit this file — state.js re-merges on change. */
-window.HISN_VERSION = 7;
+window.HISN_VERSION = 8;
 if (typeof window.HISN_ADKAR === 'undefined') {
 
 window.HISN_ADKAR = [
@@ -1159,7 +1159,7 @@ virtue:'', tags:['aam:thanks','freq:daily','ctx:action','len:short'] },
 arabic:'مَنْ حَفِظَ عَشْرَ آيَاتٍ مِنْ أَوَّلِ سُورَةِ الْكَهْفِ عُصِمَ مِنَ الدَّجَّالِ، وَالِاسْتِعَاذَةُ بِاللَّهِ مِنْ فِتْنَتِهِ عَقِبَ التَّشَهُّدِ الْأَخِيرِ مِنْ كُلِّ صَلَاةٍ',
 transliteration:'Whoever memorizes ten \'Ayat (Verses) from the beginning of Surat Al-Kahf, will be protected from the False Messiah, if he recites in every prayer after the final Tashahhud before ending the prayer, seeking the protection of Allah from the trials of the False Messiah.',
 hadith:'Hisn al-Muslim 199 · Muslim 1/555-556; see invocations no. 55 and 56',
-virtue:'', tags:['duaa:doubt','freq:occasion','ctx:emotion','len:medium'] },
+virtue:'', tags:['duaa:protection','freq:occasion','ctx:emotion','len:medium'] },
 
 { cat:'aam', categories:['aam'], repeat:1, reliability:'hasan', situation:'الدعاء لمن قال إني أحبك في الله',
 arabic:'أَحَبَّكَ الَّذِي أَحْبَبْتَنِي لَهُ',
@@ -1183,7 +1183,7 @@ virtue:'', tags:['aam:thanks','freq:daily','ctx:action','len:short'] },
 arabic:'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ أَنْ أُشْرِكَ بِكَ وَأَنَا أَعْلَمُ، وَأَسْتَغْفِرُكَ لِمَا لَا أَعْلَمُ',
 transliteration:'O Allah, I seek refuge in You lest I associate anything with You knowingly, and I seek Your forgiveness for what I know not.',
 hadith:'Hisn al-Muslim 203 · Ahmad 4/403; Al-Albani, Sahihul-Jami\' 3/233, Sahihut-Targhib 1/19',
-virtue:'', tags:['duaa:daily','freq:occasion','ctx:emotion','len:medium'] },
+virtue:'', tags:['duaa:protection','freq:occasion','ctx:emotion','len:medium'] },
 
 { cat:'aam', categories:['aam'], repeat:1, reliability:'sahih', situation:'الدعاء لمن قال بارك الله فيك',
 arabic:'وَفِيكَ بَارَكَ اللَّهُ',
@@ -1195,7 +1195,7 @@ virtue:'', tags:['aam:thanks','freq:daily','ctx:action','len:short'] },
 arabic:'اللَّهُمَّ لَا طَيْرَ إِلَّا طَيْرُكَ، وَلَا خَيْرَ إِلَّا خَيْرُكَ، وَلَا إِلَهَ غَيْرُكَ',
 transliteration:'O Allah there is no portent other than Your portent, no goodness other than Your goodness, and none worthy of worship other than You.',
 hadith:'Hisn al-Muslim 205 · Ahmad 2/220, Ibn As-Sunni 292; Al-Albani, Silsilatul Ahadith As-Sahihah 3/54 (1065)',
-virtue:'', tags:['duaa:daily','freq:occasion','ctx:emotion','len:medium'] },
+virtue:'', tags:['duaa:protection','freq:occasion','ctx:emotion','len:medium'] },
 
 { cat:'travel', categories:['travel'], repeat:1, reliability:'sahih', situation:'دعاء ركوب الدابة أو ما يقوم مقامها',
 arabic:'بِسْمِ اللَّهِ، وَالْحَمْدُ لِلَّهِ. ﴿سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ ۞ وَإِنَّا إِلَى رَبِّنَا لَمُنْقَلِبُونَ﴾ الْحَمْدُ لِلَّهِ، الْحَمْدُ لِلَّهِ، الْحَمْدُ لِلَّهِ، اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، سُبْحَانَكَ اللَّهُمَّ إِنِّي ظَلَمْتُ نَفْسِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
@@ -1333,7 +1333,7 @@ virtue:'', tags:['aam:misc','freq:daily','ctx:action','len:short'] },
 arabic:'اللَّهُمَّ فَأَيُّمَا مُؤْمِنٍ سَبَبْتُهُ فَاجْعَلْ ذَلِكَ لَهُ قُرْبَةً إِلَيْكَ يَوْمَ الْقِيَامَةِ',
 transliteration:'O Allah, whomever of the believers I have abused, give him the reward of a sacrificial slaughter for it on the Day of Resurrection.',
 hadith:'Hisn al-Muslim 230 · Al-Bukhari, Fathul-Bari 11/171, Muslim 4/2007',
-virtue:'', tags:['duaa:daily','freq:occasion','ctx:emotion','len:medium'] },
+virtue:'', tags:['duaa:misc','freq:occasion','ctx:emotion','len:medium'] },
 
 { cat:'aam', categories:['aam'], repeat:1, reliability:'sahih', situation:'ما يقول المسلم إذا مدح المسلم',
 arabic:'أَحْسِبُ فُلَانًا، وَاللَّهُ حَسِيبُهُ، وَلَا أُزَكِّي عَلَى اللَّهِ أَحَدًا، أَحْسِبُهُ - إِنْ كَانَ يَعْلَمُ ذَاكَ - كَذَا وَكَذَا',
@@ -1345,7 +1345,7 @@ virtue:'', tags:['aam:salam','freq:daily','ctx:action','len:short'] },
 arabic:'اللَّهُمَّ لَا تُؤَاخِذْنِي بِمَا يَقُولُونَ، وَاغْفِرْ لِي مَا لَا يَعْلَمُونَ [وَاجْعَلْنِي خَيْرًا مِمَّا يَظُنُّونَ]',
 transliteration:'O Allah, do not call me to account for what they say and forgive me for what they have no knowledge of [and make me better than they imagine].',
 hadith:'Hisn al-Muslim 232 · Al-Bukhari, Al-Adabul-Mufrad 761; Al-Albani, Sahih Al-Adabul-Mufrad 585',
-virtue:'', tags:['duaa:praise','freq:occasion','ctx:emotion','len:medium'] },
+virtue:'', tags:['duaa:misc','freq:occasion','ctx:emotion','len:medium'] },
 
 { cat:'travel', categories:['hajj'], repeat:1, reliability:'sahih', situation:'كيف يلبي المحرم في الحج أو العمرة',
 arabic:'لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ',
@@ -1417,7 +1417,7 @@ virtue:'', tags:['sickness:pain','freq:emergency','ctx:emotion','len:short'] },
 arabic:'إِذَا رَأَى أَحَدُكُمْ مِنْ أَخِيهِ، أَوْ مِنْ نَفْسِهِ، أَوْ مِنْ مَالِهِ مَا يُعْجِبُهُ [فَلْيَدْعُ لَهُ بِالْبَرَكَةِ] فَإِنَّ الْعَيْنَ حَقٌّ',
 transliteration:'If you see something from your brother, yourself or wealth which you find impressing, then invoke blessings for it, for the evil eye is indeed true.',
 hadith:'Hisn al-Muslim 244 · Ahmad 4/447, Ibn Majah, Malik; Al-Albani, Sahihul-Jami\' 1/212',
-virtue:'', tags:['duaa:daily','freq:occasion','ctx:emotion','len:medium'] },
+virtue:'', tags:['duaa:protection','freq:occasion','ctx:emotion','len:medium'] },
 
 { cat:'aam', categories:['aam'], repeat:1, reliability:'sahih', situation:'ما يقول عند الذبح أو النحر',
 arabic:'بِسْمِ اللَّهِ وَاللَّهُ أَكْبَرُ [اللَّهُمَّ مِنْكَ وَلَكَ] اللَّهُمَّ تَقَبَّلْ مِنِّي',
@@ -1429,7 +1429,7 @@ virtue:'', tags:['aam:misc','freq:daily','ctx:action','len:short'] },
 arabic:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ الَّتِي لَا يُجَاوِزُهُنَّ بَرٌّ وَلَا فَاجِرٌ، مِنْ شَرِّ مَا خَلَقَ، وَبَرَأَ وَذَرَأَ، وَمِنْ شَرِّ مَا يَنْزِلُ مِنَ السَّمَاءِ، وَمِنْ شَرِّ مَا يَعْرُجُ فِيهَا، وَمِنْ شَرِّ مَا ذَرَأَ فِي الْأَرْضِ، وَمِنْ شَرِّ مَا يَخْرُجُ مِنْهَا، وَمِنْ شَرِّ فِتَنِ اللَّيْلِ وَالنَّهَارِ، وَمِنْ شَرِّ كُلِّ طَارِقٍ إِلَّا طَارِقًا يَطْرُقُ بِخَيْرٍ يَا رَحْمَنُ',
 transliteration:'I seek refuge in the Perfect Words of Allah - which neither the upright nor the corrupt may overcome - from the evil of what He created, of what He made, and of what He scattered, from the evil of what descends from the heavens, and of what rises up to them, from the evil of what He scattered in the earth, and of what emerges from it, from the evil trials of night and day, and from the evil of every night visitor, except the night visitor who comes with good. O Merciful One.',
 hadith:'Hisn al-Muslim 247 · Ahmad 3/419 (sahih), Ibn As-Sunni 637; Majma\'uz-Zawa\'id 10/127',
-virtue:'', tags:['duaa:daily','freq:occasion','ctx:emotion','len:medium'] },
+virtue:'', tags:['duaa:shaytan','freq:occasion','ctx:emotion','len:medium'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'الاستغفار والتوبة',
 arabic:'وَاللَّهِ إِنِّي لَأَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ فِي الْيَوْمِ أَكْثَرَ مِنْ سَبْعِينَ مَرَّةً',

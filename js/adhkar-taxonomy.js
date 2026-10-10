@@ -55,20 +55,20 @@ window.ADHKAR_SUBCATS = {
     { key: 'protection', ar: 'الحماية',      en: 'Protection' },
     { key: 'dua',        ar: 'أدعية',        en: 'Du\'a' }
   ],
-  duaa: [
-    { key: 'anxiety',  ar: 'الهم والحزن',       en: 'Anxiety' },
-    { key: 'distress', ar: 'الكرب',             en: 'Distress' },
-    { key: 'enemy',    ar: 'العدو والسلطان',    en: 'Enemy' },
-    { key: 'doubt',    ar: 'الشك',              en: 'Doubt' },
-    { key: 'debt',     ar: 'الدين',             en: 'Debt' },
-    { key: 'sin',      ar: 'الذنب',             en: 'Sin' },
-    { key: 'shaytan',  ar: 'الشيطان',           en: 'Shaytan' },
-    { key: 'mishap',   ar: 'المصائب',           en: 'Mishaps' },
-    { key: 'weather',  ar: 'الطقس',             en: 'Weather' },
-    { key: 'newborn',  ar: 'المولود',           en: 'Newborn' },
-    { key: 'marriage', ar: 'الزواج',            en: 'Marriage' },
-    { key: 'praise',   ar: 'الثناء',            en: 'Praise' },
-    { key: 'daily',    ar: 'أدعية يومية',       en: 'Daily' }
+duaa: [
+    { key: 'anxiety',    ar: 'الهم والحزن',    en: 'Anxiety' },
+    { key: 'distress',   ar: 'الكرب',          en: 'Distress' },
+    { key: 'enemy',      ar: 'العدو والسلطان', en: 'Enemy' },
+    { key: 'doubt',      ar: 'الشك',           en: 'Doubt' },
+    { key: 'debt',       ar: 'الدين',          en: 'Debt' },
+    { key: 'sin',        ar: 'الذنب',          en: 'Sin' },
+    { key: 'shaytan',    ar: 'الشيطان',        en: 'Shaytan' },
+    { key: 'mishap',     ar: 'المصائب',        en: 'Mishaps' },
+    { key: 'weather',    ar: 'الطقس',          en: 'Weather' },
+    { key: 'newborn',    ar: 'المولود',        en: 'Newborn' },
+    { key: 'marriage',   ar: 'الزواج',         en: 'Marriage' },
+    { key: 'protection', ar: 'الحماية',        en: 'Protection' },
+    { key: 'misc',       ar: 'متفرقات',        en: 'Misc' }
   ],
 dhikr: [
     { key: 'tasbih',    ar: 'التسبيح',           en: 'Tasbih' },
