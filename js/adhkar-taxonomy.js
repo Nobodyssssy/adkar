@@ -55,20 +55,12 @@ window.ADHKAR_SUBCATS = {
     { key: 'protection', ar: 'الحماية',      en: 'Protection' },
     { key: 'dua',        ar: 'أدعية',        en: 'Du\'a' }
   ],
-duaa: [
-    { key: 'anxiety',    ar: 'الهم والحزن',    en: 'Anxiety' },
-    { key: 'distress',   ar: 'الكرب',          en: 'Distress' },
-    { key: 'enemy',      ar: 'العدو والسلطان', en: 'Enemy' },
-    { key: 'doubt',      ar: 'الشك',           en: 'Doubt' },
-    { key: 'debt',       ar: 'الدين',          en: 'Debt' },
-    { key: 'sin',        ar: 'الذنب',          en: 'Sin' },
-    { key: 'shaytan',    ar: 'الشيطان',        en: 'Shaytan' },
-    { key: 'mishap',     ar: 'المصائب',        en: 'Mishaps' },
-    { key: 'weather',    ar: 'الطقس',          en: 'Weather' },
-    { key: 'newborn',    ar: 'المولود',        en: 'Newborn' },
-    { key: 'marriage',   ar: 'الزواج',         en: 'Marriage' },
-    { key: 'protection', ar: 'الحماية',        en: 'Protection' },
-    { key: 'misc',       ar: 'متفرقات',        en: 'Misc' }
+ duaa: [
+    { key: 'doubt',     ar: 'الشك في الإيمان',  en: 'Doubt in Faith' },
+    { key: 'debt',      ar: 'الدين',            en: 'Debt' },
+    { key: 'sin',       ar: 'الذنب والتوبة',    en: 'Sin & Forgiveness' },
+    { key: 'mishap',    ar: 'المصائب',          en: 'Calamity' },
+    { key: 'praise',    ar: 'الثناء والمدح',    en: 'Praise' }
   ],
 dhikr: [
     { key: 'tasbih',    ar: 'التسبيح',           en: 'Tasbih' },
@@ -129,15 +121,46 @@ dhikr: [
     { key: 'leaving',  ar: 'الخروج من المنزل', en: 'Leaving' },
     { key: 'entering', ar: 'الدخول إلى المنزل', en: 'Entering' }
   ],
-  aam: [
-    { key: 'salawat-info', ar: 'فضل الصلاة على النبي', en: 'Salawat Virtues' },
-    { key: 'salam',        ar: 'إفشاء السلام',         en: 'Greeting' },
-    { key: 'sneeze',       ar: 'العطاس',               en: 'Sneezing' },
-    { key: 'gathering',    ar: 'المجالس',              en: 'Gatherings' },
-    { key: 'thanks',       ar: 'الشكر والثناء',        en: 'Thanks' },
-    { key: 'istighfar',    ar: 'الاستغفار والتوبة',    en: 'Istighfar' },
-    { key: 'dhikr-info',   ar: 'فضل الأذكار',          en: 'Dhikr Virtues' },
-    { key: 'misc',         ar: 'متفرقات',              en: 'Misc' }
+  fear: [
+    { key: 'anxiety', ar: 'الهم والحزن', en: 'Anxiety' },
+    { key: 'distress', ar: 'الكرب والضيق', en: 'Distress' },
+    { key: 'enemy', ar: 'لقاء العدو', en: 'Meeting Enemy' },
+    { key: 'ruler', ar: 'ظلم السلطان', en: 'Fear of Ruler' },
+    { key: 'attack', ar: 'الدعاء على العدو', en: 'Against Enemy' },
+    { key: 'people', ar: 'خاف قوماً', en: 'Fear of People' },
+    { key: 'difficulty', ar: 'استصعاب الأمر', en: 'Difficulty' }
+  ],
+  protection: [
+    { key: 'dajjal', ar: 'الدجال', en: 'Dajjal' },
+    { key: 'shirk', ar: 'الشرك', en: 'Shirk' },
+    { key: 'tiyarah', ar: 'الطيرة', en: 'Bad Omens' },
+    { key: 'evil-eye', ar: 'العين', en: 'Evil Eye' },
+    { key: 'shaytan', ar: 'الشيطان', en: 'Shaytan' },
+    { key: 'jinn', ar: 'مردة الشياطين', en: 'Jinn' }
+  ],
+  weather: [
+    { key: 'wind', ar: 'الريح', en: 'Wind' },
+    { key: 'thunder', ar: 'الرعد', en: 'Thunder' },
+    { key: 'istisqa', ar: 'الاستسقاء', en: 'Rain Prayer' },
+    { key: 'rain', ar: 'المطر', en: 'Rain' },
+    { key: 'istishha', ar: 'الاستصحاء', en: 'Stop Rain' },
+    { key: 'hilal', ar: 'الهلال', en: 'New Moon' }
+  ],
+  family: [
+    { key: 'marriage', ar: 'الزواج', en: 'Marriage' },
+    { key: 'newborn', ar: 'المولود', en: 'Newborn' }
+  ],
+  manners: [
+    { key: 'salam', ar: 'السلام', en: 'Greetings' },
+    { key: 'sneeze', ar: 'العطاس', en: 'Sneezing' },
+    { key: 'gathering', ar: 'المجالس', en: 'Gatherings' },
+    { key: 'thanks', ar: 'الشكر', en: 'Thanking Others' },
+    { key: 'actions', ar: 'أفعال', en: 'Actions' },
+    { key: 'animals', ar: 'أصوات الحيوانات', en: 'Animal Sounds' },
+    { key: 'misc', ar: 'متفرقات', en: 'Misc' }
+  ],
+  salawat: [
+    { key: 'virtue', ar: 'فضل الصلاة على النبي', en: 'Virtue of Salawat' }
   ]
 };
 
