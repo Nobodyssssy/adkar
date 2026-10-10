@@ -1,9 +1,11 @@
 # Local server script — not part of the deployable app
 start.py
+backup-to-e.js
 
 # Backups / exports
 *.json
 !package.json
+!assets/asma-audio/index.json
 
 # Python
 __pycache__/
