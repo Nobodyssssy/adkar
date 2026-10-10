@@ -137,16 +137,35 @@ There is no framework and no build step.
 
 ### Names of Allah
 
-- Asma ul-Husna view.
-- Flashcard-style study mode.
-- Inline data, fully offline.
-- Per-name detail data: `about` (scholarly explanation) and `quran` (array of `{ surah, ayah, arabic, translation }`) are stored in `js/asma-data.js`. 99/99 names populated from islamtics.com.
-- Audio: 99 pronunciation clips live at `assets/asma-audio/{id}_{name}.mp3`. `assets/asma-audio/index.json` maps `id` to filename.
-- Reference for verification: https://islamtics.com/99-names-of-allah-al-asma-ul-husna/
+- Asma ul-Husna view with flashcard study mode. Inline data, fully offline.
+- Per-name detail data in `js/asma-data.js`:
+  - `about` - English scholarly paragraph from islamtics.com, 99/99 populated
+  - `aboutAr` - Arabic translation of `about`, 99/99 populated
+  - `tafsirAr` / `tafsirEn` - short meaning paragraph per name
+  - `quran` - array of `{ surah, ayah, arabic, translation }`
+  - 99/99 entries carry `about` and `aboutAr`; `quran` is empty for a small number of names (ids 63 Al-Qayyum, 68 As-Samad, and any others whose reference page had no verses)
+- Detail modal (opened by tapping a card) renders, in this order:
+  - Hero block: Arabic name, transliteration, English meaning, per-name audio play button
+  - Meaning section: `tafsirAr` or `tafsirEn`, follows modal language
+  - Collapsed "More info" fold, collapsed by default, resets on every open:
+    - About section: `aboutAr` in Arabic mode, `about` in English mode
+    - In the Quran section: each verse with Arabic text, translation, and `Surah : ayah` reference
+  - Inline AR/EN toggle in the modal title bar
+  - Direction follows modal language: Arabic mode RTL right-aligned, English mode LTR left-aligned
+- Arabic `aboutAr`, `tafsirAr`, and Quran verse Arabic render with `font-weight: 700` (Amiri Bold) for readability.
+- Audio: 99 pronunciation clips live at `assets/asma-audio/{id}_{name}.mp3`.
+  - `assets/asma-audio/index.json` maps `id` to filename.
+  - Play button only inside the detail modal, not on grid cards. Tap card then tap play.
+  - Audio stops and resets on modal close. One shared `Audio` element, not one per open.
+- Reference for verification:
+  - https://islamtics.com/99-names-of-allah-al-asma-ul-husna/
   - Per-name page example: https://islamtics.com/99-names-of-allah-al-asma-ul-husna/ar-rahman-1/
   - Do not scrape. Use it manually to confirm any Arabic before writing it into `js/asma-data.js`.
 - English meanings are intentionally kept as the app's existing wording, not islamtics wording. 76 of 99 differ by word choice; the app wording was reviewed and kept.
-
+- Known data residuals:
+  - `aboutAr` is not fully vocalized with tashkeel. Deferred, see Roadmap.
+  - Some `aboutAr` strings contain guillemets `«»` inside Arabic sentences. Deferred cleanup, see Roadmap.
+  
 ### Library and Reader
 
 - Curated local PDF library stored under `assets/books`.
@@ -210,12 +229,14 @@ There is no framework and no build step.
   - Zoomed past fit-width, the scroll container gains a horizontal scrollbar; the wrap and canvas are unclamped.
   - Zoom resets to 100% on each reader open.
 
-### Current state (as of v2.10.58)
+### Current state (as of v2.10.65)
 
 - `window.HISN_VERSION = 11`.
-- `sw.js VERSION = v2.10.58`.
+- `sw.js VERSION = v2.10.65`.
 - Fresh-install adhkar count: 256 Hisn entries, 22 buckets.
-- 99 names enriched with `about` + `quran`; audio assets committed; detail modal not yet built.
+- 99 names enriched with `about`, `aboutAr`, `tafsirAr`, `tafsirEn`, and `quran`.
+- Asma detail modal shipped: progressive disclosure, inline AR/EN toggle, per-name audio with dedicated runtime cache.
+- Audio cache: `sahib-asma-audio`, cache-first, exempt from activate cleanup.
 - Three page rendering modes:
   - Light
   - Dark
@@ -374,6 +395,18 @@ PakePlus free tier: 3 cloud builds per 24 hours.
 Distribution: attach the built files to a release at
 `https://github.com/Nobodyssssy/adkar/releases`.
 
+When built, the Windows `.exe` and `.msi`, the Android `.apk`, and the
+unsigned iOS `.ipa` will be attached to a GitHub Release and linked from
+this README under a "Downloads" heading. Users install directly from the
+release page; the wrappers load the live GitHub Pages URL and inherit the
+Worker proxy for PDF fetching.
+
+Status:
+- Windows: not yet built.
+- Android APK: not yet built.
+- iOS IPA: not yet built.
+- All three: not yet uploaded to Releases.
+
 ## Data Merge Model
 
 Sahib uses a deterministic, versioned merge system.
@@ -466,6 +499,32 @@ PDF fetching goes through a Cloudflare Worker, not directly to GitHub.
 - Do not bypass the Worker. Do not call `api.github.com` or
   `raw.githubusercontent.com` directly from the app.
   
+## Asma Audio Cache Model
+
+The 99 pronunciation clips are cached separately from the app shell.
+
+- `assets/asma-audio/{id}_{name}.mp3` - 99 files.
+- `assets/asma-audio/index.json` - maps `id` to filename, precached in `APP_SHELL`.
+- `sahib-asma-audio` - dedicated Cache Storage bucket. Owned by `sw.js`.
+- Cache-first for `/assets/asma-audio/*.mp3`.
+- Exempt from activate cleanup, parallel to `sahib-books`.
+- Runtime-cached only, never precached. 99 files would bloat the service worker install.
+- Handled BEFORE the Range short-circuit in the fetch handler. `<audio>` sends `Range: bytes=0-` on every load; the cache stores the full file under a clean URL key and slices are served from the cached response.
+
+Playback lifecycle, `js/views/asma.js`:
+
+- One shared `Audio` element per session, created lazily on first play.
+- `play`, `playing`, `pause`, `ended` events drive `_asmaIsPlaying` and the button state.
+- Button state keyed on `_asmaAudioId`, so a stale element from a previous modal cannot light up the wrong name.
+- On modal close: `pause()`, `currentTime = 0`, `removeAttribute('src')`, `load()`. No leaked stream.
+- Open a different name while another is playing: previous pauses and resets before the new `src` is assigned.
+
+Do not:
+
+- Precache the 99 mp3s in `APP_SHELL`. Use runtime cache only.
+- Put mp3s in the versioned `sahib-vX.Y.Z` cache.
+- Remove `sahib-asma-audio` from the activate exemption.
+
 ## Prayer Offline Snapshot Model
 
 Prayer times now degrade gracefully offline.
@@ -590,6 +649,19 @@ Offline core (shell precache, prayer snapshot, sahib-books cache, five beginner 
 22. Attribution footer verification.
 23. Dead-code sweep and `.adkar-grid` consolidation.
 24. ~~Tasbih enhancements~~ ✅ Shipped as of v2.10.47 — minus, reset, editable count, dhikr presets, target chips, color swatches, growing ring, green completion state.
+25. ~~Asma detail modal + per-name audio~~ ✅ Shipped as of v2.10.65 — progressive disclosure, inline AR/EN toggle, per-name audio with dedicated runtime cache, RTL/LTR alignment fix, pause and chevron-down sprite icons.
+26. Asma data refinement (deferred, deterministic pass only):
+   - Add full tashkeel to `aboutAr`, sourced from a verified vocalized text
+     (islamtics.com per-name pages or a printed reference). One-off local
+     script plus audit TSV. Not chat-authored.
+   - Replace guillemets `«»` inside Arabic sentences with plain Arabic text
+     or Arabic double quotes, per Arabic typography convention for divine
+     names.
+27. Distribution packaging:
+   - Build signed Windows MSI/EXE, Android APK, iOS IPA.
+   - Attach to a GitHub Release.
+   - Add a Downloads section to this README that links to the release.
+
 ## Project Principles
 
 - Offline-first.
