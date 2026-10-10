@@ -1,7 +1,7 @@
 'use strict';
 /* Hisn al-Muslim — full dataset (sunnah.com/hisn). Guarded: safe to load twice. */
 /* Bump HISN_VERSION every time you edit this file — state.js re-merges on change. */
-window.HISN_VERSION = 10;
+window.HISN_VERSION = 11;
 if (typeof window.HISN_ADKAR === 'undefined') {
 
 window.HISN_ADKAR = [
@@ -269,11 +269,11 @@ transliteration:'Lord, forgive me. My Lord, forgive me.',
 hadith:'Hisn al-Muslim 48 · Abu Dawud 1/231; Al-Albani, Sahih Ibn Majah 1/148',
 virtue:'', tags:['salah:sujud','freq:daily','ctx:action','len:medium'] },
 
-{ cat:'salah', categories:['salah'], repeat:1, reliability:'sahih', situation:'دعاء الجلسة بين السجدتين',
+{ cat:'salah', categories:['salah','rizq'], repeat:1, reliability:'sahih', situation:'دعاء الجلسة بين السجدتين',
 arabic:'اللَّهُمَّ اغْفِرْ لِي، وَارْحَمْنِي، وَاهْدِنِي، وَاجْبُرْنِي، وَعَافِنِي، وَارْزُقْنِي، وَارْفَعْنِي',
 transliteration:'O Allah forgive me, have mercy on me, guide me, support me, protect me, provide for me, and elevate me.',
 hadith:'Hisn al-Muslim 49 · Abu Dawud, Ibn Majah, At-Tirmidhi; Al-Albani, Sahih At-Tirmidhi 1/90, Sahih Ibn Majah 1/148',
-virtue:'', tags:['salah:sujud','freq:daily','ctx:action','len:medium'] },
+virtue:'', tags:['salah:sujud','freq:daily','ctx:action','len:medium','rizq:general'] },
 
 { cat:'salah', categories:['salah'], repeat:1, reliability:'sahih', situation:'دعاء سجود التلاوة',
 arabic:'سَجَدَ وَجْهِيَ لِلَّذِي خَلَقَهُ، وَشَقَّ سَمْعَهُ وَبَصَرَهُ، بِحَوْلِهِ وَقُوَّتِهِ، فَتَبَارَكَ اللَّهُ أَحْسَنُ الْخَالِقِينَ',
@@ -413,11 +413,11 @@ transliteration:'None has the right to be worshipped but Allah alone, Who has no
 hadith:'Hisn al-Muslim 72 · At-Tirmidhi 5/515, Ahmad 4/227; Zadul-Ma\'ad 1/300',
 virtue:'', tags:['salah_after:maghrib-fajr','freq:daily','ctx:time','len:short'] },
 
-{ cat:'salah_after', categories:['salah_after','sabah'], repeat:1, reliability:'sahih', situation:'بعد السلام من صلاة الفجر',
+{ cat:'salah_after', categories:['salah_after','sabah','rizq'], repeat:1, reliability:'sahih', situation:'بعد السلام من صلاة الفجر',
 arabic:'اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا',
 transliteration:'O Allah, I ask You for knowledge which is beneficial, and sustenance which is good, and deeds which are acceptable. [To be said after giving salam for the Fajr prayer.]',
 hadith:'Hisn al-Muslim 73 · Ibn Majah; Sahih Ibn Majah 1/152; Majma\' Az-Zawa\'id 10/111 · Hisn al-Muslim 95 · Ibn As-Sunni 54, Ibn Majah 925 (hasan)',
-virtue:'', tags:['salah_after:after-fard','sabah:core','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['salah_after:after-fard','sabah:core','freq:daily','ctx:time','len:short','rizq:barakah'] },
 
 { cat:'salah_after', categories:['salah'], repeat:1, reliability:'sahih', situation:'دعاء صلاة الاستخارة',
 arabic:'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ الْغُيُوبِ، اللَّهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الْأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ، وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الْأَمْرَ شَرٌّ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاصْرِفْهُ عَنِّي وَاصْرِفْنِي عَنْهُ، وَاقْدُرْ لِيَ الْخَيْرَ حَيْثُ كَانَ، ثُمَّ أَرْضِنِي بِهِ',
@@ -461,11 +461,11 @@ transliteration:'O Allah, by You we enter the morning and by You we enter the ev
 hadith:'Hisn al-Muslim 78 · Sahih At-Tirmidhi 3/142',
 virtue:'', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
 
-{ cat:'sabah', categories:['sabah','masaa'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء (سيد الاستغفار)',
+{ cat:'sabah', categories:['sabah','masaa','rizq'], repeat:1, reliability:'sahih', situation:'أذكار الصباح والمساء (سيد الاستغفار)',
 arabic:'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
 transliteration:'O Allah, You are my Lord, there is none worthy of worship but You. You created me and I am your slave. I keep Your covenant, and my pledge to You so far as I am able. I seek refuge in You from the evil of what I have done. I admit to Your blessings upon me, and I admit to my misdeeds. Forgive me, for there is none who may forgive sins but You.',
 hadith:'Hisn al-Muslim 79 · Al-Bukhari 7/150; An-Nasa\'i; At-Tirmidhi',
-virtue:'Whoever recites this with conviction in the evening and dies during that night shall enter Paradise, and whoever recites it with conviction in the morning and dies during that day shall enter Paradise.', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium'] },
+virtue:'Whoever recites this with conviction in the evening and dies during that night shall enter Paradise, and whoever recites it with conviction in the morning and dies during that day shall enter Paradise.', tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium','rizq:barakah'] },
 
 { cat:'sabah', categories:['sabah'], repeat:4, reliability:'hasan', situation:'أذكار الصباح والمساء',
 arabic:'اللَّهُمَّ إِنِّي أَصْبَحْتُ أُشْهِدُكَ، وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلَائِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ',
@@ -633,11 +633,11 @@ transliteration:'Glory is to Allah (thirty-three times), Praise is to Allah (thi
 hadith:'Hisn al-Muslim 106 · Al-Bukhari, Fathul-Bari 7/71, Muslim 4/2091',
 virtue:'', tags:['nawm:sleep','freq:daily','ctx:time','len:medium'] },
 
-{ cat:'nawm', categories:['nawm'], repeat:1, reliability:'sahih', situation:'أذكار النوم',
+{ cat:'nawm', categories:['nawm','rizq'], repeat:1, reliability:'sahih', situation:'أذكار النوم',
 arabic:'اللَّهُمَّ رَبَّ السَّمَاوَاتِ السَّبْعِ وَرَبَّ الْعَرْشِ الْعَظِيمِ، رَبَّنَا وَرَبَّ كُلِّ شَيْءٍ، فَالِقَ الْحَبِّ وَالنَّوَى، وَمُنْزِلَ التَّوْرَاةِ وَالْإِنْجِيلِ وَالْفُرْقَانِ، أَعُوذُ بِكَ مِنْ شَرِّ كُلِّ شَيْءٍ أَنْتَ آخِذٌ بِنَاصِيَتِهِ، اللَّهُمَّ أَنْتَ الْأَوَّلُ فَلَيْسَ قَبْلَكَ شَيْءٌ، وَأَنْتَ الْآخِرُ فَلَيْسَ بَعْدَكَ شَيْءٌ، وَأَنْتَ الظَّاهِرُ فَلَيْسَ فَوْقَكَ شَيْءٌ، وَأَنْتَ الْبَاطِنُ فَلَيْسَ دُونَكَ شَيْءٌ، اقْضِ عَنَّا الدَّيْنَ وَأَغْنِنَا مِنَ الْفَقْرِ',
 transliteration:'O Allah! Lord of the seven heavens and Lord of the Magnificent Throne. Our Lord and the Lord of everything. Splitter of the grain and the date-stone, Revealer of the Torah and the Injeel and the Furqan (the Qur\'an), I seek refuge in You from the evil of everything that You shall seize by the forelock. O Allah You are the First and nothing has come before you, and You are the Last, and nothing may come after You. You are the Most High, nothing is above You and You are the Most Near, and nothing is nearer than You. Remove our debts from us and enrich us against poverty.',
 hadith:'Hisn al-Muslim 107 · Muslim 4/2084',
-virtue:'', tags:['nawm:sleep','freq:daily','ctx:time','len:medium'] },
+virtue:'', tags:['nawm:sleep','freq:daily','ctx:time','len:medium','rizq:barakah'] },
 
 { cat:'nawm', categories:['nawm'], repeat:1, reliability:'sahih', situation:'أذكار النوم',
 arabic:'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا، وَكَفَانَا، وَآوَانَا، فَكَمْ مِمَّنْ لَا كَافِيَ لَهُ وَلَا مُؤْوِيَ',
@@ -795,11 +795,11 @@ transliteration:'He is the First and the Last, the Most High and the Most Near. 
 hadith:'Hisn al-Muslim 135 · Al-Hadid 57:3; Abu Dawud 4/329; Al-Albani, Sahih Abu Dawud 3/962 (hasan)',
 virtue:'', tags:['duaa:doubt','freq:occasion','ctx:emotion','len:medium'] },
 
-{ cat:'duaa', categories:['duaa'], repeat:1, reliability:'sahih', situation:'الدعاء قضاء الدين',
+{ cat:'duaa', categories:['duaa','rizq'], repeat:1, reliability:'sahih', situation:'الدعاء قضاء الدين',
 arabic:'اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ، وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ',
 transliteration:'O Allah, suffice me with what You have allowed instead of what You have forbidden, and make me independent of all others besides You.',
 hadith:'Hisn al-Muslim 136 · At-Tirmidhi 5/560; Al-Albani, Sahih At-Tirmidhi 3/180',
-virtue:'', tags:['duaa:debt','freq:occasion','ctx:emotion','len:medium'] },
+virtue:'', tags:['duaa:debt','freq:occasion','ctx:emotion','len:medium','rizq:debt'] },
 
 { cat:'salah', categories:['salah'], repeat:3, reliability:'sahih', situation:'دعاء الوسوسة في الصلاة والقراءة',
 arabic:'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ، وَاتْفُلْ عَلَى يَسَارِكَ (ثلاثاً)',

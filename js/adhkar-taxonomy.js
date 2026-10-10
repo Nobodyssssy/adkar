@@ -161,6 +161,11 @@ dhikr: [
   ],
   salawat: [
     { key: 'virtue', ar: 'فضل الصلاة على النبي', en: 'Virtue of Salawat' }
+  ],
+  rizq: [
+    { key: 'debt',    ar: 'الدين',    en: 'Debt Relief' },
+    { key: 'barakah', ar: 'البركة', en: 'Blessing' },
+    { key: 'general', ar: 'الرزق',    en: 'Provision' }
   ]
 };
 
