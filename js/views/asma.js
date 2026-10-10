@@ -6,6 +6,14 @@ let _asmaLang = 'ar';
 let _asmaFilter = 'all';
 let _asmaQuery = '';
 
+/* Asma audio playback state (single shared element, reset on modal close) */
+let _asmaAudioIndex = null;
+let _asmaAudioEl = null;
+let _asmaAudioId = null;
+
+/* Currently open detail id (for AR/EN toggle re-render) */
+let _asmaDetailId = null;
+
 let _flashDeck = null;
 let _flashIdx = 0;
 let _flashRevealed = false;
@@ -50,6 +58,12 @@ function renderAsmaGrid(){
         <button class="quote-lang-btn ${_asmaLang==='ar'?'on':''}" onclick="setAsmaLang('ar')">عربي</button>
         <button class="quote-lang-btn ${_asmaLang==='en'?'on':''}" onclick="setAsmaLang('en')">EN</button>
       </div>
+    </div>
+
+    <div class="asma-intro">
+      ${_asmaLang === 'ar'
+        ? 'قال النبي ﷺ: "إن لله تسعة وتسعين اسمًا، مائة إلا واحدًا، من أحصاها دخل الجنة." (صحيح البخاري 6410). أحصاها: حفظ ألفاظها، وفهم معانيها، ودعا الله بها.'
+        : 'The Prophet (peace be upon him) said: "Allah has ninety-nine names, one hundred minus one, and whoever enumerates them will enter Paradise." (Sahih al-Bukhari 6410). To enumerate them: memorize the wording, understand the meaning, and call upon Allah by each name.'}
     </div>
 
     <div class="asma-progress-card">
@@ -122,10 +136,110 @@ function onAsmaSearch(value){
   }, 200);
 }
 
+function setAsmaLang(lang){
+  _asmaLang = (lang === 'en') ? 'en' : 'ar';
+  renderAsmaGrid();
+  if(_asmaDetailId != null){
+    const modal = $('ov-asma-detail');
+    if(modal && modal.classList.contains('open')){
+      const n = getAsmaById(_asmaDetailId);
+      if(n) renderAsmaDetail(n, _asmaLang);
+    }
+  }
+}
+
+async function loadAsmaAudioIndex(){
+  if(_asmaAudioIndex) return _asmaAudioIndex;
+  try {
+    const res = await fetch('assets/asma-audio/index.json', { cache: 'force-cache' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    _asmaAudioIndex = await res.json();
+  } catch(err){
+    console.warn('[asma] audio index load failed', err);
+    _asmaAudioIndex = {};
+  }
+  return _asmaAudioIndex;
+}
+
+let _asmaIsPlaying = false;
+
+function getAsmaAudioEl(){
+  if(_asmaAudioEl) return _asmaAudioEl;
+  const el = new Audio();
+  el.preload = 'none';
+  el.addEventListener('play',    () => { _asmaIsPlaying = true;  updateAsmaPlayBtn(); });
+  el.addEventListener('playing', () => { _asmaIsPlaying = true;  updateAsmaPlayBtn(); });
+  el.addEventListener('pause',   () => { _asmaIsPlaying = false; updateAsmaPlayBtn(); });
+  el.addEventListener('ended',   () => { _asmaIsPlaying = false; updateAsmaPlayBtn(); });
+  _asmaAudioEl = el;
+  return el;
+}
+
+function updateAsmaPlayBtn(){
+  const btn = document.getElementById('asma-audio-btn');
+  if(!btn) return;
+  const id = parseInt(btn.dataset.asmaId || '0', 10);
+  const playing = !!(_asmaIsPlaying && _asmaAudioId === id);
+  const ar = _asmaLang === 'ar';
+  btn.innerHTML = playing
+    ? `${icon('pause', 16)} <span>${ar ? 'إيقاف' : 'Pause'}</span>`
+    : `${icon('play', 16)} <span>${ar ? 'استمع' : 'Play'}</span>`;
+  btn.classList.toggle('playing', playing);
+}
+
+async function toggleAsmaAudio(id){
+  const idx = await loadAsmaAudioIndex();
+  const file = idx[String(id)];
+  const ar = _asmaLang === 'ar';
+
+  if(!file){
+    toast(ar ? 'الصوت غير متوفر' : 'Audio not available', 'alert');
+    return;
+  }
+
+  const el = getAsmaAudioEl();
+  const src = 'assets/asma-audio/' + file;
+
+  if(_asmaAudioId !== id){
+    el.pause();
+    el.currentTime = 0;
+    _asmaIsPlaying = false;
+    el.src = src;
+    _asmaAudioId = id;
+    try {
+      await el.play();
+    } catch(err){
+      console.warn('[asma] audio play failed', err);
+      toast(ar ? 'تعذّر تشغيل الصوت' : 'Could not play audio', 'alert');
+    }
+    return;
+  }
+
+  if(el.paused){
+    try { await el.play(); } catch(err){ console.warn('[asma] audio play failed', err); }
+  } else {
+    el.pause();
+  }
+}
+
+function stopAsmaAudio(){
+  _asmaIsPlaying = false;
+  if(!_asmaAudioEl) return;
+  try {
+    _asmaAudioEl.pause();
+    _asmaAudioEl.currentTime = 0;
+    _asmaAudioEl.removeAttribute('src');
+    _asmaAudioEl.load();
+  } catch(err){ /* ignore */ }
+  _asmaAudioId = null;
+}
+
 function openAsmaDetail(id){
   const n = getAsmaById(id);
   if(!n) return;
 
+  stopAsmaAudio();
+  _asmaDetailId = id;
   window._asmaSavedScroll = window.scrollY || window.pageYOffset || 0;
 
   ensureAsmaDetailModal();
@@ -137,34 +251,113 @@ function openAsmaDetail(id){
 
 function renderAsmaDetail(n, lang){
   const isMemo = isMemorized(n.id);
-  $('asma-detail-title').innerHTML = `${lang === 'ar' ? n.ar : n.transliteration} <span class="asma-detail-id">#${n.id}</span>`;
+  const quran = Array.isArray(n.quran) ? n.quran : [];
+  const about = (n.about || '').trim();
+  const aboutAr = (n.aboutAr || '').trim();
+  const tafsir = (lang === 'ar' ? n.tafsirAr : n.tafsirEn) || '';
+  const ar = lang === 'ar';
+
+  $('asma-detail-title').innerHTML = `
+    <span class="asma-detail-title-main">${ar ? n.ar : n.transliteration} <span class="asma-detail-id">#${n.id}</span></span>
+    <span class="asma-detail-lang-toggle">
+      <button type="button" class="quote-lang-btn ${ar?'on':''}" onclick="setAsmaLang('ar')">عربي</button>
+      <button type="button" class="quote-lang-btn ${!ar?'on':''}" onclick="setAsmaLang('en')">EN</button>
+    </span>
+  `;
+
+  const aboutText = ar ? (aboutAr || about) : about;
+  const aboutIsFallback = ar && !aboutAr && !!about;
+  const showAbout = !!aboutText;
+  const hasQuran = quran.length > 0;
+  const hasMore = showAbout || hasQuran;
+
+  const _asmaBodyEl = $('asma-detail-body');
+  if(_asmaBodyEl) _asmaBodyEl.setAttribute('dir', ar ? 'rtl' : 'ltr');
 
   $('asma-detail-body').innerHTML = `
     <div class="asma-detail-hero">
       <div class="asma-detail-ar">${n.ar}</div>
-      <div class="asma-detail-translit">${esc(n.transliteration)}</div>
-      <div class="asma-detail-meaning">${esc(n.meaningEn)}</div>
+      <div class="asma-detail-translit" dir="ltr">${esc(n.transliteration)}</div>
+      <div class="asma-detail-meaning" dir="ltr">${esc(n.meaningEn)}</div>
+      <button type="button" id="asma-audio-btn" class="asma-audio-btn" data-asma-id="${n.id}" onclick="toggleAsmaAudio(${n.id})" aria-label="${ar ? 'استمع' : 'Play audio'}">
+        ${icon('play', 16)} <span>${ar ? 'استمع' : 'Play'}</span>
+      </button>
     </div>
 
-    <div class="asma-detail-tafsir ${lang==='ar'?'ar':'en'}">
-      ${lang === 'ar' ? n.tafsirAr : n.tafsirEn}
-    </div>
+    ${tafsir ? `
+      <div class="asma-detail-section">
+        <div class="asma-detail-section-title">${ar ? 'المعنى' : 'Meaning'}</div>
+        <div class="asma-detail-tafsir ${ar?'ar':'en'}" dir="${ar?'rtl':'ltr'}">${tafsir}</div>
+      </div>
+    ` : ''}
+
+    ${hasMore ? `
+      <button type="button" class="asma-more-btn" onclick="toggleAsmaMore(this)" aria-expanded="false">
+        <span class="asma-more-label">${ar ? 'مزيد من التفاصيل' : 'More info'}</span>
+        <span class="asma-more-chevron">${icon('chevron-down', 16)}</span>
+      </button>
+      <div class="asma-more-body" hidden>
+        ${showAbout ? `
+          <div class="asma-detail-section">
+            <div class="asma-detail-section-title">
+              ${ar ? 'شرح تفصيلي' : 'About this name'}
+              ${aboutIsFallback ? `<span class="asma-detail-en-tag">EN</span>` : ''}
+            </div>
+            <div class="asma-detail-about" dir="${ar && !aboutIsFallback ? 'rtl' : 'ltr'}">${esc(aboutText)}</div>
+          </div>
+        ` : ''}
+
+        ${hasQuran ? `
+          <div class="asma-detail-section">
+            <div class="asma-detail-section-title">${ar ? 'من القرآن الكريم' : 'In the Quran'}</div>
+            <div class="asma-detail-quran">
+              ${quran.map(v => `
+                <div class="asma-quran-verse">
+                  <div class="asma-quran-ar" dir="rtl">${v.arabic || ''}</div>
+                  ${!ar ? `<div class="asma-quran-en" dir="ltr">${esc(v.translation || '')}</div>` : ''}
+                  <div class="asma-quran-ref" dir="ltr">${esc(v.surah || '')} : ${v.ayah != null ? v.ayah : ''}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    ` : ''}
 
     <div class="asma-detail-actions">
       <button class="btn-save ${isMemo?'memo':''}" onclick="toggleAsmaMemo(${n.id})">
         ${isMemo
-          ? `${icon('memory', 14)} ${lang === 'ar' ? 'محفوظ' : 'Memorized'}`
-          : `${icon('hourglass', 14)} ${lang === 'ar' ? 'ضع علامة محفوظ' : 'Mark as memorized'}`}
+          ? `${icon('memory', 14)} ${ar ? 'محفوظ' : 'Memorized'}`
+          : `${icon('hourglass', 14)} ${ar ? 'ضع علامة محفوظ' : 'Mark as memorized'}`}
       </button>
     </div>
 
     ${n.videoUrl
-      ? `<div class="asma-detail-video"><a href="${n.videoUrl}" target="_blank" rel="noopener">${icon('external-link', 12)} ${lang === 'ar' ? 'شاهد الشرح' : 'Watch explanation'}</a></div>`
+      ? `<div class="asma-detail-video"><a href="${n.videoUrl}" target="_blank" rel="noopener">${icon('external-link', 12)} ${ar ? 'شاهد الشرح' : 'Watch explanation'}</a></div>`
       : ''}
   `;
+
+  updateAsmaPlayBtn();
+}
+
+function toggleAsmaMore(btn){
+  const body = btn.nextElementSibling;
+  if(!body) return;
+  const hidden = body.hasAttribute('hidden');
+  if(hidden){
+    body.removeAttribute('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+    btn.classList.add('open');
+  } else {
+    body.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.classList.remove('open');
+  }
 }
 
 function closeAsmaDetail(){
+  stopAsmaAudio();
+  _asmaDetailId = null;
   const modal = $('ov-asma-detail');
   if(modal) modal.classList.remove('open');
   unlockBody();

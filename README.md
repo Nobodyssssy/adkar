@@ -15,7 +15,7 @@ There is no framework and no build step.
   - 256 Hisn entries
   - 40 curated seed entries
   - 296 total adhkar on a fresh install
-- 17 frozen top-level buckets:
+- 22 frozen top-level buckets:
   - nawm
   - wudu
   - masjid
@@ -24,6 +24,7 @@ There is no framework and no build step.
   - sabah
   - masaa
   - duaa
+  - rizq
   - dhikr
   - food
   - travel
@@ -32,7 +33,12 @@ There is no framework and no build step.
   - janazah
   - clothing
   - home
-  - aam
+  - fear
+  - protection
+  - weather
+  - family
+  - manners
+  - salawat
 - Retired category keys that must never reappear:
   - mutafarriqa
   - cat_100
@@ -134,6 +140,12 @@ There is no framework and no build step.
 - Asma ul-Husna view.
 - Flashcard-style study mode.
 - Inline data, fully offline.
+- Per-name detail data: `about` (scholarly explanation) and `quran` (array of `{ surah, ayah, arabic, translation }`) are stored in `js/asma-data.js`. 99/99 names populated from islamtics.com.
+- Audio: 99 pronunciation clips live at `assets/asma-audio/{id}_{name}.mp3`. `assets/asma-audio/index.json` maps `id` to filename.
+- Reference for verification: https://islamtics.com/99-names-of-allah-al-asma-ul-husna/
+  - Per-name page example: https://islamtics.com/99-names-of-allah-al-asma-ul-husna/ar-rahman-1/
+  - Do not scrape. Use it manually to confirm any Arabic before writing it into `js/asma-data.js`.
+- English meanings are intentionally kept as the app's existing wording, not islamtics wording. 76 of 99 differ by word choice; the app wording was reviewed and kept.
 
 ### Library and Reader
 
@@ -192,6 +204,18 @@ There is no framework and no build step.
   - no PDF.js
   - no external cmap or standard-font downloads
   - PDFium engine files are precached with the app shell
+- Reader zoom:
+  - Pinch on touch, Ctrl + wheel on desktop, `+`/`-`/Reset in the settings panel.
+  - Zoom grows the page box, not just the raster density; canvas is re-rendered at `scale × devicePixelRatio` so text stays crisp.
+  - Zoomed past fit-width, the scroll container gains a horizontal scrollbar; the wrap and canvas are unclamped.
+  - Zoom resets to 100% on each reader open.
+
+### Current state (as of v2.10.58)
+
+- `window.HISN_VERSION = 11`.
+- `sw.js VERSION = v2.10.58`.
+- Fresh-install adhkar count: 256 Hisn entries, 22 buckets.
+- 99 names enriched with `about` + `quran`; audio assets committed; detail modal not yet built.
 - Three page rendering modes:
   - Light
   - Dark

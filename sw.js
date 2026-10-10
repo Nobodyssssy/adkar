@@ -7,7 +7,7 @@
      - Stale-while-revalidate for fonts
    ================================================================= */
 
-const VERSION = 'v2.10.58';
+const VERSION = 'v2.10.64';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -29,6 +29,7 @@ const APP_SHELL = [
   './css/responsive.css',
   
   './assets/icons/sprite.svg',
+  './assets/asma-audio/index.json',
   './assets/fonts/Amiri-Regular.woff2',
   './assets/fonts/Amiri-Bold.woff2',
   './assets/fonts/Tajawal-Regular.woff2',
@@ -137,7 +138,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((k) => (k.startsWith('adkar-') || k.startsWith('sahib-')) && k !== CACHE && k !== 'sahib-books')
+        keys.filter((k) => (k.startsWith('adkar-') || k.startsWith('sahib-')) && k !== CACHE && k !== 'sahib-books' && k !== 'sahib-asma-audio')
             .map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())
@@ -157,7 +158,30 @@ self.addEventListener('fetch', (event) => {
   /* Handle same-origin requests and book-proxy requests. */
   if (!isSameOrigin && !isBookProxy) return;
 
-    /* Range requests: let the browser stream them directly. */
+  /* Asma audio mp3s: dedicated runtime cache, cache-first, exempt from version cleanup.
+     Handled BEFORE the Range short-circuit because <audio> sends Range: bytes=0-
+     on every load. We fetch without Range, cache the full file, and let the
+     browser slice it from the cached response. */
+  if (url.pathname.startsWith('/assets/asma-audio/') && url.pathname.endsWith('.mp3')) {
+    event.respondWith((async () => {
+      const cache = await caches.open('sahib-asma-audio');
+      const cacheKey = new Request(url.origin + url.pathname, { method: 'GET' });
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+      try {
+        const res = await fetch(cacheKey);
+        if (res && res.status === 200) {
+          await cache.put(cacheKey, res.clone());
+        }
+        return res;
+      } catch (err) {
+        return new Response('', { status: 504 });
+      }
+    })());
+    return;
+  }
+
+  /* Range requests: let the browser stream them directly. */
   if (req.headers.has('range')) return;
 
   /* Book PDFs: if the URL is already in the offline-books cache, serve it;

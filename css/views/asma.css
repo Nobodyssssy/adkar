@@ -248,3 +248,188 @@
   padding-bottom: 2px;
 }
 .asma-detail-video a:hover { color: var(--accent2); }
+/* ── Asma detail audio play button ── */
+.asma-audio-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding:8px 14px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:border-color .15s ease, color .15s ease, background .15s ease;
+}
+.asma-audio-btn:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.asma-audio-btn.playing{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--on-accent);
+}
+.asma-audio-btn svg{ width:16px; height:16px; }
+/* ── Asma grid intro line ── */
+.asma-intro{
+  margin:6px 0 14px;
+  padding:10px 14px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:12.5px;
+  line-height:1.7;
+  color:var(--text2);
+}
+
+/* ── Asma detail: title row with in-modal AR/EN toggle ── */
+.asma-detail-title-main{ display:inline-block; }
+
+.asma-detail-lang-toggle{
+  display:inline-flex;
+  gap:4px;
+  margin-inline-start:10px;
+  vertical-align:middle;
+}
+.asma-detail-lang-toggle .quote-lang-btn{
+  padding:2px 8px;
+  font-size:11px;
+}
+
+/* ── Asma detail sections ── */
+.asma-detail-section{ margin-top:14px; }
+.asma-detail-section-title{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:8px;
+}
+.asma-detail-about{
+  font-size:14px;
+  line-height:1.75;
+  color:var(--text2);
+}
+
+/* ── Asma detail Quran verses ── */
+.asma-detail-quran{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.asma-quran-verse{
+  border-inline-start:2px solid var(--accent);
+  padding-inline-start:10px;
+  padding-block:4px;
+}
+.asma-quran-ar{
+  font-family:'Amiri',serif;
+  font-size:17px;
+  line-height:1.9;
+  color:var(--text);
+  margin-bottom:6px;
+}
+.asma-quran-en{
+  font-size:13px;
+  line-height:1.65;
+  color:var(--text2);
+  margin-bottom:4px;
+}
+.asma-quran-ref{
+  font-size:11px;
+  font-weight:700;
+  color:var(--accent);
+}
+/* ── English blocks: force LTR left-aligned even inside RTL parents ── */
+.asma-detail-translit,
+.asma-detail-meaning,
+.asma-detail-about,
+.asma-quran-en,
+.asma-quran-ref{
+  text-align:left;
+  direction:ltr;
+}
+.asma-detail-tafsir.ar{ text-align:right; direction:rtl; }
+.asma-detail-tafsir.en{ text-align:left;  direction:ltr; }
+
+/* ── More-info toggle ── */
+.asma-more-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+  margin-top:14px;
+  padding:10px 14px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:transparent;
+  color:var(--accent);
+  font:inherit;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:border-color .15s ease, background .15s ease;
+}
+.asma-more-btn:hover{ border-color:var(--accent); }
+.asma-more-chevron{ display:inline-flex; transition:transform .2s ease; }
+.asma-more-chevron svg{ width:16px; height:16px; }
+.asma-more-btn.open .asma-more-chevron{ transform:rotate(180deg); }
+.asma-more-body{ margin-top:8px; }
+.asma-more-body[hidden]{ display:none; }
+/* ── Inline EN tag on About section when Arabic fallback is shown ── */
+.asma-detail-en-tag{
+  display:inline-block;
+  margin-inline-start:6px;
+  padding:1px 6px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.08em;
+  color:var(--text3);
+  vertical-align:middle;
+}
+/* ── Arabic paragraph weight: tafsir, aboutAr, Quran verses ── */
+.asma-detail-tafsir.ar{
+  font-weight: 700;
+}
+.asma-detail-about[dir="rtl"]{
+  font-weight: 700;
+}
+.asma-quran-ar{
+  font-weight: 700;
+}
+/* ── Direction fix: section titles and about follow modal language ── */
+#asma-detail-body[dir="rtl"] .asma-detail-section-title,
+#asma-detail-body[dir="rtl"] .asma-detail-about,
+#asma-detail-body[dir="rtl"] .asma-detail-tafsir.ar{
+  text-align: right;
+  direction: rtl;
+}
+#asma-detail-body[dir="ltr"] .asma-detail-section-title,
+#asma-detail-body[dir="ltr"] .asma-detail-about,
+#asma-detail-body[dir="ltr"] .asma-detail-tafsir.en{
+  text-align: left;
+  direction: ltr;
+}
+
+/* English blocks always LTR left, even inside RTL container */
+.asma-detail-translit,
+.asma-detail-meaning,
+.asma-quran-en,
+.asma-quran-ref{
+  text-align: left;
+  direction: ltr;
+}
+
+/* Arabic Quran verse always RTL right */
+.asma-quran-ar{
+  text-align: right;
+  direction: rtl;
+}
