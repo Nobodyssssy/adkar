@@ -7,7 +7,7 @@
      - Stale-while-revalidate for fonts
    ================================================================= */
 
-const VERSION = 'v2.10.65';
+const VERSION = 'v2.10.66';
 const CACHE = `sahib-${VERSION}`;
 
 const APP_SHELL = [
@@ -161,8 +161,12 @@ self.addEventListener('fetch', (event) => {
   /* Asma audio mp3s: dedicated runtime cache, cache-first, exempt from version cleanup.
      Handled BEFORE the Range short-circuit because <audio> sends Range: bytes=0-
      on every load. We fetch without Range, cache the full file, and let the
-     browser slice it from the cached response. */
-  if (url.pathname.startsWith('/assets/asma-audio/') && url.pathname.endsWith('.mp3')) {
+     browser slice it from the cached response.
+     Use includes(), not startsWith(). On GitHub Pages the site is served under
+     a subpath like /adkar/, so pathname is /adkar/assets/asma-audio/x.mp3,
+     not /assets/asma-audio/x.mp3. startsWith() failed silently on prod and
+     let the browser HTTP cache serve the mp3s instead. */
+  if (url.pathname.includes('/assets/asma-audio/') && url.pathname.endsWith('.mp3')) {
     event.respondWith((async () => {
       const cache = await caches.open('sahib-asma-audio');
       const cacheKey = new Request(url.origin + url.pathname, { method: 'GET' });
