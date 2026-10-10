@@ -84,7 +84,7 @@ function ensureReaderOverlay(){
   const existing = $('reader-overlay');
   if(existing){
     /* Rebuild if the cached overlay predates the dark-mode button */
-    if(existing.querySelector('#reader-darkmode-btn')){
+    if(existing.querySelector('#reader-darkmode-btn') && existing.querySelector('#reader-zoom-readout')){
       return;
     }
     existing.remove();
@@ -124,12 +124,12 @@ function ensureReaderOverlay(){
         </div>
       </div>
 
-      <div class="reader-setting-group">
-        <span class="reader-setting-label">Zoom</span>
+<div class="reader-setting-group">
+        <span class="reader-setting-label">Zoom <span id="reader-zoom-readout" style="color:var(--text3);font-weight:400;margin-left:6px">100%</span></span>
         <div class="reader-setting-buttons">
-          <button class="reader-setting-btn" onclick="readerZoomOut()">−</button>
-          <button class="reader-setting-btn" onclick="readerZoomReset()">Reset</button>
-          <button class="reader-setting-btn" onclick="readerZoomIn()">+</button>
+          <button class="reader-setting-btn" onclick="readerZoomOut()" title="Zoom out (Ctrl + scroll down)">−</button>
+          <button class="reader-setting-btn" onclick="readerZoomReset()" title="Reset zoom">Reset</button>
+          <button class="reader-setting-btn" onclick="readerZoomIn()" title="Zoom in (Ctrl + scroll up)">+</button>
         </div>
       </div>
 
@@ -216,6 +216,10 @@ function renderReaderUI(){
   if(bot) bot.style.display = 'flex';
   const top = $('reader-topbar');
   if(top) top.style.display = 'flex';
+
+  _updateReaderZoomReadout();
+  _attachReaderWheelZoom();
+  _attachReaderPinchZoom();
 }
 
 function updateReaderBookmarkBtn(){
@@ -294,6 +298,8 @@ async function renderScrollMode(){
   body.innerHTML = `<div class="reader-scroll" id="reader-scroll"></div>`;
   const container = $('reader-scroll');
 
+  _syncReaderZoomLayout();
+
   const width = Math.min(container.clientWidth || 700, 900);
 
   for(let i = 1; i <= _readerTotalPages; i++){
@@ -340,6 +346,8 @@ async function renderScrollPage(pageNum, wrapEl, width){
   try{
     const canvas = wrapEl.querySelector('canvas');
     const size = await renderPageToCanvas(_readerPdf, pageNum, canvas, width, _readerZoom);
+    wrapEl.style.width = size.width + 'px';
+    wrapEl.style.maxWidth = _readerZoom > 1.001 ? 'none' : '';
     wrapEl.style.minHeight = size.height + 'px';
   }catch(err){
     console.warn('[reader] page', pageNum, 'failed', err);
@@ -380,6 +388,8 @@ function setupScrollObserver(pageWidth){
 async function renderFlipMode(){
   const body = $('reader-body');
   body.innerHTML = `<div class="reader-flip"><canvas class="reader-canvas" id="reader-flip-canvas"></canvas></div>`;
+
+  _syncReaderZoomLayout();
 
   const container = body.querySelector('.reader-flip');
   const width = Math.min(container.clientWidth || 700, 900);
@@ -532,10 +542,129 @@ async function readerZoomOut(){
 
 async function readerZoomReset(){
   _readerZoom = 1;
+  _updateReaderZoomReadout();
   await refreshReaderPages();
 }
 
+function _updateReaderZoomReadout(){
+  const el = $('reader-zoom-readout');
+  if(el) el.textContent = Math.round(_readerZoom * 100) + '%';
+}
+
+/* Live CSS-transform preview used during pinch; cleared on commit */
+function _applyLiveZoom(ratio){
+  const scroll = $('reader-scroll');
+  if(scroll){
+    scroll.style.transformOrigin = 'top center';
+    scroll.style.transform = 'scale(' + ratio + ')';
+  }
+  const flip = $('reader-flip-canvas');
+  if(flip){
+    flip.style.transformOrigin = 'center center';
+    flip.style.transform = 'scale(' + ratio + ')';
+  }
+}
+
+function _clearLiveZoom(){
+  const scroll = $('reader-scroll');
+  if(scroll){ scroll.style.transform = ''; scroll.style.transformOrigin = ''; }
+  const flip = $('reader-flip-canvas');
+  if(flip){ flip.style.transform = ''; flip.style.transformOrigin = ''; }
+}
+
+/* Sync scroll/flip containers to the current zoom level. */
+function _syncReaderZoomLayout(){
+  const zoomed = _readerZoom > 1.001;
+  const scroll = $('reader-scroll');
+  if(scroll){
+    scroll.style.alignItems = zoomed ? 'flex-start' : '';
+    scroll.style.overflowX = zoomed ? 'auto' : '';
+  }
+  const flip = document.querySelector('.reader-flip');
+  if(flip){
+    flip.style.overflow = zoomed ? 'auto' : '';
+    flip.style.alignItems = zoomed ? 'flex-start' : '';
+    flip.style.justifyContent = zoomed ? 'flex-start' : '';
+  }
+}
+
+/* Desktop: Ctrl + wheel zooms the PDF. Plain wheel keeps scrolling. */
+let _readerWheelTimer = null;
+function _attachReaderWheelZoom(){
+  const body = $('reader-body');
+  if(!body || body.dataset.wheelZoom === '1') return;
+  body.dataset.wheelZoom = '1';
+  body.addEventListener('wheel', (e) => {
+    if(!e.ctrlKey) return;
+    e.preventDefault();
+    const step = 0.1;
+    const next = Math.max(0.5, Math.min(3, _readerZoom + (e.deltaY < 0 ? step : -step)));
+    if(Math.abs(next - _readerZoom) < 0.001) return;
+    _readerZoom = next;
+    _updateReaderZoomReadout();
+    if(_readerWheelTimer) clearTimeout(_readerWheelTimer);
+    _readerWheelTimer = setTimeout(() => { refreshReaderPages(); }, 120);
+  }, { passive: false });
+}
+
+/* Mobile: two-finger pinch to zoom. Live preview, commits on release. */
+let _pinchActive = false;
+let _pinchStartDist = 0;
+let _pinchStartZoom = 1;
+let _pinchPendingZoom = null;
+
+function _attachReaderPinchZoom(){
+  const body = $('reader-body');
+  if(!body || body.dataset.pinchZoom === '1') return;
+  body.dataset.pinchZoom = '1';
+
+  body.addEventListener('touchstart', (e) => {
+    if(e.touches.length !== 2) return;
+    _pinchActive = true;
+    const t0 = e.touches[0];
+    const t1 = e.touches[1];
+    _pinchStartDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+    _pinchStartZoom = _readerZoom;
+    _pinchPendingZoom = null;
+  }, { passive: true });
+
+  body.addEventListener('touchmove', (e) => {
+    if(!_pinchActive || e.touches.length !== 2) return;
+    e.preventDefault();
+    const t0 = e.touches[0];
+    const t1 = e.touches[1];
+    const d = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+    if(_pinchStartDist <= 0) return;
+    const target = Math.max(0.5, Math.min(3, _pinchStartZoom * (d / _pinchStartDist)));
+    _pinchPendingZoom = target;
+    _applyLiveZoom(target / _readerZoom);
+  }, { passive: false });
+
+  body.addEventListener('touchend', (e) => {
+    if(!_pinchActive) return;
+    if(e.touches.length >= 2) return;
+    _pinchActive = false;
+    _clearLiveZoom();
+    if(_pinchPendingZoom != null && Math.abs(_pinchPendingZoom - _readerZoom) > 0.02){
+      _readerZoom = _pinchPendingZoom;
+      _updateReaderZoomReadout();
+      refreshReaderPages();
+    }
+    _pinchPendingZoom = null;
+    _pinchStartDist = 0;
+  });
+
+  body.addEventListener('touchcancel', () => {
+    if(!_pinchActive) return;
+    _pinchActive = false;
+    _clearLiveZoom();
+    _pinchPendingZoom = null;
+    _pinchStartDist = 0;
+  });
+}
+
 async function refreshReaderPages(){
+  _syncReaderZoomLayout();
   if(_readerMode === 'scroll'){
     _readerRenderedPages.clear();
     const width = Math.min($('reader-scroll').clientWidth || 700, 900);
@@ -844,16 +973,20 @@ function setupFlipGestures(){
     toggleReaderControls();
   };
 
-  body.ontouchstart = (e) => {
+ body.ontouchstart = (e) => {
+    if(e.touches.length !== 1){ startTime = 0; return; }
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     startTime = Date.now();
   };
 
   body.ontouchend = (e) => {
+    if(!startTime) return;
+    if(e.touches.length > 0) return;
     const dx = e.changedTouches[0].clientX - startX;
     const dy = e.changedTouches[0].clientY - startY;
     const dt = Date.now() - startTime;
+    startTime = 0;
 
     if(Math.abs(dx) < 12 && Math.abs(dy) < 12 && dt < 300){
       toggleReaderControls();
@@ -908,7 +1041,8 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault();
       readerZoomIn();
       break;
-    case '-':
+	case '-':
+      e.preventDefault();
       readerZoomOut();
       break;
   }

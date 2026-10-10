@@ -216,6 +216,8 @@ async function renderPageToCanvas(pdf, pageNum, canvas, containerWidth, zoomFact
   canvas.height = img.naturalHeight;
   canvas.style.width = (baseWidth * scale) + 'px';
   canvas.style.height = (page.size.height * scale) + 'px';
+  canvas.style.maxWidth = 'none';
+  canvas.style.maxHeight = 'none';
 
   const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0);
