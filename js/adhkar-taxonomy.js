@@ -70,17 +70,14 @@ window.ADHKAR_SUBCATS = {
     { key: 'praise',   ar: 'الثناء',            en: 'Praise' },
     { key: 'daily',    ar: 'أدعية يومية',       en: 'Daily' }
   ],
-  dhikr: [
+dhikr: [
     { key: 'tasbih',    ar: 'التسبيح',           en: 'Tasbih' },
+    { key: 'tahmid',    ar: 'التحميد',           en: 'Tahmid' },
     { key: 'tahlil',    ar: 'التهليل',           en: 'Tahlil' },
-    { key: 'istighfar', ar: 'الاستغفار',         en: 'Istighfar' },
-    { key: 'salawat',   ar: 'الصلاة على النبي',  en: 'Salawat' },
     { key: 'hawqala',   ar: 'الحوقلة',           en: 'Hawqala' },
-    { key: 'count-100', ar: 'مائة',              en: '100x' },
-    { key: 'count-33',  ar: 'ثلاث وثلاثون',      en: '33x' },
-    { key: 'count-10',  ar: 'عشر',               en: '10x' },
-    { key: 'count-7',   ar: 'سبع',               en: '7x' },
-    { key: 'count-3',   ar: 'ثلاث',              en: '3x' }
+    { key: 'istighfar', ar: 'الاستغفار',         en: 'Istighfar' },
+    { key: 'marvel',    ar: 'عند التعجب',        en: 'At Marvel' },
+    { key: 'general',   ar: 'ذكر عام',           en: 'General' }
   ],
   food: [
     { key: 'before',  ar: 'قبل الطعام',       en: 'Before' },

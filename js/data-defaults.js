@@ -10,7 +10,7 @@ function defaultCats(){
     {key:'sabah',       ar:'أذكار الصباح',           en:'Morning',         color:'#ffa726', icon:'sunrise'},
     {key:'masaa',       ar:'أذكار المساء',           en:'Evening',         color:'#8d6e63', icon:'sunset'},
     {key:'duaa',        ar:'دعاء',                  en:"Du'a",            color:'#ef5350', icon:'dua'},
-    {key:'dhikr',       ar:'الذكر',                 en:'Adhkar',          color:'#f5a623', icon:'tasbih'},
+    {key:'dhikr',       ar:'الباقيات الصالحات',                 en:'Everlasting Good Deeds',          color:'#f5a623', icon:'tasbih'},
     {key:'food',        ar:'أذكار الطعام',           en:'Food & Drink',    color:'#9ccc65', icon:'utensils'},
     {key:'travel',      ar:'أذكار السفر',            en:'Travel',          color:'#29b6f6', icon:'plane'},
     {key:'hajj',        ar:'الحج',                  en:'Hajj',            color:'#ab47bc', icon:'kaaba'},

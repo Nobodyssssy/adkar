@@ -1,7 +1,7 @@
 'use strict';
 /* Hisn al-Muslim — full dataset (sunnah.com/hisn). Guarded: safe to load twice. */
 /* Bump HISN_VERSION every time you edit this file — state.js re-merges on change. */
-window.HISN_VERSION = 5;
+window.HISN_VERSION = 7;
 if (typeof window.HISN_ADKAR === 'undefined') {
 
 window.HISN_ADKAR = [
@@ -566,7 +566,7 @@ hadith:'Hisn al-Muslim 92 · An-Nasa\'i, Amalul-Yawm wal-Laylah 24 (sahih); Al-A
 virtue:'Allah will write ten Hasanat for whoever recites this ten times in the morning, and forgive him ten misdeeds and give him the reward of freeing ten slaves and protect him from Satan.', 
 tags:['sabah:core','masaa:core','freq:daily','ctx:time','len:medium']},
 
-{ cat:'sabah', categories:['sabah','masaa'], repeat:100, reliability:'sahih', situation:'أذكار الصباح (مائة مرة)',
+{ cat:'sabah', categories:['sabah'], repeat:100, reliability:'sahih', situation:'أذكار الصباح (مائة مرة)',
 arabic:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
 transliteration:'None has the right to be worshipped but Allah alone, Who has no partner. His is the dominion and His is the praise and He is Able to do all things. (Recite 100 times upon rising in the morning.)',
 hadith:'Hisn al-Muslim 93 · Al-Bukhari 4/95, Muslim 4/2071',
@@ -1393,13 +1393,13 @@ virtue:'', tags:['hajj:jamarat','freq:occasion','ctx:place','len:medium'] },
 arabic:'سُبْحَانَ اللَّهِ',
 transliteration:'Glory is to Allah.',
 hadith:'Hisn al-Muslim 240 · Al-Bukhari, Fathul-Bari 1/210, 390, 414, Muslim 4/1857',
-virtue:'', tags:['dhikr:tasbih','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['dhikr:marvel','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'ما يقول عند التعجب والأمر السار',
 arabic:'اللَّهُ أَكْبَرُ',
 transliteration:'Allah is the Most Great.',
 hadith:'Hisn al-Muslim 241 · Al-Bukhari, Fathul-Bari 8/441; Al-Albani, Sahih At-Tirmidhi 2/103, 235',
-virtue:'', tags:['dhikr:tasbih','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['dhikr:marvel','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['aam'], repeat:1, reliability:'sahih', situation:'ما يفعل من أتاه أمر يسره',
 arabic:'كَانَ النَّبِيُّ ﷺ إِذَا أَتَاهُ أَمْرٌ يَسُرُّهُ أَوْ يُسَرُّ بِهِ خَرَّ سَاجِدًا شُكْرًا لِلَّهِ تَبَارَكَ وَتَعَالَى',
@@ -1471,37 +1471,37 @@ virtue:'', tags:['dhikr:istighfar','freq:daily','ctx:time','len:short'] },
 arabic:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيمِ',
 transliteration:'Two words are light on the tongue, weigh heavily in the balance, and are loved by the Most Merciful One: Glorified is Allah and praised is He, Glorified is Allah the Most Great.',
 hadith:'Hisn al-Muslim 256 · Al-Bukhari 7/168, Muslim 4/2072',
-virtue:'', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['dhikr:tasbih','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'من فضل التسبيح والتحميد والتهليل والتكبير',
 arabic:'سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ',
 transliteration:'Glory is to Allah, and praise is to Allah, and there is none worthy of worship but Allah, and Allah is the Most Great. (For me to say this is dearer to me than all that the sun rises upon.)',
 hadith:'Hisn al-Muslim 257 · Muslim 4/2072',
-virtue:'', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['dhikr:general','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:100, reliability:'sahih', situation:'من فضل التسبيح والتحميد والتهليل والتكبير',
 arabic:'يُسَبِّحُ مِائَةَ تَسْبِيحَةٍ، فَيُكْتَبُ لَهُ أَلْفُ حَسَنَةٍ، أَوْ يُحَطُّ عَنْهُ أَلْفُ خَطِيئَةٍ',
 transliteration:'Glorify Allah a hundred times and a thousand Hasanah will be written for you, or a thousand sins will be wiped away.',
 hadith:'Hisn al-Muslim 258 · Muslim 4/2073',
-virtue:'', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['dhikr:tasbih','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'من فضل التسبيح والتحميد والتهليل والتكبير',
 arabic:'سُبْحَانَ اللَّهِ الْعَظِيمِ وَبِحَمْدِهِ',
 transliteration:'Glorified is Allah the Most Great and praised is He.',
 hadith:'Hisn al-Muslim 259 · At-Tirmidhi 5/511, Al-Hakim 1/501 (sahih); Al-Albani, Sahihul-Jami\' 5/531',
-virtue:'Whoever says this will have a date palm planted for him in Paradise.', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'Whoever says this will have a date palm planted for him in Paradise.', tags:['dhikr:tasbih','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'من فضل التسبيح والتحميد والتهليل والتكبير',
 arabic:'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
 transliteration:'There is no power and no might except by Allah. (One of the treasures of Paradise.)',
 hadith:'Hisn al-Muslim 260 · Al-Bukhari, Fathul-Bari 11/213, Muslim 4/2076',
-virtue:'كنز من كنوز الجنة', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'كنز من كنوز الجنة', tags:['dhikr:hawqala','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'من فضل التسبيح والتحميد والتهليل والتكبير',
 arabic:'أَحَبُّ الْكَلَامِ إِلَى اللَّهِ أَرْبَعٌ: سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ، لَا يَضُرُّكَ بِأَيِّهِنَّ بَدَأْتَ',
 transliteration:'The most beloved words to Allah are four: Glorified is Allah, and The praise is for Allah, and There is none worthy of worship but Allah, and Allah is the Most Great.',
 hadith:'Hisn al-Muslim 261 · Muslim 3/1685',
-virtue:'', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['dhikr:general','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'من فضل التسبيح والتحميد والتهليل والتكبير',
 arabic:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، اللَّهُ أَكْبَرُ كَبِيرًا، وَالْحَمْدُ لِلَّهِ كَثِيرًا، سُبْحَانَ اللَّهِ رَبِّ الْعَالَمِينَ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَزِيزِ الْحَكِيمِ. [ثم قال:] اللَّهُمَّ اغْفِرْ لِي، وَارْحَمْنِي، وَاهْدِنِي، وَارْزُقْنِي',
@@ -1513,19 +1513,19 @@ virtue:'', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
 arabic:'اللَّهُمَّ اغْفِرْ لِي، وَارْحَمْنِي، وَاهْدِنِي، وَعَافِنِي وَارْزُقْنِي',
 transliteration:'O Allah forgive me, and have mercy on me and guide me and give me good health and provide for me.',
 hadith:'Hisn al-Muslim 263 · Muslim 4/2073',
-virtue:'These words combine the goodness of this world and the next.', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'These words combine the goodness of this world and the next.', tags:['dhikr:general','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'من فضل التسبيح والتحميد والتهليل والتكبير',
 arabic:'إِنَّ أَفْضَلَ الدُّعَاءِ الْحَمْدُ لِلَّهِ، وَأَفْضَلَ الذِّكْرِ لَا إِلَهَ إِلَّا اللَّهُ',
 transliteration:'The most excellent invocation is: Praise is for Allah. And the most excellent words of remembrance are: There is none worthy of worship but Allah.',
 hadith:'Hisn al-Muslim 264 · At-Tirmidhi 5/462, Ibn Majah 2/1249, Al-Hakim 1/503 (sahih); Al-Albani, Sahihul-Jami\' 1/362',
-virtue:'', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['dhikr:tahmid','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'من فضل التسبيح والتحميد والتهليل والتكبير',
 arabic:'الْبَاقِيَاتُ الصَّالِحَاتُ: سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
 transliteration:'The good deeds which endure are: Glorified is Allah, and The praise is for Allah, and There is none worthy of worship but Allah, and Allah is the Most Great, and There is no power and no might except by Allah.',
 hadith:'Hisn al-Muslim 265 · Ahmad 513 (sahih), Majma\'uz-Zawa\'id 1/297; Bulughul-Maram',
-virtue:'', tags:['dhikr:tahlil','freq:daily','ctx:time','len:short'] },
+virtue:'', tags:['dhikr:tasbih','freq:daily','ctx:time','len:short'] },
 
 { cat:'aam', categories:['dhikr'], repeat:1, reliability:'sahih', situation:'كيف كان النبي ﷺ يسبح',
 arabic:'رَأَيْتُ النَّبِيَّ ﷺ يَعْقِدُ التَّسْبِيحَ بِيَمِينِهِ',
